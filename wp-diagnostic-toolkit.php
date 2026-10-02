@@ -53,3 +53,7 @@ add_action(
     'admin_menu',
       array($admin, 'register_menu')
 );
+
+$diagnostic_manager->register(
+    new WPDT\Diagnostics\ServerDiagnostic()
+);

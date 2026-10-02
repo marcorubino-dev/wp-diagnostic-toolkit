@@ -1,20 +1,41 @@
-
 <?php
+
 /**
- * Collects read-only WordPress environment diagnostics.
+ * WordPress environment diagnostics.
  */
 
-defined('ABSPATH') || exit;
+namespace WPDT\Diagnostics;
 
-class WPDT_Environment_Diagnostics
+use WPDT\Core\DiagnosticInterface;
+
+class EnvironmentDiagnostic implements DiagnosticInterface
 {
+    /**
+     * Get the diagnostic identifier.
+     *
+     * @return string
+     */
+    public function get_id()
+    {
+        return 'environment';
+    }
 
     /**
-     * Collect environment checks.
+     * Get the diagnostic name.
+     *
+     * @return string
+     */
+    public function get_name()
+    {
+        return 'WordPress Environment';
+    }
+
+    /**
+     * Run environment checks.
      *
      * @return array
      */
-    public static function run()
+    public function run()
     {
         global $wpdb;
 
@@ -61,55 +82,4 @@ class WPDT_Environment_Diagnostics
             ),
         );
     }
-
-    /**
-     * Register the diagnostics page.
-     */
-    public static function register_menu()
-    {
-        add_management_page(
-            'WP Diagnostic Toolkit',
-            'WP Diagnostic Toolkit',
-            'manage_options',
-            'wp-diagnostic-toolkit',
-            array(__CLASS__, 'render_page')
-        );
-    }
-
-    /**
-     * Render the diagnostics page.
-     */
-    public static function render_page()
-    {
-        if (! current_user_can('manage_options')) {
-            return;
-        }
-
-        $checks = self::run();
-
-        echo '<div class="wrap">';
-        echo '<h1>WP Diagnostic Toolkit</h1>';
-        echo '<p>Read-only environment diagnostics.</p>';
-
-        echo '<table class="widefat striped">';
-        echo '<thead><tr>';
-        echo '<th>Check</th>';
-        echo '<th>Value</th>';
-        echo '<th>Status</th>';
-        echo '<th>Description</th>';
-        echo '</tr></thead><tbody>';
-
-        foreach ($checks as $check) {
-            echo '<tr>';
-            echo '<td>' . esc_html($check['name']) . '</td>';
-            echo '<td>' . esc_html($check['value']) . '</td>';
-            echo '<td>' . esc_html(strtoupper($check['status'])) . '</td>';
-            echo '<td>' . esc_html($check['description']) . '</td>';
-            echo '</tr>';
-        }
-
-        echo '</tbody></table>';
-        echo '</div>';
-    }
-
-    }
+}

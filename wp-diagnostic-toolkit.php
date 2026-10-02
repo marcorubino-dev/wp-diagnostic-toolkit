@@ -43,9 +43,13 @@ $diagnostic_manager->register(
     new WPDT\Diagnostics\EnvironmentDiagnostic()
 );
 
+$diagnostic_manager->register(
+    new WPDT\Diagnostics\PluginDiagnostic()
+);
+
 $admin = new WPDT\Admin\Admin($diagnostic_manager);
 
 add_action(
     'admin_menu',
-    array($admin, 'register_menu')
+      array($admin, 'register_menu')
 );

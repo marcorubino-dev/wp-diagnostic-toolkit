@@ -59,7 +59,7 @@ class PluginDiagnostic implements DiagnosticInterface
             array(
                 'name'        => 'Inactive plugins',
                 'value'       => $inactive_count,
-                'status'      => $inactive_count > 0 ? 'info' : 'ok',
+                'status'      => $inactive_count > 0 ? 'info' : 'pass',
                 'description' => 'Number of installed plugins that are currently inactive.',
             ),
         );

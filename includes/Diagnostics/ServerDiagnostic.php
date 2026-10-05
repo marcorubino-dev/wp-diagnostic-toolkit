@@ -37,7 +37,7 @@ class ServerDiagnostic implements DiagnosticInterface
      */
     public function run()
     {
-        return array(
+        $results = array(
             array(
                 'name'        => 'PHP memory limit',
                 'value'       => ini_get('memory_limit'),
@@ -69,6 +69,11 @@ class ServerDiagnostic implements DiagnosticInterface
                 'description' => 'Availability of commonly used PHP extensions.',
             ),
         );
+
+        return array_merge(
+            $results,
+            $this->get_extension_diagnostics()
+        );
     }
 
     /**
@@ -97,5 +102,44 @@ class ServerDiagnostic implements DiagnosticInterface
         }
 
         return count($loaded) . '/' . count($extensions) . ' loaded';
+    }
+
+    /**
+     * Get individual PHP extension diagnostics.
+     *
+     * @return array
+     */
+    private function get_extension_diagnostics()
+    {
+        $extensions = array(
+            'curl',
+            'json',
+            'mbstring',
+            'mysqli',
+            'openssl',
+            'xml',
+            'zip',
+        );
+
+        $results = array();
+
+        foreach ($extensions as $extension) {
+            $loaded = extension_loaded($extension);
+
+            $results[] = array(
+                'name'           => 'PHP extension: ' . $extension,
+                'value'          => $loaded ? 'Loaded' : 'Not loaded',
+                'status'         => $loaded ? 'pass' : 'warning',
+                'description'    => $loaded
+                    ? 'PHP extension is available.'
+                    : 'PHP extension is not available.',
+                'recommendation' => $loaded
+                    ? 'No action required.'
+                    : 'Enable the ' . $extension . ' PHP extension and re-run the audit.',
+                'evidence'       => "extension_loaded('{$extension}')",
+            );
+        }
+
+        return $results;
     }
 }

@@ -45,6 +45,15 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             ? WP_MEMORY_LIMIT
             : 'Not explicitly defined';
 
+        $php_version = PHP_VERSION;
+        $minimum_php_version = '7.4';
+
+        $php_version_supported = version_compare(
+            $php_version,
+            $minimum_php_version,
+            '>='
+        );
+
         return array(
             array(
                 'name'        => 'WordPress version',
@@ -53,12 +62,16 @@ class EnvironmentDiagnostic implements DiagnosticInterface
                 'description' => 'Installed WordPress version.',
             ),
             array(
-                'name'        => 'PHP version',
-                'value'       => PHP_VERSION,
-                'status'      => version_compare(PHP_VERSION, '7.4', '>=')
-                    ? 'ok'
-                    : 'warning',
-                'description' => 'PHP version available to WordPress.',
+                'name'           => 'PHP version',
+                'value'          => $php_version,
+                'status'         => $php_version_supported ? 'pass' : 'warning',
+                'description'    => $php_version_supported
+                    ? 'PHP version meets the configured minimum requirement.'
+                    : 'PHP version is below the configured minimum requirement.',
+                'recommendation' => $php_version_supported
+                    ? 'No action required.'
+                    : 'Upgrade PHP to a supported version.',
+                'evidence'       => 'PHP_VERSION',
             ),
             array(
                 'name'        => 'Database version',
@@ -69,7 +82,7 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             array(
                 'name'        => 'WP_DEBUG',
                 'value'       => $debug_enabled ? 'Enabled' : 'Disabled',
-                'status'      => $debug_enabled ? 'warning' : 'ok',
+                'status'      => $debug_enabled ? 'warning' : 'pass',
                 'description' => $debug_enabled
                     ? 'Debug mode is enabled. Check the environment before exposing errors publicly.'
                     : 'WordPress debug mode is disabled.',

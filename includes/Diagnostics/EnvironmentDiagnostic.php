@@ -45,6 +45,12 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             ? WP_MEMORY_LIMIT
             : 'Not explicitly defined';
 
+        $home_url = get_home_url();
+        $site_url = get_site_url();
+
+        $home_url_https = wp_parse_url($home_url, PHP_URL_SCHEME) === 'https';
+        $site_url_https = wp_parse_url($site_url, PHP_URL_SCHEME) === 'https';
+
         $php_version = PHP_VERSION;
         $minimum_php_version = '7.4';
 
@@ -92,6 +98,30 @@ class EnvironmentDiagnostic implements DiagnosticInterface
                 'value'       => $memory_limit,
                 'status'      => 'info',
                 'description' => 'WordPress memory limit constant, if explicitly defined.',
+            ),
+            array(
+                'name'           => 'Home URL HTTPS',
+                'value'          => $home_url_https ? 'Enabled' : 'Disabled',
+                'status'         => $home_url_https ? 'pass' : 'warning',
+                'description'    => $home_url_https
+                    ? 'The WordPress home URL uses HTTPS.'
+                    : 'The WordPress home URL does not use HTTPS.',
+                'recommendation' => $home_url_https
+                    ? 'No action required.'
+                    : 'Configure the home URL to use HTTPS.',
+                'evidence'       => $home_url,
+            ),
+            array(
+                'name'           => 'Site URL HTTPS',
+                'value'          => $site_url_https ? 'Enabled' : 'Disabled',
+                'status'         => $site_url_https ? 'pass' : 'warning',
+                'description'    => $site_url_https
+                    ? 'The WordPress site URL uses HTTPS.'
+                    : 'The WordPress site URL does not use HTTPS.',
+                'recommendation' => $site_url_https
+                    ? 'No action required.'
+                    : 'Configure the site URL to use HTTPS.',
+                'evidence'       => $site_url,
             ),
         );
     }

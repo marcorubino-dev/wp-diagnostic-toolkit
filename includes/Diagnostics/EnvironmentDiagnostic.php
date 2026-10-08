@@ -31,6 +31,67 @@ class EnvironmentDiagnostic implements DiagnosticInterface
     }
 
     /**
+     * Evaluate a loopback response.
+     *
+     * @param mixed  $response    WordPress HTTP response or WP_Error.
+     * @param string $request_url Loopback request URL.
+     *
+     * @return array
+     */
+    private function evaluate_loopback_response($response, $request_url)
+    {
+        if (is_wp_error($response)) {
+            return array(
+                'status'         => 'warning',
+                'value'          => 'Request failed',
+                'description'    => 'WordPress could not successfully reach its own site.',
+                'recommendation' => 'Review loopback requests, DNS, firewall, or server configuration.',
+                'evidence'       => $response->get_error_message(),
+            );
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+
+        if ($status_code >= 500) {
+            return array(
+                'status'         => 'critical',
+                'value'          => $status_code,
+                'description'    => 'WordPress reached its own site but received a server error.',
+                'recommendation' => 'Inspect server logs and WordPress errors.',
+                'evidence'       => $request_url . ' | HTTP ' . $status_code,
+            );
+        }
+
+        if ($status_code >= 400) {
+            return array(
+                'status'         => 'warning',
+                'value'          => $status_code,
+                'description'    => 'WordPress reached its own site but received an HTTP client error.',
+                'recommendation' => 'Review the loopback URL, authentication, and server configuration.',
+                'evidence'       => $request_url . ' | HTTP ' . $status_code,
+            );
+        }
+
+        if ($status_code >= 300) {
+            return array(
+                'status'         => 'warning',
+                'value'          => $status_code,
+                'description'    => 'WordPress reached its own site but received an HTTP redirect.',
+                'recommendation' => 'Review the loopback URL and redirect configuration.',
+                'evidence'       => $request_url . ' | HTTP ' . $status_code,
+            );
+        }
+
+        return array(
+            'status'         => 'pass',
+            'value'          => $status_code,
+            'description'    => 'WordPress successfully reached its own site.',
+            'recommendation' => 'No action required.',
+            'evidence'       => $request_url . ' | HTTP ' . $status_code,
+        );
+    }
+
+    /**
      * Run environment checks.
      *
      * @return array
@@ -52,8 +113,8 @@ class EnvironmentDiagnostic implements DiagnosticInterface
         $site_url_https = wp_parse_url($site_url, PHP_URL_SCHEME) === 'https';
 
         /*
-     * Loopback request.
-     */
+         * Loopback request.
+         */
         $loopback_url = home_url('/');
 
         $loopback_response = wp_remote_get(
@@ -63,49 +124,20 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             )
         );
 
-        $loopback_status_code = null;
+        $loopback_result = $this->evaluate_loopback_response(
+            $loopback_response,
+            $loopback_url
+        );
 
-        if (! is_wp_error($loopback_response)) {
-            $loopback_status_code = wp_remote_retrieve_response_code(
-                $loopback_response
-            );
-        }
-
-        if (is_wp_error($loopback_response)) {
-            $loopback_status = 'warning';
-            $loopback_value = 'Request failed';
-            $loopback_description = 'WordPress could not successfully reach its own site.';
-            $loopback_recommendation = 'Review loopback requests, DNS, firewall, or server configuration.';
-            $loopback_evidence = $loopback_response->get_error_message();
-        } elseif ($loopback_status_code >= 500) {
-            $loopback_status = 'critical';
-            $loopback_value = $loopback_status_code;
-            $loopback_description = 'WordPress reached its own site but received a server error.';
-            $loopback_recommendation = 'Inspect server logs and WordPress errors.';
-            $loopback_evidence = $loopback_url . ' | HTTP ' . $loopback_status_code;
-        } elseif ($loopback_status_code >= 400) {
-            $loopback_status = 'warning';
-            $loopback_value = $loopback_status_code;
-            $loopback_description = 'WordPress reached its own site but received an HTTP client error.';
-            $loopback_recommendation = 'Review the loopback URL, authentication, and server configuration.';
-            $loopback_evidence = $loopback_url . ' | HTTP ' . $loopback_status_code;
-        } elseif ($loopback_status_code >= 300) {
-            $loopback_status = 'warning';
-            $loopback_value = $loopback_status_code;
-            $loopback_description = 'WordPress reached its own site but received an HTTP redirect.';
-            $loopback_recommendation = 'Review the loopback URL and redirect configuration.';
-            $loopback_evidence = $loopback_url . ' | HTTP ' . $loopback_status_code;
-        } else {
-            $loopback_status = 'pass';
-            $loopback_value = $loopback_status_code;
-            $loopback_description = 'WordPress successfully reached its own site.';
-            $loopback_recommendation = 'No action required.';
-            $loopback_evidence = $loopback_url . ' | HTTP ' . $loopback_status_code;
-        }
+        $loopback_status = $loopback_result['status'];
+        $loopback_value = $loopback_result['value'];
+        $loopback_description = $loopback_result['description'];
+        $loopback_recommendation = $loopback_result['recommendation'];
+        $loopback_evidence = $loopback_result['evidence'];
 
         /*
-     * PHP version.
-     */
+         * PHP version.
+         */
         $php_version = PHP_VERSION;
         $minimum_php_version = '7.4';
 

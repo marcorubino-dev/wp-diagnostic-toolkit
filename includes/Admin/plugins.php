@@ -40,7 +40,9 @@ if ($critical_count > 0) {
     <div class="wpdt-header">
         <div>
             <h1><?php echo esc_html($diagnostic['name']); ?></h1>
-            <p>Plugin health and compatibility diagnostics.</p>
+            <p class="wpdt-page-subtitle">
+                Plugin inventory and update diagnostics.
+            </p>
         </div>
     </div>
 

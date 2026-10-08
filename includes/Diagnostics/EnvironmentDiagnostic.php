@@ -51,6 +51,17 @@ class EnvironmentDiagnostic implements DiagnosticInterface
         $home_url_https = wp_parse_url($home_url, PHP_URL_SCHEME) === 'https';
         $site_url_https = wp_parse_url($site_url, PHP_URL_SCHEME) === 'https';
 
+        $loopback_url = home_url('/');
+        $loopback_response = wp_remote_get(
+            $loopback_url,
+            array(
+                'timeout' => 5,
+            )
+        );
+        $loopback_success = ! is_wp_error($loopback_response)
+            && wp_remote_retrieve_response_code($loopback_response) >= 200
+            && wp_remote_retrieve_response_code($loopback_response) < 400;
+
         $php_version = PHP_VERSION;
         $minimum_php_version = '7.4';
 
@@ -122,6 +133,22 @@ class EnvironmentDiagnostic implements DiagnosticInterface
                     ? 'No action required.'
                     : 'Configure the site URL to use HTTPS.',
                 'evidence'       => $site_url,
+            ),
+            array(
+                'name'           => 'Loopback request',
+                'value'          => is_wp_error($loopback_response)
+                    ? 'Request failed'
+                    : wp_remote_retrieve_response_code($loopback_response),
+                'status'         => $loopback_success ? 'pass' : 'warning',
+                'description'    => $loopback_success
+                    ? 'WordPress successfully reached its own site.'
+                    : 'WordPress could not successfully reach its own site.',
+                'recommendation' => $loopback_success
+                    ? 'No action required.'
+                    : 'Review loopback requests, DNS, firewall, or server configuration.',
+                'evidence'       => is_wp_error($loopback_response)
+                    ? $loopback_response->get_error_message()
+                    : $loopback_url,
             ),
         );
     }

@@ -37,6 +37,8 @@ class ServerDiagnostic implements DiagnosticInterface
      */
     public function run()
     {
+        $extension_status = $this->get_extension_status();
+
         $results = array(
             array(
                 'name'        => 'PHP memory limit',
@@ -63,10 +65,11 @@ class ServerDiagnostic implements DiagnosticInterface
                 'description' => 'Maximum execution time configured for PHP scripts.',
             ),
             array(
-                'name'        => 'PHP extensions',
-                'value'       => $this->get_extension_status(),
-                'status'      => 'info',
-                'description' => 'Availability of commonly used PHP extensions.',
+                'name'           => 'PHP extensions',
+                'value'          => $extension_status['value'],
+                'status'         => $extension_status['status'],
+                'description'    => $extension_status['description'],
+                'recommendation' => $extension_status['recommendation'],
             ),
         );
 
@@ -77,31 +80,39 @@ class ServerDiagnostic implements DiagnosticInterface
     }
 
     /**
-     * Get the status of commonly used PHP extensions.
+     * Get the aggregate status of required PHP extensions.
      *
-     * @return string
+     * @return array
      */
     private function get_extension_status()
     {
-        $extensions = array(
-            'curl',
-            'json',
-            'mbstring',
-            'mysqli',
-            'openssl',
-            'xml',
-            'zip',
-        );
+        $extensions = $this->get_required_extensions();
 
-        $loaded = array();
+        $loaded = 0;
 
         foreach ($extensions as $extension) {
             if (extension_loaded($extension)) {
-                $loaded[] = $extension;
+                $loaded++;
             }
         }
 
-        return count($loaded) . '/' . count($extensions) . ' loaded';
+        $total = count($extensions);
+
+        if ($loaded === $total) {
+            return array(
+                'value'          => $loaded . '/' . $total . ' loaded',
+                'status'         => 'pass',
+                'description'    => 'All required PHP extensions are available.',
+                'recommendation' => 'No action required.',
+            );
+        }
+
+        return array(
+            'value'          => $loaded . '/' . $total . ' loaded',
+            'status'         => 'warning',
+            'description'    => 'One or more required PHP extensions are not available.',
+            'recommendation' => 'Enable the missing PHP extensions and re-run the audit.',
+        );
     }
 
     /**
@@ -111,15 +122,7 @@ class ServerDiagnostic implements DiagnosticInterface
      */
     private function get_extension_diagnostics()
     {
-        $extensions = array(
-            'curl',
-            'json',
-            'mbstring',
-            'mysqli',
-            'openssl',
-            'xml',
-            'zip',
-        );
+        $extensions = $this->get_required_extensions();
 
         $results = array();
 
@@ -141,5 +144,23 @@ class ServerDiagnostic implements DiagnosticInterface
         }
 
         return $results;
+    }
+
+    /**
+     * Get PHP extensions required by the toolkit.
+     *
+     * @return array
+     */
+    private function get_required_extensions()
+    {
+        return array(
+            'curl',
+            'json',
+            'mbstring',
+            'mysqli',
+            'openssl',
+            'xml',
+            'zip',
+        );
     }
 }

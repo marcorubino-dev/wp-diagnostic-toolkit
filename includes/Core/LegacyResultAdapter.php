@@ -88,7 +88,15 @@ final class LegacyResultAdapter
             }
 
             $result = $this->adapt($module_id, $legacy_result);
-            $results[$result->get('id')] = $result;
+            $result_id = $result->get('id');
+
+            if (isset($results[$result_id])) {
+                throw new \\InvalidArgumentException(
+                    sprintf('Duplicate legacy diagnostic ID "%s".', $result_id)
+                );
+            }
+
+            $results[$result_id] = $result;
         }
 
         return $results;

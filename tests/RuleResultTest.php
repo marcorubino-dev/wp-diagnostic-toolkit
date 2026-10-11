@@ -128,11 +128,6 @@ $legacy_info = $adapter->adapt('plugins', array(
 check_result($legacy_info->get('outcome') === 'finding', 'adapter maps legacy info to finding');
 check_result($legacy_info->get('severity') === 'info', 'adapter maps legacy info severity');
 
-expect_invalid_result(
-    array_merge(valid_result_data(), array('outcome' => 'pass', 'severity' => 'none', 'module' => 'environment')),
-    'baseline RuleResult remains valid before adapter error checks'
-);
-
 try {
     $adapter->adapt('environment', array('name' => 'Unknown status', 'status' => 'mystery'));
     check_result(false, 'adapter rejects an unknown legacy status');

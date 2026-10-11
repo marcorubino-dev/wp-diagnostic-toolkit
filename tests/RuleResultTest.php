@@ -7,8 +7,10 @@
  */
 
 require_once __DIR__ . '/../includes/Core/RuleResult.php';
+require_once __DIR__ . '/../includes/Core/LegacyResultAdapter.php';
 
 use WPDT\Core\RuleResult;
+use WPDT\Core\LegacyResultAdapter;
 
 $passed = 0;
 $failed = 0;
@@ -100,6 +102,49 @@ try {
     check_result(false, 'rejects access to an unknown field');
 } catch (InvalidArgumentException $exception) {
     check_result(true, 'rejects access to an unknown field');
+}
+
+$adapter = new LegacyResultAdapter();
+$legacy_pass = $adapter->adapt('environment', array(
+    'name' => 'PHP version',
+    'value' => '8.2.29',
+    'status' => 'pass',
+    'description' => 'Version check passed.',
+    'recommendation' => 'No action required.',
+    'evidence' => 'PHP_VERSION',
+));
+check_result($legacy_pass->get('id') === 'environment.php_version', 'adapter creates a namespaced check ID');
+check_result($legacy_pass->get('outcome') === 'pass', 'adapter maps legacy pass status');
+check_result($legacy_pass->get('severity') === 'none', 'adapter maps legacy pass severity');
+check_result($legacy_pass->get('value') === '8.2.29', 'adapter preserves legacy value');
+check_result($legacy_pass->get('evidence') === 'PHP_VERSION', 'adapter preserves legacy evidence');
+
+$legacy_info = $adapter->adapt('plugins', array(
+    'name' => 'Installed plugins',
+    'value' => 12,
+    'status' => 'info',
+    'description' => 'Total number of installed plugins.',
+));
+check_result($legacy_info->get('outcome') === 'finding', 'adapter maps legacy info to finding');
+check_result($legacy_info->get('severity') === 'info', 'adapter maps legacy info severity');
+
+expect_invalid_result(
+    array_merge(valid_result_data(), array('outcome' => 'pass', 'severity' => 'none', 'module' => 'environment')),
+    'baseline RuleResult remains valid before adapter error checks'
+);
+
+try {
+    $adapter->adapt('environment', array('name' => 'Unknown status', 'status' => 'mystery'));
+    check_result(false, 'adapter rejects an unknown legacy status');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects an unknown legacy status');
+}
+
+try {
+    $adapter->adapt('environment', array('name' => 'Missing status'));
+    check_result(false, 'adapter rejects a legacy result without status');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects a legacy result without status');
 }
 
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;

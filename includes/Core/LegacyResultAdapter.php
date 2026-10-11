@@ -23,8 +23,8 @@ final class LegacyResultAdapter
      */
     public function adapt($module_id, array $legacy)
     {
-        if (!is_string($module_id) || trim($module_id) === '') {
-            throw new \InvalidArgumentException('Module ID must be a non-empty string.');
+        if (!is_string($module_id) || !preg_match('/^[a-z0-9][a-z0-9._-]*$/', $module_id)) {
+            throw new \\InvalidArgumentException('Module ID must be a stable lowercase identifier.');
         }
 
         if (!isset($legacy['name']) || !is_string($legacy['name']) || trim($legacy['name']) === '') {

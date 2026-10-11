@@ -142,5 +142,22 @@ try {
     check_result(true, 'adapter rejects a legacy result without status');
 }
 
+try {
+    $adapter->adapt('Environment', array('name' => 'PHP version', 'status' => 'pass'));
+    check_result(false, 'adapter rejects unstable module IDs');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects unstable module IDs');
+}
+
+try {
+    $adapter->adapt_all('environment', array(
+        array('name' => 'PHP version', 'status' => 'pass'),
+        array('name' => 'PHP-version', 'status' => 'pass'),
+    ));
+    check_result(false, 'adapter rejects duplicate generated check IDs');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects duplicate generated check IDs');
+}
+
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;
 exit($failed === 0 ? 0 : 1);

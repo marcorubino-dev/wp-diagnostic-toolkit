@@ -24,7 +24,7 @@ final class LegacyResultAdapter
     public function adapt($module_id, array $legacy)
     {
         if (!is_string($module_id) || !preg_match('/^[a-z0-9][a-z0-9._-]*$/', $module_id)) {
-            throw new \\InvalidArgumentException('Module ID must be a stable lowercase identifier.');
+            throw new \InvalidArgumentException('Module ID must be a stable lowercase identifier.');
         }
 
         if (!isset($legacy['name']) || !is_string($legacy['name']) || trim($legacy['name']) === '') {
@@ -91,7 +91,7 @@ final class LegacyResultAdapter
             $result_id = $result->get('id');
 
             if (isset($results[$result_id])) {
-                throw new \\InvalidArgumentException(
+                throw new \InvalidArgumentException(
                     sprintf('Duplicate legacy diagnostic ID "%s".', $result_id)
                 );
             }

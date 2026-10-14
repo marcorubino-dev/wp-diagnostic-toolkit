@@ -189,6 +189,24 @@ if ($critical_count > 0) {
                                 <?php echo esc_html($check['description']); ?>
                             </p>
 
+                            <?php if (isset($check['value']) && $check['value'] !== '') : ?>
+
+                                <p class="wpdt-issue-detail">
+                                    <strong>Observed value:</strong>
+                                    <?php echo esc_html($check['value']); ?>
+                                </p>
+
+                            <?php endif; ?>
+
+                            <?php if (! empty($check['evidence'])) : ?>
+
+                                <p class="wpdt-issue-evidence">
+                                    <strong>Evidence:</strong>
+                                    <?php echo esc_html($check['evidence']); ?>
+                                </p>
+
+                            <?php endif; ?>
+
                             <?php if (! empty($check['recommendation'])) : ?>
 
                                 <p class="wpdt-recommendation">

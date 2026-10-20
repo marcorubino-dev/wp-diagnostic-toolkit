@@ -2,23 +2,22 @@
 
 **A lightweight diagnostic toolkit for WordPress developers and small agencies.**
 
-WP Diagnostic Toolkit helps developers inspect a WordPress installation's environment, plugins, and server configuration from the WordPress admin dashboard.
+WP Diagnostic Toolkit helps developers inspect a WordPress installation's environment, plugins, server configuration, and selected WooCommerce/multilingual integration signals from the WordPress admin dashboard.
 
-The goal is to make technical information easier to access, identify potential configuration issues, and provide a starting point for troubleshooting.
+The goal is to make technical information easier to access, identify potential configuration issues, and provide a starting point for evidence-based troubleshooting.
 
 ## Features
-
-The plugin currently includes diagnostic modules for:
 
 - **Environment:** WordPress and PHP versions, database information, debugging configuration, memory limits, HTTPS configuration, and loopback requests.
 - **Plugins:** Installed plugins, activation status, and available updates.
 - **Server:** PHP configuration, resource limits, and extension availability.
+- **WooCommerce & multilingual (initial checks):** WooCommerce availability, detection of selected multilingual plugins, and guidance for investigating language-switch/cart symptoms.
 - **Dashboard:** A centralized view of diagnostic results, grouped by status.
 - **Settings:** An administration section for toolkit-related settings.
 
 Diagnostic results use statuses such as `pass`, `info`, `warning`, and `critical` to help distinguish normal conditions from potential issues.
 
-> WP Diagnostic Toolkit is intended as a technical troubleshooting aid, not as a replacement for specialized performance, security, or SEO auditing tools.
+> The initial multilingual module is an environment-level starting point. It does not yet capture a visitor's live cart, prove translation mapping correctness, or identify a root cause automatically.
 
 ## Requirements
 
@@ -48,7 +47,8 @@ WP Diagnostic Toolkit
 ├── Diagnostics
 │   ├── EnvironmentDiagnostic
 │   ├── PluginDiagnostic
-│   └── ServerDiagnostic
+│   ├── ServerDiagnostic
+│   └── MultilingualWooCommerceDiagnostic
 └── Admin
     ├── Dashboard
     ├── Environment
@@ -69,6 +69,24 @@ The manager registers diagnostic modules and runs them through a shared entry po
 
 The administration layer presents diagnostic results in the WordPress dashboard, keeping presentation separate from the diagnostic checks themselves.
 
+## Multilingual & WooCommerce Troubleshooting
+
+The initial module is designed to provide safe starting evidence when investigating issues such as products or cart contents changing after a language switch.
+
+Current checks:
+- Detect whether WooCommerce is loaded.
+- Detect selected multilingual plugins using active plugin entries and available runtime APIs.
+- Explain what the admin snapshot cannot prove about a visitor's cart/session.
+- Identify the need for adapter-specific translation mapping checks.
+
+Planned follow-up:
+- Add integration adapters for the multilingual plugin actually installed on the target site.
+- Add an explicit, temporary frontend capture workflow for before/after language-switch comparisons.
+- Compare product/variation IDs, quantities, price values, language, URL, and cart state.
+- Add a privacy-conscious exportable report with secrets and customer data excluded by default.
+
+The current module does not modify products, prices, translations, sessions, or cart contents. Findings are not root-cause diagnoses.
+
 ## Design Principles
 
 - **Read-only diagnostics:** Inspect the environment without intentionally modifying site content or configuration.
@@ -79,44 +97,29 @@ The administration layer presents diagnostic results in the WordPress dashboard,
 
 ## Current Status
 
-**Version:** 0.2.0
+**Version:** 0.3.0 (development branch)
 
 This project is under active development. Diagnostic coverage, compatibility handling, result classification, and administration workflows may change between versions.
 
-The current implementation provides the foundation for a modular WordPress diagnostic tool. It should not yet be considered a comprehensive audit or monitoring solution.
-
-## Roadmap
-
-Potential areas for future improvement include:
-
-- [ ] Improve diagnostic result consistency and documentation.
-- [ ] Refine plugin activation and update detection, including multisite considerations.
-- [ ] Review server checks to distinguish actual requirements from recommendations.
-- [ ] Reduce false positives in environment and connectivity checks.
-- [ ] Improve dashboard feedback and diagnostic execution workflow.
-- [ ] Add automated tests for diagnostic logic.
-- [ ] Improve error handling and diagnostic reporting.
-- [ ] Expand checks based on practical troubleshooting needs.
+The current implementation provides a foundation for a modular diagnostic tool. It should not yet be considered a comprehensive audit or monitoring solution.
 
 ## Contributing
 
 Contributions, bug reports, and suggestions are welcome.
 
 When reporting an issue, include relevant details where possible:
-
 - WordPress version
 - PHP version
 - Database type and version
+- Relevant WooCommerce and multilingual plugin versions
 - Steps to reproduce the issue
 - Relevant diagnostic output or error messages
 
-Please avoid sharing credentials, private configuration values, or sensitive production data.
+Please avoid sharing credentials, private configuration values, customer data, or sensitive production data.
 
 ## Disclaimer
 
-Diagnostic findings are intended to support technical investigation. A warning does not necessarily indicate a failure, and a passing check does not guarantee that a WordPress installation is secure, performant, or error-free.
-
-Always validate findings against the specific environment before making changes.
+Diagnostic findings support technical investigation. A warning does not necessarily indicate a failure, and a passing check does not guarantee that an installation is secure, performant, or error-free. Validate findings against the specific environment before making changes.
 
 ## License
 

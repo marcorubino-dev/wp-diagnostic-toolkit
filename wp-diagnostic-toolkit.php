@@ -3,7 +3,7 @@
 /**
  * Plugin Name: WP Diagnostic Toolkit
  * Description: Read-only diagnostics for WordPress environments.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Requires PHP: 7.4
  * Author: Marco Rubino
  * License: GPL-2.0-or-later
@@ -12,7 +12,7 @@
 
 defined('ABSPATH') || exit;
 
-define('WPDT_VERSION', '0.2.0');
+define('WPDT_VERSION', '0.3.0');
 define('WPDT_PATH', plugin_dir_path(__FILE__));
 define('WPDT_URL', plugin_dir_url(__FILE__));
 
@@ -48,18 +48,22 @@ $diagnostic_manager->register(
     new WPDT\Diagnostics\PluginDiagnostic()
 );
 
+$diagnostic_manager->register(
+    new WPDT\Diagnostics\ServerDiagnostic()
+);
+
+$diagnostic_manager->register(
+    new WPDT\Diagnostics\MultilingualWooCommerceDiagnostic()
+);
+
 $admin = new WPDT\Admin\Admin($diagnostic_manager);
 
 add_action(
     'admin_menu',
-      array($admin, 'register_menu')
+    array($admin, 'register_menu')
 );
 
 add_action(
     'admin_enqueue_scripts',
     array($admin, 'enqueue_assets')
-);
-
-$diagnostic_manager->register(
-    new WPDT\Diagnostics\ServerDiagnostic()
 );

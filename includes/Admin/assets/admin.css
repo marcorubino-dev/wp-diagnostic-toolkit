@@ -523,3 +523,58 @@
 .wpdt-total-checks {
     background: #f8f9fa;
 }
+
+
+/* Accessibility: visible keyboard focus and status readability */
+
+.wpdt-admin a:focus-visible,
+.wpdt-admin button:focus-visible,
+.wpdt-admin input:focus-visible,
+.wpdt-admin select:focus-visible,
+.wpdt-admin textarea:focus-visible {
+    outline: 2px solid #2271b1;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 1px #ffffff;
+}
+
+.wpdt-status-warning,
+.wpdt-summary-warning .wpdt-summary-icon,
+.wpdt-issue-status {
+    color: #805800;
+}
+
+.wpdt-status-critical,
+.wpdt-issue-critical .wpdt-issue-icon,
+.wpdt-issue-critical .wpdt-issue-status {
+    color: #b32d2e;
+}
+
+.wpdt-status-pass,
+.wpdt-summary-pass .wpdt-summary-icon {
+    color: #007017;
+}
+
+.wpdt-summary-info .wpdt-summary-icon,
+.wpdt-check-status-info {
+    color: #135e96;
+}
+
+.wpdt-check-status {
+    line-height: 1.5;
+}
+
+.wpdt-check-recommendation {
+    border-left-color: #2271b1;
+    border-radius: 0 4px 4px 0;
+    line-height: 1.5;
+}
+
+.wpdt-check-evidence {
+    line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wpdt-module {
+        transition: none;
+    }
+}

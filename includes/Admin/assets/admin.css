@@ -426,3 +426,223 @@
         min-width: 760px;
     }
 }
+
+/* Dashboard polish: clearer hierarchy and consistent spacing */
+
+.wpdt-admin {
+    box-sizing: border-box;
+}
+
+.wpdt-admin *,
+.wpdt-admin *::before,
+.wpdt-admin *::after {
+    box-sizing: inherit;
+}
+
+.wpdt-header {
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.wpdt-header h1 {
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+}
+
+.wpdt-header-action form {
+    margin: 0;
+}
+
+.wpdt-header-action .button {
+    min-height: 36px;
+    padding: 4px 14px;
+    font-weight: 600;
+}
+
+.wpdt-status-card,
+.wpdt-module,
+.wpdt-issue {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.035);
+}
+
+.wpdt-status-card-header {
+    align-items: center;
+}
+
+.wpdt-summary-item {
+    gap: 2px;
+    border-radius: 8px;
+    background: #fbfbfc;
+}
+
+.wpdt-summary-item strong {
+    font-size: 21px;
+    font-variant-numeric: tabular-nums;
+}
+
+.wpdt-section-header {
+    margin-bottom: 14px;
+}
+
+.wpdt-section-header h2 {
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.wpdt-issue {
+    border-radius: 8px;
+    padding: 20px 22px;
+}
+
+.wpdt-issue-content h3 {
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.wpdt-recommendation {
+    padding: 10px 12px;
+    border-left: 3px solid #2271b1;
+    border-radius: 0 4px 4px 0;
+    background: #f0f6fc;
+}
+
+.wpdt-module {
+    border-radius: 8px;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.wpdt-module:hover {
+    border-color: #a7aaad;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.055);
+}
+
+.wpdt-module-content h3 {
+    line-height: 1.45;
+}
+
+.wpdt-total-checks {
+    background: #f8f9fa;
+}
+
+
+/* Accessibility: visible keyboard focus and status readability */
+
+.wpdt-admin a:focus-visible,
+.wpdt-admin button:focus-visible,
+.wpdt-admin input:focus-visible,
+.wpdt-admin select:focus-visible,
+.wpdt-admin textarea:focus-visible {
+    outline: 2px solid #2271b1;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 1px #ffffff;
+}
+
+.wpdt-status-warning,
+.wpdt-summary-warning .wpdt-summary-icon,
+.wpdt-issue-status {
+    color: #805800;
+}
+
+.wpdt-status-critical,
+.wpdt-issue-critical .wpdt-issue-icon,
+.wpdt-issue-critical .wpdt-issue-status {
+    color: #b32d2e;
+}
+
+.wpdt-status-pass,
+.wpdt-summary-pass .wpdt-summary-icon {
+    color: #007017;
+}
+
+.wpdt-summary-info .wpdt-summary-icon,
+.wpdt-check-status-info {
+    color: #135e96;
+}
+
+.wpdt-check-status {
+    line-height: 1.5;
+}
+
+.wpdt-check-recommendation {
+    border-left-color: #2271b1;
+    border-radius: 0 4px 4px 0;
+    line-height: 1.5;
+}
+
+.wpdt-check-evidence {
+    line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wpdt-module {
+        transition: none;
+    }
+}
+
+
+/* Responsive refinements */
+
+@media screen and (max-width: 900px) {
+    .wpdt-status-card-header {
+        gap: 24px;
+        padding: 20px;
+    }
+
+    .wpdt-summary {
+        width: 100%;
+    }
+
+    .wpdt-module {
+        min-height: 0;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .wpdt-admin {
+        padding-right: 10px;
+    }
+
+    .wpdt-header {
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .wpdt-header-action {
+        width: 100%;
+        padding-top: 0;
+    }
+
+    .wpdt-header-action form,
+    .wpdt-header-action .button {
+        width: 100%;
+    }
+
+    .wpdt-status-card-header {
+        padding: 16px;
+    }
+
+    .wpdt-summary {
+        gap: 8px;
+    }
+
+    .wpdt-summary-item {
+        min-height: 72px;
+    }
+
+    .wpdt-total-checks {
+        padding: 11px 16px;
+    }
+
+    .wpdt-issue {
+        gap: 10px;
+        padding: 16px;
+    }
+
+    .wpdt-issue-status {
+        padding-left: 26px;
+    }
+
+    .wpdt-module-table {
+        max-width: 100%;
+    }
+}

@@ -426,3 +426,100 @@
         min-width: 760px;
     }
 }
+
+/* Dashboard polish: clearer hierarchy and consistent spacing */
+
+.wpdt-admin {
+    box-sizing: border-box;
+}
+
+.wpdt-admin *,
+.wpdt-admin *::before,
+.wpdt-admin *::after {
+    box-sizing: inherit;
+}
+
+.wpdt-header {
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.wpdt-header h1 {
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+}
+
+.wpdt-header-action form {
+    margin: 0;
+}
+
+.wpdt-header-action .button {
+    min-height: 36px;
+    padding: 4px 14px;
+    font-weight: 600;
+}
+
+.wpdt-status-card,
+.wpdt-module,
+.wpdt-issue {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.035);
+}
+
+.wpdt-status-card-header {
+    align-items: center;
+}
+
+.wpdt-summary-item {
+    gap: 2px;
+    border-radius: 8px;
+    background: #fbfbfc;
+}
+
+.wpdt-summary-item strong {
+    font-size: 21px;
+    font-variant-numeric: tabular-nums;
+}
+
+.wpdt-section-header {
+    margin-bottom: 14px;
+}
+
+.wpdt-section-header h2 {
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.wpdt-issue {
+    border-radius: 8px;
+    padding: 20px 22px;
+}
+
+.wpdt-issue-content h3 {
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.wpdt-recommendation {
+    padding: 10px 12px;
+    border-left: 3px solid #2271b1;
+    border-radius: 0 4px 4px 0;
+    background: #f0f6fc;
+}
+
+.wpdt-module {
+    border-radius: 8px;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.wpdt-module:hover {
+    border-color: #a7aaad;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.055);
+}
+
+.wpdt-module-content h3 {
+    line-height: 1.45;
+}
+
+.wpdt-total-checks {
+    background: #f8f9fa;
+}

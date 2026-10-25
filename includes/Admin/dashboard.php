@@ -58,9 +58,12 @@ if ($critical_count > 0) {
         </div>
 
         <div class="wpdt-header-action">
-            <button type="button" class="button button-primary">
-                Run Diagnostics
-            </button>
+            <form method="get" action="">
+                <input type="hidden" name="page" value="wp-diagnostic-toolkit" />
+                <button type="submit" class="button button-primary">
+                    Run Diagnostics
+                </button>
+            </form>
         </div>
     </div>
 

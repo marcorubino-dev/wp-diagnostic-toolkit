@@ -578,3 +578,71 @@
         transition: none;
     }
 }
+
+
+/* Responsive refinements */
+
+@media screen and (max-width: 900px) {
+    .wpdt-status-card-header {
+        gap: 24px;
+        padding: 20px;
+    }
+
+    .wpdt-summary {
+        width: 100%;
+    }
+
+    .wpdt-module {
+        min-height: 0;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .wpdt-admin {
+        padding-right: 10px;
+    }
+
+    .wpdt-header {
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .wpdt-header-action {
+        width: 100%;
+        padding-top: 0;
+    }
+
+    .wpdt-header-action form,
+    .wpdt-header-action .button {
+        width: 100%;
+    }
+
+    .wpdt-status-card-header {
+        padding: 16px;
+    }
+
+    .wpdt-summary {
+        gap: 8px;
+    }
+
+    .wpdt-summary-item {
+        min-height: 72px;
+    }
+
+    .wpdt-total-checks {
+        padding: 11px 16px;
+    }
+
+    .wpdt-issue {
+        gap: 10px;
+        padding: 16px;
+    }
+
+    .wpdt-issue-status {
+        padding-left: 26px;
+    }
+
+    .wpdt-module-table {
+        max-width: 100%;
+    }
+}

@@ -38,12 +38,11 @@ class PluginDiagnostic implements DiagnosticInterface
     public function run()
     {
         $all_plugins    = get_plugins();
-        $active_plugins = get_option('active_plugins', array());
-
-        $active_count   = count($active_plugins);
+        $active_plugins = $this->get_active_plugins();
+        $active_count   = count(array_intersect(array_keys($all_plugins), $active_plugins));
         $inactive_count = count($all_plugins) - $active_count;
 
-        $update_status = $this->get_update_status();
+        $update_status = $this->get_update_status($active_plugins);
 
         return array(
             array(
@@ -56,7 +55,7 @@ class PluginDiagnostic implements DiagnosticInterface
                 'name'        => 'Active plugins',
                 'value'       => $active_count,
                 'status'      => 'info',
-                'description' => 'Number of currently active plugins.',
+                'description' => 'Number of currently active plugins, including network-active plugins on multisite.',
             ),
             array(
                 'name'        => 'Inactive plugins',
@@ -75,11 +74,32 @@ class PluginDiagnostic implements DiagnosticInterface
     }
 
     /**
-     * Get the current plugin update status reported by WordPress.
+     * Get plugin files active on this site, including network activation.
      *
      * @return array
      */
-    private function get_update_status()
+    private function get_active_plugins()
+    {
+        $active_plugins = (array) get_option('active_plugins', array());
+
+        if (is_multisite()) {
+            $network_plugins = array_keys(
+                (array) get_site_option('active_sitewide_plugins', array())
+            );
+
+            $active_plugins = array_merge($active_plugins, $network_plugins);
+        }
+
+        return array_values(array_unique($active_plugins));
+    }
+
+    /**
+     * Get the current plugin update status reported by WordPress.
+     *
+     * @param array $active_plugins Plugin files active on this site.
+     * @return array
+     */
+    private function get_update_status($active_plugins)
     {
         $update_plugins = get_site_transient('update_plugins');
 
@@ -96,8 +116,7 @@ class PluginDiagnostic implements DiagnosticInterface
             );
         }
 
-        $active_plugins = get_option('active_plugins', array());
-        $updates        = 0;
+        $updates = 0;
 
         foreach ($update_plugins->response as $plugin_file => $plugin_update) {
             if (in_array($plugin_file, $active_plugins, true)) {

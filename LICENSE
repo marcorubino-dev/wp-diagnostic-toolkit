@@ -1,0 +1,10 @@
+SPDX-License-Identifier: GPL-2.0-or-later
+
+WP Diagnostic Toolkit is licensed under the GNU General Public License,
+version 2 or (at your option) any later version.
+
+The full license text is available at:
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+This project uses the "GPL-2.0-or-later" license identifier declared in
+wp-diagnostic-toolkit.php.

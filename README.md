@@ -123,4 +123,4 @@ Diagnostic findings support technical investigation. A warning does not necessar
 
 ## License
 
-The project's license should be specified here once selected.
+WP Diagnostic Toolkit is licensed under the GNU General Public License, version 2 or (at your option) any later version. See the [LICENSE](LICENSE) file for the license notice and the [official GPL v2 text](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html).

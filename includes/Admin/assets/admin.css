@@ -678,3 +678,64 @@
         max-width: 100%;
     }
 }
+
+
+/* Copy controls */
+.wpdt-header-action {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.wpdt-copy-control {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.wpdt-copy-control-inline {
+    margin-top: 6px;
+}
+
+.wpdt-copy-source[hidden] {
+    display: none !important;
+}
+
+.wpdt-copy-button {
+    white-space: nowrap;
+}
+
+.wpdt-copy-button:focus-visible {
+    outline: 2px solid #3b82c4;
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.wpdt-copy-feedback {
+    color: #50575e;
+    font-size: 12px;
+}
+
+.wpdt-section-header-actions {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.wpdt-check-evidence .wpdt-copy-control {
+    display: flex;
+}
+
+@media screen and (max-width: 782px) {
+    .wpdt-header-action {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wpdt-section-header-actions {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

@@ -74,7 +74,10 @@ foreach ($diagnostics as $diagnostic) {
     foreach ($diagnostic['results'] as $check) {
         $report_lines[] = '';
         $report_lines[] = 'Check: ' . $check['name'];
-        $report_lines[] = 'Status: ' . strtoupper($check['status']);
+        $report_status = isset($check['status']) && is_string($check['status'])
+            ? strtoupper(trim($check['status']))
+            : 'UNCLASSIFIED';
+        $report_lines[] = 'Status: ' . $report_status;
         $report_lines[] = 'Description: ' . $check['description'];
 
         if (isset($check['value']) && $check['value'] !== '') {

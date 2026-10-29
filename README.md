@@ -4,20 +4,44 @@
 
 WP Diagnostic Toolkit helps developers inspect a WordPress installation's environment, plugins, server configuration, and selected WooCommerce/multilingual integration signals from the WordPress admin dashboard.
 
-The goal is to make technical information easier to access, identify potential configuration issues, and provide a starting point for evidence-based troubleshooting.
+Its purpose is to make technical information easier to access, surface potential configuration issues, and provide a starting point for evidence-based troubleshooting.
+
+> **Project status:** Active development. The toolkit is a diagnostic aid, not a comprehensive audit or monitoring solution.
+
+## At a glance
+
+- **Platform:** WordPress
+- **Minimum PHP version:** 7.4, according to the current plugin header
+- **Approach:** Modular, read-only diagnostics
+- **License:** GPL-2.0-or-later
+
+## Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [How it works](#how-it-works)
+- [WooCommerce and multilingual troubleshooting](#woocommerce-and-multilingual-troubleshooting)
+- [Design principles](#design-principles)
+- [Current status](#current-status)
+- [Contributing](#contributing)
+- [Disclaimer](#disclaimer)
+- [License](#license)
 
 ## Features
 
-- **Environment:** WordPress and PHP versions, database information, debugging configuration, memory limits, HTTPS configuration, and loopback requests.
-- **Plugins:** Installed plugins, activation status, and available updates.
-- **Server:** PHP configuration, resource limits, and extension availability.
-- **WooCommerce & multilingual (initial checks):** WooCommerce availability, detection of selected multilingual plugins, and guidance for investigating language-switch/cart symptoms.
-- **Dashboard:** A centralized view of diagnostic results, grouped by status.
-- **Settings:** An administration section for toolkit-related settings.
+| Area | What it checks |
+| --- | --- |
+| **Environment** | WordPress and PHP versions, database information, debugging configuration, memory limits, HTTPS configuration, and loopback requests. |
+| **Plugins** | Installed plugins, activation status, and available updates. |
+| **Server** | PHP configuration, resource limits, and extension availability. |
+| **WooCommerce and multilingual** | WooCommerce availability, detection of selected multilingual plugins, and guidance for investigating language-switch/cart symptoms. |
+| **Dashboard** | A centralized view of diagnostic results, grouped by status. |
+| **Settings** | An administration section for toolkit-related settings. |
 
-Diagnostic results use statuses such as `pass`, `info`, `warning`, and `critical` to help distinguish normal conditions from potential issues.
+Results use statuses such as `pass`, `info`, `warning`, and `critical` to help distinguish normal conditions from potential issues.
 
-> The initial multilingual module is an environment-level starting point. It does not yet capture a visitor's live cart, prove translation mapping correctness, or identify a root cause automatically.
+**Scope note:** The initial multilingual module is an environment-level starting point. It does not capture a visitor's live cart, prove translation mapping correctness, or automatically identify a root cause.
 
 ## Requirements
 
@@ -35,7 +59,7 @@ Actual compatibility depends on the WordPress version, PHP runtime, and the func
 
 For local development, install the plugin in a test WordPress environment before using it on a production site.
 
-## How It Works
+## How it works
 
 The plugin uses a modular architecture to keep diagnostic logic separate from the administration interface.
 
@@ -57,37 +81,39 @@ WP Diagnostic Toolkit
     └── Settings
 ```
 
-### Diagnostic Interface
+### Diagnostic interface
 
 Each diagnostic module implements a common interface that defines its identifier, display name, and execution method.
 
-### Diagnostic Manager
+### Diagnostic manager
 
 The manager registers diagnostic modules and runs them through a shared entry point.
 
-### Admin Interface
+### Admin interface
 
 The administration layer presents diagnostic results in the WordPress dashboard, keeping presentation separate from the diagnostic checks themselves.
 
-## Multilingual & WooCommerce Troubleshooting
+## WooCommerce and multilingual troubleshooting
 
-The initial module is designed to provide safe starting evidence when investigating issues such as products or cart contents changing after a language switch.
+The initial module provides a starting point when investigating issues such as products or cart contents changing after a language switch.
 
-Current checks:
+### Current checks
+
 - Detect whether WooCommerce is loaded.
 - Detect selected multilingual plugins using active plugin entries and available runtime APIs.
 - Explain what the admin snapshot cannot prove about a visitor's cart/session.
 - Identify the need for adapter-specific translation mapping checks.
 
-Planned follow-up:
-- Add integration adapters for the multilingual plugin actually installed on the target site.
+### Planned follow-up
+
+- Add integration adapters for the multilingual plugin installed on the target site.
 - Add an explicit, temporary frontend capture workflow for before/after language-switch comparisons.
 - Compare product/variation IDs, quantities, price values, language, URL, and cart state.
 - Add a privacy-conscious exportable report with secrets and customer data excluded by default.
 
 The current module does not modify products, prices, translations, sessions, or cart contents. Findings are not root-cause diagnoses.
 
-## Design Principles
+## Design principles
 
 - **Read-only diagnostics:** Inspect the environment without intentionally modifying site content or configuration.
 - **Modular architecture:** Keep checks isolated so they can be maintained and extended independently.
@@ -95,11 +121,11 @@ The current module does not modify products, prices, translations, sessions, or 
 - **Practical scope:** Prioritize checks that help developers investigate real WordPress issues.
 - **Incremental development:** Improve the accuracy and reliability of existing checks before expanding the feature set.
 
-## Current Status
+## Current status
 
-**Version:** 0.3.0 (development branch)
+**Version:** 0.3.0 (development)
 
-This project is under active development. Diagnostic coverage, compatibility handling, result classification, and administration workflows may change between versions.
+Diagnostic coverage, compatibility handling, result classification, and administration workflows may change as the project evolves.
 
 The current implementation provides a foundation for a modular diagnostic tool. It should not yet be considered a comprehensive audit or monitoring solution.
 
@@ -108,6 +134,7 @@ The current implementation provides a foundation for a modular diagnostic tool. 
 Contributions, bug reports, and suggestions are welcome.
 
 When reporting an issue, include relevant details where possible:
+
 - WordPress version
 - PHP version
 - Database type and version

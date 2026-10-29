@@ -47,6 +47,44 @@ if ($critical_count > 0) {
     $system_status = 'OK';
     $status_class  = 'pass';
 }
+
+$report_lines = array(
+    'WP Diagnostic Toolkit — Diagnostic report',
+    'System status: ' . $system_status,
+    'Checks: ' . $total_checks,
+    'Passed: ' . $pass_count,
+    'Info: ' . $info_count,
+    'Warnings: ' . $warning_count,
+    'Critical: ' . $critical_count,
+    '',
+);
+
+foreach ($diagnostics as $diagnostic) {
+    $report_lines[] = 'MODULE: ' . $diagnostic['name'];
+
+    foreach ($diagnostic['results'] as $check) {
+        $report_lines[] = '';
+        $report_lines[] = 'Check: ' . $check['name'];
+        $report_lines[] = 'Status: ' . strtoupper($check['status']);
+        $report_lines[] = 'Description: ' . $check['description'];
+
+        if (isset($check['value']) && $check['value'] !== '') {
+            $report_lines[] = 'Value: ' . $check['value'];
+        }
+
+        if (! empty($check['evidence'])) {
+            $report_lines[] = 'Evidence: ' . $check['evidence'];
+        }
+
+        if (! empty($check['recommendation'])) {
+            $report_lines[] = 'Recommendation: ' . $check['recommendation'];
+        }
+    }
+
+    $report_lines[] = '';
+}
+
+$report_text = implode("\n", $report_lines);
 ?>
 
 <div class="wrap wpdt-admin">
@@ -58,6 +96,13 @@ if ($critical_count > 0) {
         </div>
 
         <div class="wpdt-header-action">
+            <div class="wpdt-copy-control">
+                <button type="button" class="button button-secondary wpdt-copy-button" data-wpdt-copy>
+                    Copy full report
+                </button>
+                <textarea class="wpdt-copy-source" hidden readonly tabindex="-1" aria-hidden="true"><?php echo esc_textarea($report_text); ?></textarea>
+                <span class="wpdt-copy-feedback" aria-live="polite"></span>
+            </div>
             <form method="get" action="">
                 <input type="hidden" name="page" value="wp-diagnostic-toolkit" />
                 <button type="submit" class="button button-primary">
@@ -218,6 +263,35 @@ if ($critical_count > 0) {
                                 </p>
 
                             <?php endif; ?>
+
+                            <?php
+                            $finding_lines = array(
+                                'Module: ' . $issue['module'],
+                                'Check: ' . $check['name'],
+                                'Status: ' . strtoupper($status),
+                                'Description: ' . $check['description'],
+                            );
+
+                            if (isset($check['value']) && $check['value'] !== '') {
+                                $finding_lines[] = 'Observed value: ' . $check['value'];
+                            }
+
+                            if (! empty($check['evidence'])) {
+                                $finding_lines[] = 'Evidence: ' . $check['evidence'];
+                            }
+
+                            if (! empty($check['recommendation'])) {
+                                $finding_lines[] = 'Recommendation: ' . $check['recommendation'];
+                            }
+                            ?>
+
+                            <div class="wpdt-copy-control wpdt-copy-control-inline">
+                                <button type="button" class="button button-small wpdt-copy-button" data-wpdt-copy>
+                                    Copy finding
+                                </button>
+                                <textarea class="wpdt-copy-source" hidden readonly tabindex="-1" aria-hidden="true"><?php echo esc_textarea(implode("\n", $finding_lines)); ?></textarea>
+                                <span class="wpdt-copy-feedback" aria-live="polite"></span>
+                            </div>
 
                         </div>
 

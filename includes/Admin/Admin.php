@@ -111,6 +111,14 @@ class Admin
             array(),
             WPDT_VERSION
         );
+
+        wp_enqueue_script(
+            'wpdt-admin',
+            WPDT_URL . 'includes/Admin/assets/admin.js',
+            array(),
+            WPDT_VERSION,
+            true
+        );
     }
 
     /**

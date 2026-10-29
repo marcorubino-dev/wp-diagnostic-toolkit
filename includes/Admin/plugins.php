@@ -4,6 +4,34 @@ defined('ABSPATH') || exit;
 
 $results = $diagnostic['results'];
 
+$report_lines = array(
+    'WP Diagnostic Toolkit — ' . $diagnostic['name'] . ' report',
+    'Checks: ' . count($results),
+    '',
+);
+
+foreach ($results as $report_check) {
+    $report_lines[] = 'Check: ' . $report_check['name'];
+    $report_lines[] = 'Status: ' . strtoupper($report_check['status']);
+    $report_lines[] = 'Value: ' . (isset($report_check['value']) ? $report_check['value'] : '');
+
+    if (! empty($report_check['description'])) {
+        $report_lines[] = 'Description: ' . $report_check['description'];
+    }
+
+    if (! empty($report_check['evidence'])) {
+        $report_lines[] = 'Evidence: ' . $report_check['evidence'];
+    }
+
+    if (! empty($report_check['recommendation'])) {
+        $report_lines[] = 'Recommendation: ' . $report_check['recommendation'];
+    }
+
+    $report_lines[] = '';
+}
+
+$report_text = implode("\n", $report_lines);
+
 $pass_count     = 0;
 $info_count     = 0;
 $warning_count  = 0;
@@ -106,10 +134,17 @@ if ($critical_count > 0) {
 
     <section class="wpdt-section">
 
-        <div class="wpdt-section-header">
+        <div class="wpdt-section-header wpdt-section-header-actions">
             <div>
                 <h2>Diagnostic Checks</h2>
                 <p>Active plugins and plugin-related conditions.</p>
+            </div>
+            <div class="wpdt-copy-control">
+                <button type="button" class="button button-secondary wpdt-copy-button" data-wpdt-copy>
+                    Copy module report
+                </button>
+                <textarea class="wpdt-copy-source" hidden readonly tabindex="-1" aria-hidden="true"><?php echo esc_textarea($report_text); ?></textarea>
+                <span class="wpdt-copy-feedback" aria-live="polite"></span>
             </div>
         </div>
 
@@ -195,6 +230,14 @@ if ($critical_count > 0) {
                                         <strong>Evidence:</strong>
 
                                         <?php echo esc_html($check['evidence']); ?>
+
+                                        <div class="wpdt-copy-control wpdt-copy-control-inline">
+                                            <button type="button" class="button button-small wpdt-copy-button" data-wpdt-copy>
+                                                Copy evidence
+                                            </button>
+                                            <textarea class="wpdt-copy-source" hidden readonly tabindex="-1" aria-hidden="true"><?php echo esc_textarea($check['evidence']); ?></textarea>
+                                            <span class="wpdt-copy-feedback" aria-live="polite"></span>
+                                        </div>
 
                                     </div>
 

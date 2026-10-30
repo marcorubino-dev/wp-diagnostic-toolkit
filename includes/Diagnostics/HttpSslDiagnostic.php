@@ -32,14 +32,10 @@ class HttpSslDiagnostic implements DiagnosticInterface
         $scheme = isset($parts['scheme']) ? strtolower($parts['scheme']) : '';
         $is_https = 'https' === $scheme;
 
-        $response = wp_remote_head(
-            $url,
-            array(
-                'timeout'     => 8,
-                'redirection' => 3,
-                'sslverify'   => true,
-            )
-        );
+        $request = $this->request_home_url($url);
+        $response = $request['response'];
+        $method = $request['method'];
+        $used_fallback = $request['used_fallback'];
 
         $results = array();
 
@@ -48,8 +44,8 @@ class HttpSslDiagnostic implements DiagnosticInterface
                 'name'           => 'Home URL HTTP response',
                 'value'          => 'Request failed',
                 'status'         => 'warning',
-                'description'    => 'The configured home URL could not be reached with an HTTP HEAD request.',
-                'evidence'       => $url . ' | ' . $response->get_error_message(),
+                'description'    => 'The configured home URL could not be reached with the WordPress HTTP API.',
+                'evidence'       => $url . ' | ' . $method . ' | ' . $response->get_error_message(),
                 'recommendation' => 'Check DNS, hosting availability, firewall rules, redirects, and server response.',
             );
         } else {
@@ -58,18 +54,31 @@ class HttpSslDiagnostic implements DiagnosticInterface
                 ? 'critical'
                 : ($status_code >= 400 || $status_code >= 300 ? 'warning' : 'pass');
 
+            $description = $status_code >= 500
+                ? 'The home URL returned a server error.'
+                : ($status_code >= 400
+                    ? 'The home URL returned a client error.'
+                    : ($status_code >= 300
+                        ? 'The home URL returned a redirect after the configured redirect limit.'
+                        : 'The home URL responded successfully.'));
+
+            $evidence = $url . ' | ' . $method . ' | HTTP ' . $status_code;
+
+            if ($used_fallback) {
+                $evidence .= ' | GET fallback used because HEAD is not supported.';
+            }
+
+            $location = wp_remote_retrieve_header($response, 'location');
+            if ($status_code >= 300 && $status_code < 400 && ! empty($location)) {
+                $evidence .= ' | Location: ' . $location;
+            }
+
             $results[] = array(
                 'name'           => 'Home URL HTTP response',
                 'value'          => $status_code,
                 'status'         => $status,
-                'description'    => $status_code >= 500
-                    ? 'The home URL returned a server error.'
-                    : ($status_code >= 400
-                        ? 'The home URL returned a client error.'
-                        : ($status_code >= 300
-                            ? 'The home URL returned a redirect after the configured redirect limit.'
-                            : 'The home URL responded successfully to an HTTP HEAD request.')),
-                'evidence'       => $url . ' | HTTP ' . $status_code,
+                'description'    => $description,
+                'evidence'       => $evidence,
                 'recommendation' => 'Review the HTTP response and redirect configuration if this result is not expected.',
             );
         }
@@ -111,11 +120,46 @@ class HttpSslDiagnostic implements DiagnosticInterface
             'value'          => 'TLS verification passed',
             'status'         => 'pass',
             'description'    => 'WordPress completed an HTTPS request with certificate verification enabled.',
-            'evidence'       => 'WordPress HTTP API request used sslverify=true. This confirms validation for this request, not the certificate expiry date.',
+            'evidence'       => 'WordPress HTTP API request used sslverify=true via ' . $method . '. This confirms validation for this request, not the certificate expiry date.',
             'recommendation' => 'No action required.',
         );
 
         return $results;
+    }
+
+    /**
+     * Request the home URL, falling back to GET when HEAD is unsupported.
+     *
+     * @param string $url Home URL.
+     * @return array
+     */
+    private function request_home_url($url)
+    {
+        $args = array(
+            'timeout'             => 8,
+            'redirection'         => 3,
+            'sslverify'           => true,
+            'limit_response_size' => 1024,
+        );
+
+        $response = wp_remote_head($url, $args);
+        $used_fallback = false;
+        $method = 'HEAD';
+
+        if (
+            ! is_wp_error($response)
+            && in_array((int) wp_remote_retrieve_response_code($response), array(405, 501), true)
+        ) {
+            $response = wp_remote_get($url, $args);
+            $method = 'GET';
+            $used_fallback = true;
+        }
+
+        return array(
+            'response'      => $response,
+            'method'        => $method,
+            'used_fallback' => $used_fallback,
+        );
     }
 
     /**

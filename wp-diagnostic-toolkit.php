@@ -45,6 +45,10 @@ $diagnostic_manager->register(
 );
 
 $diagnostic_manager->register(
+    new WPDT\Diagnostics\HttpSslDiagnostic()
+);
+
+$diagnostic_manager->register(
     new WPDT\Diagnostics\PluginDiagnostic()
 );
 

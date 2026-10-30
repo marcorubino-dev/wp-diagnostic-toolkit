@@ -53,6 +53,10 @@ $diagnostic_manager->register(
 );
 
 $diagnostic_manager->register(
+    new WPDT\Diagnostics\DiskSpaceDiagnostic()
+);
+
+$diagnostic_manager->register(
     new WPDT\Diagnostics\MultilingualWooCommerceDiagnostic()
 );
 

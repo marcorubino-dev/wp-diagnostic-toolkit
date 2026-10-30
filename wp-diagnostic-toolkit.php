@@ -49,6 +49,10 @@ $diagnostic_manager->register(
 );
 
 $diagnostic_manager->register(
+    new WPDT\Diagnostics\ThemeDiagnostic()
+);
+
+$diagnostic_manager->register(
     new WPDT\Diagnostics\ServerDiagnostic()
 );
 

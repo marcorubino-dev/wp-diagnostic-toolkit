@@ -11,7 +11,7 @@ use WPDT\Core\DiagnosticInterface;
 class MultilingualWooCommerceDiagnostic implements DiagnosticInterface
 {
     /**
-     * Known multilingual plugin slugs.
+     * Known multilingual plugin files.
      *
      * @var array
      */
@@ -41,54 +41,95 @@ class MultilingualWooCommerceDiagnostic implements DiagnosticInterface
     public function run()
     {
         $results = array();
-        $active_plugins = (array) get_option('active_plugins', array());
+        $active_plugins = $this->get_active_plugins();
+        $installed_plugins = $this->get_installed_plugins();
 
-        if (is_multisite()) {
-            $network_plugins = array_keys((array) get_site_option('active_sitewide_plugins', array()));
-            $active_plugins = array_unique(array_merge($active_plugins, $network_plugins));
+        $woocommerce_file = 'woocommerce/woocommerce.php';
+        $woocommerce_runtime = class_exists('WooCommerce') || defined('WC_VERSION');
+        $woocommerce_installed = isset($installed_plugins[$woocommerce_file]);
+        $woocommerce_active = $woocommerce_runtime || in_array($woocommerce_file, $active_plugins, true);
+
+        if ($woocommerce_active) {
+            $woocommerce_status = 'pass';
+            $woocommerce_description = 'WooCommerce is active on this site.';
+            $woocommerce_value = defined('WC_VERSION')
+                ? WC_VERSION
+                : 'Active; version unavailable';
+            $woocommerce_recommendation = 'No action required.';
+        } elseif ($woocommerce_installed) {
+            $woocommerce_status = 'info';
+            $woocommerce_description = 'WooCommerce is installed but is not active.';
+            $woocommerce_value = 'Installed; inactive';
+            $woocommerce_recommendation = 'Activate WooCommerce only if this site is intended to run an online store.';
+        } else {
+            $woocommerce_status = 'info';
+            $woocommerce_description = 'WooCommerce is not installed. WooCommerce-specific checks are not applicable.';
+            $woocommerce_value = 'Not installed';
+            $woocommerce_recommendation = 'No action required unless this site is intended to use WooCommerce.';
         }
-
-        $woocommerce_active = class_exists('WooCommerce') || defined('WC_VERSION');
 
         $results[] = array(
             'id' => 'woocommerce_detected',
             'name' => 'WooCommerce availability',
-            'status' => $woocommerce_active ? 'pass' : 'warning',
-            'description' => $woocommerce_active
-                ? 'WooCommerce is loaded in this request.'
-                : 'WooCommerce was not detected as loaded. Some checks require WooCommerce to be active.',
-            'value' => defined('WC_VERSION') ? WC_VERSION : ($woocommerce_active ? 'Class available; version constant unavailable' : 'Not detected'),
-            'evidence' => 'Checked the WooCommerce class and WC_VERSION constant.',
-            'recommendation' => $woocommerce_active ? '' : 'Confirm WooCommerce is installed and active, then reload this diagnostic page.',
+            'status' => $woocommerce_status,
+            'description' => $woocommerce_description,
+            'value' => $woocommerce_value,
+            'evidence' => 'Checked the installed plugin inventory, active plugin entries, WooCommerce class, and WC_VERSION constant.',
+            'recommendation' => $woocommerce_recommendation,
         );
 
-        $detected = array();
+        $integration_states = array();
+        $active_integrations = array();
+        $inactive_integrations = array();
+
         foreach ($this->multilingual_plugins as $plugin_file => $plugin_name) {
             if (in_array($plugin_file, $active_plugins, true)) {
-                $detected[] = $plugin_name;
+                $active_integrations[] = $plugin_name;
+                $integration_states[] = $plugin_name . ': active';
+            } elseif (isset($installed_plugins[$plugin_file])) {
+                $inactive_integrations[] = $plugin_name;
+                $integration_states[] = $plugin_name . ': installed, inactive';
             }
         }
 
-        if (function_exists('pll_current_language') && ! in_array('Polylang', $detected, true)) {
-            $detected[] = 'Polylang (runtime API detected)';
+        // Runtime APIs can confirm integrations even when their plugin file is
+        // not present in the regular active_plugins option (for example, custom
+        // loading or network-level setups).
+        if (function_exists('pll_current_language') && ! in_array('Polylang', $active_integrations, true)) {
+            $active_integrations[] = 'Polylang';
+            $integration_states[] = 'Polylang: runtime API detected';
         }
 
-        if (defined('ICL_SITEPRESS_VERSION') && ! in_array('WPML', $detected, true)) {
-            $detected[] = 'WPML (runtime API detected)';
+        if (defined('ICL_SITEPRESS_VERSION') && ! in_array('WPML', $active_integrations, true)) {
+            $active_integrations[] = 'WPML';
+            $integration_states[] = 'WPML: runtime API detected';
+        }
+
+        if (! empty($active_integrations)) {
+            $multilingual_status = 'pass';
+            $multilingual_description = 'One or more supported multilingual integrations are active. Detection does not verify translation configuration.';
+            $multilingual_value = implode(', ', $integration_states);
+            $multilingual_recommendation = 'Verify the translation relationship for the affected products and categories.';
+        } elseif (! empty($inactive_integrations)) {
+            $multilingual_status = 'info';
+            $multilingual_description = 'Supported multilingual plugin(s) are installed but inactive.';
+            $multilingual_value = implode(', ', $integration_states);
+            $multilingual_recommendation = 'Activate the intended multilingual plugin if this site is meant to serve translated content.';
+        } else {
+            $multilingual_status = 'info';
+            $multilingual_description = 'No supported multilingual plugin is installed.';
+            $multilingual_value = 'None installed';
+            $multilingual_recommendation = 'No action required unless this site is intended to serve multilingual content.';
         }
 
         $results[] = array(
             'id' => 'multilingual_plugin_detection',
             'name' => 'Multilingual integration detection',
-            'status' => empty($detected) ? 'info' : 'pass',
-            'description' => empty($detected)
-                ? 'No supported multilingual plugin was detected by the current checks.'
-                : 'Detected multilingual plugin(s). Detection does not prove that translations are configured correctly.',
-            'value' => empty($detected) ? 'None detected' : implode(', ', $detected),
-            'evidence' => 'Checked active plugin entries and selected runtime APIs.',
-            'recommendation' => empty($detected)
-                ? 'If this site uses a multilingual plugin, verify its plugin slug and add a detection rule if needed.'
-                : 'Verify the translation relationship for the affected product and category in the multilingual plugin.',
+            'status' => $multilingual_status,
+            'description' => $multilingual_description,
+            'value' => $multilingual_value,
+            'evidence' => 'Compared known plugin files against the installed and active plugin inventories, then checked WPML and Polylang runtime APIs.',
+            'recommendation' => $multilingual_recommendation,
         );
 
         $results[] = array(
@@ -112,5 +153,43 @@ class MultilingualWooCommerceDiagnostic implements DiagnosticInterface
         );
 
         return $results;
+    }
+
+    /**
+     * Get plugin files active on this site, including network activation.
+     *
+     * @return array
+     */
+    private function get_active_plugins()
+    {
+        $active_plugins = (array) get_option('active_plugins', array());
+
+        if (is_multisite()) {
+            $network_plugins = array_keys(
+                (array) get_site_option('active_sitewide_plugins', array())
+            );
+
+            $active_plugins = array_merge($active_plugins, $network_plugins);
+        }
+
+        return array_values(array_unique($active_plugins));
+    }
+
+    /**
+     * Get the installed plugin inventory.
+     *
+     * @return array
+     */
+    private function get_installed_plugins()
+    {
+        if (! function_exists('get_plugins')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        if (! function_exists('get_plugins')) {
+            return array();
+        }
+
+        return get_plugins();
     }
 }

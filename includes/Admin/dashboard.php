@@ -7,13 +7,16 @@ $pass_count      = 0;
 $info_count      = 0;
 $warning_count   = 0;
 $critical_count  = 0;
+$unclassified_count = 0;
 $issues          = array();
 
 foreach ($diagnostics as $diagnostic) {
     foreach ($diagnostic['results'] as $check) {
         $total_checks++;
 
-        $status = strtolower($check['status']);
+        $status = isset($check['status']) && is_string($check['status'])
+            ? strtolower(trim($check['status']))
+            : '';
 
         if ($status === 'pass') {
             $pass_count++;
@@ -33,6 +36,8 @@ foreach ($diagnostics as $diagnostic) {
                 'module' => $diagnostic['name'],
                 'check'  => $check,
             );
+        } else {
+            $unclassified_count++;
         }
     }
 }
@@ -42,6 +47,9 @@ if ($critical_count > 0) {
     $status_class  = 'critical';
 } elseif ($warning_count > 0) {
     $system_status = 'NEEDS ATTENTION';
+    $status_class  = 'warning';
+} elseif ($unclassified_count > 0) {
+    $system_status = 'NEEDS REVIEW';
     $status_class  = 'warning';
 } else {
     $system_status = 'OK';
@@ -56,6 +64,7 @@ $report_lines = array(
     'Info: ' . $info_count,
     'Warnings: ' . $warning_count,
     'Critical: ' . $critical_count,
+    'Unclassified: ' . $unclassified_count,
     '',
 );
 
@@ -65,7 +74,10 @@ foreach ($diagnostics as $diagnostic) {
     foreach ($diagnostic['results'] as $check) {
         $report_lines[] = '';
         $report_lines[] = 'Check: ' . $check['name'];
-        $report_lines[] = 'Status: ' . strtoupper($check['status']);
+        $report_status = isset($check['status']) && is_string($check['status'])
+            ? strtoupper(trim($check['status']))
+            : 'UNCLASSIFIED';
+        $report_lines[] = 'Status: ' . $report_status;
         $report_lines[] = 'Description: ' . $check['description'];
 
         if (isset($check['value']) && $check['value'] !== '') {
@@ -121,6 +133,8 @@ $report_text = implode("\n", $report_lines);
                 <h2 class="wpdt-status wpdt-status-<?php echo esc_attr($status_class); ?>">
                     <?php if ($status_class === 'critical') : ?>
                         <span aria-hidden="true">✕</span>
+                    <?php elseif ($system_status === 'NEEDS REVIEW') : ?>
+                        <span aria-hidden="true">?</span>
                     <?php elseif ($status_class === 'warning') : ?>
                         <span aria-hidden="true">⚠</span>
                     <?php else : ?>
@@ -142,8 +156,18 @@ $report_text = implode("\n", $report_lines);
                     } elseif ($warning_count > 0) {
                         echo esc_html(
                             sprintf(
-                                '%d issue(s) require attention.',
-                                $warning_count
+                                '%d issue(s) require attention.%s',
+                                $warning_count,
+                                $unclassified_count > 0
+                                    ? ' ' . $unclassified_count . ' check(s) have an unrecognized or missing status.'
+                                    : ''
+                            )
+                        );
+                    } elseif ($unclassified_count > 0) {
+                        echo esc_html(
+                            sprintf(
+                                '%d check(s) have an unrecognized or missing status; review their diagnostic definitions.',
+                                $unclassified_count
                             )
                         );
                     } else {
@@ -179,6 +203,12 @@ $report_text = implode("\n", $report_lines);
                     <span class="wpdt-summary-icon" aria-hidden="true">✕</span>
                     <strong><?php echo esc_html($critical_count); ?></strong>
                     <span>critical</span>
+                </div>
+
+                <div class="wpdt-summary-item wpdt-summary-info">
+                    <span class="wpdt-summary-icon" aria-hidden="true">?</span>
+                    <strong><?php echo esc_html($unclassified_count); ?></strong>
+                    <span>unclassified</span>
                 </div>
 
             </div>

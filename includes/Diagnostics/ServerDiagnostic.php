@@ -37,8 +37,6 @@ class ServerDiagnostic implements DiagnosticInterface
      */
     public function run()
     {
-        $extension_status = $this->get_extension_status();
-
         $results = array(
             array(
                 'name'        => 'PHP memory limit',
@@ -64,13 +62,6 @@ class ServerDiagnostic implements DiagnosticInterface
                 'status'      => 'info',
                 'description' => 'Maximum execution time configured for PHP scripts.',
             ),
-            array(
-                'name'           => 'PHP extensions',
-                'value'          => $extension_status['value'],
-                'status'         => $extension_status['status'],
-                'description'    => $extension_status['description'],
-                'recommendation' => $extension_status['recommendation'],
-            ),
         );
 
         return array_merge(
@@ -80,87 +71,110 @@ class ServerDiagnostic implements DiagnosticInterface
     }
 
     /**
-     * Get the aggregate status of required PHP extensions.
+     * Get the PHP extension groups inspected by this diagnostic.
+     *
+     * These groups are a practical subset, not an exhaustive list of
+     * every WordPress hosting recommendation.
      *
      * @return array
      */
-    private function get_extension_status()
+    private function get_extension_groups()
     {
-        $extensions = $this->get_required_extensions();
-
-        $loaded = 0;
-
-        foreach ($extensions as $extension) {
-            if (extension_loaded($extension)) {
-                $loaded++;
-            }
-        }
-
-        $total = count($extensions);
-
-        if ($loaded === $total) {
-            return array(
-                'value'          => $loaded . '/' . $total . ' loaded',
-                'status'         => 'pass',
-                'description'    => 'All required PHP extensions are available.',
-                'recommendation' => 'No action required.',
-            );
-        }
-
         return array(
-            'value'          => $loaded . '/' . $total . ' loaded',
-            'status'         => 'warning',
-            'description'    => 'One or more required PHP extensions are not available.',
-            'recommendation' => 'Enable the missing PHP extensions and re-run the audit.',
+            'core' => array(
+                'label'      => 'Core runtime',
+                'extensions' => array(
+                    'json',
+                    'mysqli',
+                ),
+                'required'   => true,
+            ),
+            'recommended' => array(
+                'label'      => 'Recommended compatibility',
+                'extensions' => array(
+                    'curl',
+                    'mbstring',
+                    'openssl',
+                    'xml',
+                    'zip',
+                ),
+                'required'   => false,
+            ),
         );
     }
 
     /**
-     * Get individual PHP extension diagnostics.
+     * Get aggregate and individual PHP extension diagnostics.
      *
      * @return array
      */
     private function get_extension_diagnostics()
     {
-        $extensions = $this->get_required_extensions();
-
         $results = array();
+        $groups = $this->get_extension_groups();
 
-        foreach ($extensions as $extension) {
-            $loaded = extension_loaded($extension);
+        foreach ($groups as $group) {
+            $extensions = $group['extensions'];
+            $loaded = array();
+            $missing = array();
+
+            foreach ($extensions as $extension) {
+                if (extension_loaded($extension)) {
+                    $loaded[] = $extension;
+                } else {
+                    $missing[] = $extension;
+                }
+            }
+
+            $is_required = $group['required'];
+            $all_loaded = empty($missing);
+            $summary_status = $all_loaded
+                ? 'pass'
+                : ($is_required ? 'critical' : 'info');
 
             $results[] = array(
-                'name'           => 'PHP extension: ' . $extension,
-                'value'          => $loaded ? 'Loaded' : 'Not loaded',
-                'status'         => $loaded ? 'pass' : 'warning',
-                'description'    => $loaded
-                    ? 'PHP extension is available.'
-                    : 'PHP extension is not available.',
-                'recommendation' => $loaded
+                'name'           => $group['label'] . ' PHP extensions',
+                'value'          => count($loaded) . '/' . count($extensions) . ' loaded',
+                'status'         => $summary_status,
+                'description'    => $all_loaded
+                    ? 'All extensions in this group are available.'
+                    : ($is_required
+                        ? 'One or more baseline runtime extensions are missing.'
+                        : 'One or more recommended extensions are not available. Some WordPress or plugin features may have reduced compatibility.'),
+                'recommendation' => $all_loaded
                     ? 'No action required.'
-                    : 'Enable the ' . $extension . ' PHP extension and re-run the audit.',
-                'evidence'       => "extension_loaded('{$extension}')",
+                    : ($is_required
+                        ? 'Ask the hosting provider to enable the missing extensions: ' . implode(', ', $missing) . '.'
+                        : 'Review whether the missing extensions are needed by your site, plugins, or integrations: ' . implode(', ', $missing) . '.'),
+                'evidence'       => 'Loaded: ' . (empty($loaded) ? 'none' : implode(', ', $loaded))
+                    . ' | Missing: ' . (empty($missing) ? 'none' : implode(', ', $missing)),
             );
+
+            foreach ($extensions as $extension) {
+                $is_loaded = extension_loaded($extension);
+                $extension_required = $is_required;
+
+                $results[] = array(
+                    'name'           => 'PHP extension: ' . $extension,
+                    'value'          => $is_loaded ? 'Loaded' : 'Not loaded',
+                    'status'         => $is_loaded
+                        ? 'pass'
+                        : ($extension_required ? 'critical' : 'info'),
+                    'description'    => $is_loaded
+                        ? 'Extension is available.'
+                        : ($extension_required
+                            ? 'This extension is part of the baseline runtime checks.'
+                            : 'This extension is recommended for compatibility with common WordPress features and integrations.'),
+                    'recommendation' => $is_loaded
+                        ? 'No action required.'
+                        : ($extension_required
+                            ? 'Ask the hosting provider to enable the ' . $extension . ' PHP extension.'
+                            : 'Check whether your active plugins or integrations require the ' . $extension . ' PHP extension.'),
+                    'evidence'       => "extension_loaded('" . $extension . "')",
+                );
+            }
         }
 
         return $results;
-    }
-
-    /**
-     * Get PHP extensions required by the toolkit.
-     *
-     * @return array
-     */
-    private function get_required_extensions()
-    {
-        return array(
-            'curl',
-            'json',
-            'mbstring',
-            'mysqli',
-            'openssl',
-            'xml',
-            'zip',
-        );
     }
 }

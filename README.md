@@ -20,6 +20,7 @@ Its purpose is to make technical information easier to access, surface potential
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Testing](#testing)
 - [How it works](#how-it-works)
 - [WooCommerce and multilingual troubleshooting](#woocommerce-and-multilingual-troubleshooting)
 - [Design principles](#design-principles)
@@ -61,6 +62,22 @@ Actual compatibility depends on the WordPress version, PHP runtime, and the func
 4. Open the toolkit menu in the WordPress admin area to review diagnostic results.
 
 For local development, install the plugin in a test WordPress environment before using it on a production site.
+
+## Testing
+
+The repository includes lightweight PHP CLI tests. They do not require PHPUnit or a WordPress bootstrap unless a test explicitly says otherwise.
+
+Run the current test scripts from the repository root:
+
+```bash
+php tests/PluginDiagnosticTest.php
+php tests/RuleResultTest.php
+php tests/ServerDiagnosticTest.php
+```
+
+The server diagnostic test checks the diagnostic interface, result structure, supported status values, unique result names, and the reported state of the inspected PHP extensions.
+
+These checks are a focused regression baseline, not a substitute for integration testing in a real WordPress installation. Run them with a PHP version supported by the plugin.
 
 ## How it works
 

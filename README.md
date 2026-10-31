@@ -2,7 +2,7 @@
 
 **A lightweight diagnostic toolkit for WordPress developers and small agencies.**
 
-WP Diagnostic Toolkit helps developers inspect a WordPress installation's environment, plugins, server configuration, and selected WooCommerce/multilingual integration signals from the WordPress admin dashboard.
+WP Diagnostic Toolkit helps developers inspect a WordPress installation's environment, plugins, active theme, server configuration, filesystem capacity, HTTP/SSL behavior, and selected WooCommerce/multilingual integration signals from the WordPress admin dashboard.
 
 Its purpose is to make technical information easier to access, surface potential configuration issues, and provide a starting point for evidence-based troubleshooting.
 
@@ -32,11 +32,14 @@ Its purpose is to make technical information easier to access, surface potential
 
 | Area | What it checks |
 | --- | --- |
-| **Environment** | WordPress and PHP versions, database information, debugging configuration, memory limits, HTTPS configuration, and loopback requests. |
+| **Environment** | WordPress and PHP versions, database information, debugging configuration, memory limits, and loopback requests. |
+| **HTTP and SSL** | HTTP response behavior, HTTPS availability, and basic SSL-related signals. |
 | **Plugins** | Installed plugins, activation status, and available updates. |
+| **Theme** | Active theme information and available theme metadata. |
 | **Server** | PHP configuration, resource limits, and extension availability. |
+| **Filesystem** | Available and total disk space reported for the filesystem containing the WordPress installation. |
 | **WooCommerce and multilingual** | WooCommerce availability, detection of selected multilingual plugins, and guidance for investigating language-switch/cart symptoms. |
-| **Dashboard** | A centralized view of diagnostic results, grouped by status. |
+| **Dashboard** | A centralized view of diagnostic results, grouped by status, with report-copy actions. |
 | **Settings** | An administration section for toolkit-related settings. |
 
 Results use statuses such as `pass`, `info`, `warning`, and `critical` to help distinguish normal conditions from potential issues.
@@ -70,8 +73,11 @@ WP Diagnostic Toolkit
 │   └── DiagnosticManager
 ├── Diagnostics
 │   ├── EnvironmentDiagnostic
+│   ├── HttpSslDiagnostic
 │   ├── PluginDiagnostic
+│   ├── ThemeDiagnostic
 │   ├── ServerDiagnostic
+│   ├── DiskSpaceDiagnostic
 │   └── MultilingualWooCommerceDiagnostic
 └── Admin
     ├── Dashboard
@@ -91,7 +97,7 @@ The manager registers diagnostic modules and runs them through a shared entry po
 
 ### Admin interface
 
-The administration layer presents diagnostic results in the WordPress dashboard, keeping presentation separate from the diagnostic checks themselves.
+The administration layer presents diagnostic results in the WordPress dashboard, keeping presentation separate from the diagnostic checks themselves. Diagnostic reports can also be copied for sharing or further investigation.
 
 ## WooCommerce and multilingual troubleshooting
 
@@ -125,7 +131,7 @@ The current module does not modify products, prices, translations, sessions, or 
 
 **Version:** 0.3.0 (development)
 
-Diagnostic coverage, compatibility handling, result classification, and administration workflows may change as the project evolves.
+The toolkit currently includes environment, HTTP/SSL, plugin, theme, server, filesystem, and initial WooCommerce/multilingual diagnostics. Diagnostic coverage, compatibility handling, result classification, and administration workflows may change as the project evolves.
 
 The current implementation provides a foundation for a modular diagnostic tool. It should not yet be considered a comprehensive audit or monitoring solution.
 

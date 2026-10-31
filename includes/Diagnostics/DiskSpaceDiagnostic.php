@@ -38,7 +38,7 @@ class DiskSpaceDiagnostic implements DiagnosticInterface
     public function run()
     {
         $path = defined('ABSPATH') ? ABSPATH : __DIR__;
-        
+
         if (! function_exists('disk_free_space') || ! function_exists('disk_total_space')) {
             return array(
                 array(
@@ -58,6 +58,8 @@ class DiskSpaceDiagnostic implements DiagnosticInterface
             false === $free_space
             || false === $total_space
             || $total_space <= 0
+            || $free_space < 0
+            || $free_space > $total_space
         ) {
             return array(
                 array(
@@ -71,17 +73,32 @@ class DiskSpaceDiagnostic implements DiagnosticInterface
             );
         }
 
-        $used_space = max(0, $total_space - $free_space);
+        $used_space = $total_space - $free_space;
         $used_percent = ($used_space / $total_space) * 100;
         $free_percent = ($free_space / $total_space) * 100;
 
+        $status = 'info';
+        $recommendation = 'No immediate action indicated by this filesystem capacity check.';
+
+        if ($free_percent < 5) {
+            $status = 'critical';
+            $recommendation = 'Free disk space is critically low. Review filesystem usage and safely free or expand capacity.';
+        } elseif ($free_percent < 10) {
+            $status = 'warning';
+            $recommendation = 'Free disk space is low. Review filesystem usage and plan to free or expand capacity.';
+        }
+
         return array(
             array(
-                'name'        => 'Filesystem disk space',
-                'value'       => $this->format_bytes($free_space) . ' free of ' . $this->format_bytes($total_space),
-                'status'      => 'info',
-                'description' => 'Available and total capacity reported by the filesystem containing the WordPress installation.',
-                'evidence'    => sprintf(
+                'name'           => 'Filesystem disk space',
+                'value'          => $this->format_bytes($free_space) . ' free of ' . $this->format_bytes($total_space),
+                'status'         => $status,
+                'description'    => sprintf(
+                    'The filesystem containing the WordPress installation has %.1f%% free capacity.',
+                    $free_percent
+                ),
+                'recommendation' => $recommendation,
+                'evidence'       => sprintf(
                     'Used: %s (%.1f%%) | Free: %.1f%% | Path: %s',
                     $this->format_bytes($used_space),
                     $used_percent,

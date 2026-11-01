@@ -65,9 +65,9 @@ For local development, install the plugin in a test WordPress environment before
 
 ## Testing
 
-The repository includes lightweight PHP CLI tests. They do not require PHPUnit or a WordPress bootstrap unless a test explicitly says otherwise.
+The repository includes lightweight PHP CLI tests. They do not require PHPUnit or a WordPress bootstrap; tests that exercise WordPress-dependent diagnostics provide controlled stubs for the WordPress HTTP and environment APIs.
 
-Run the current test scripts from the repository root:
+Run the test scripts from the repository root:
 
 ```bash
 php tests/PluginDiagnosticTest.php
@@ -75,11 +75,15 @@ php tests/RuleResultTest.php
 php tests/DiagnosticManagerTest.php
 php tests/ServerDiagnosticTest.php
 php tests/DiskSpaceDiagnosticTest.php
+php tests/HttpSslDiagnosticTest.php
+php tests/EnvironmentDiagnosticTest.php
 ```
 
-The diagnostic manager test checks empty-state behavior, registration order, result grouping, and replacement of duplicate diagnostic IDs. The server diagnostic test checks the diagnostic interface, result structure, supported status values, unique result names, and the runtime state and severity classification of inspected PHP extensions. The filesystem diagnostic test checks its result contract and verifies that available disk capacity is classified against the configured warning thresholds.
+The HTTP/SSL regression test covers successful responses, redirects, client and server errors, HEAD-to-GET fallback, generic transport failures, TLS verification errors, and non-HTTPS URLs. The environment test covers WordPress/database version reporting, HTTPS detection, loopback success, redirects, client/server errors, and transport failures.
 
-These checks are a focused regression baseline, not a substitute for integration testing in a real WordPress installation. Run them with a PHP version supported by the plugin.
+The GitHub Actions workflow runs PHP syntax validation and all CLI regression tests against PHP 7.4 through 8.4.
+
+These tests verify diagnostic behavior against controlled API responses. They are not a substitute for integration testing in a real WordPress installation or validation against different hosting, proxy, DNS, and TLS configurations.
 
 ## How it works
 

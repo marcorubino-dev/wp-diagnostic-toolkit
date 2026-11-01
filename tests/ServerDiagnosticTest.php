@@ -141,6 +141,16 @@ foreach ($extension_names as $extension) {
                 $expected_value === $result['value'],
                 'reports the runtime state of ' . $extension
             );
+
+            $is_required = in_array($extension, array('json', 'mysqli'), true);
+            $expected_status = extension_loaded($extension)
+                ? 'pass'
+                : ($is_required ? 'critical' : 'info');
+
+            wpdt_server_check(
+                $expected_status === $result['status'],
+                'classifies the ' . $extension . ' extension correctly'
+            );
             break;
         }
     }

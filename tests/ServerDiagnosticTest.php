@@ -84,7 +84,8 @@ $expected_settings = array(
     'Upload max filesize',
     'POST max size',
     'Maximum execution time',
-    'PHP extensions',
+    'Core runtime PHP extensions',
+    'Recommended compatibility PHP extensions',
 );
 
 foreach ($expected_settings as $expected_name) {
@@ -92,6 +93,37 @@ foreach ($expected_settings as $expected_name) {
         in_array($expected_name, $names, true),
         'includes the ' . $expected_name . ' check'
     );
+}
+
+$extension_groups = array(
+    'core' => array('json', 'mysqli'),
+    'recommended' => array('curl', 'mbstring', 'openssl', 'xml', 'zip'),
+);
+
+foreach ($extension_groups as $group => $extensions) {
+    $group_name = ('core' === $group ? 'Core runtime' : 'Recommended compatibility')
+        . ' PHP extensions';
+    $loaded = 0;
+
+    foreach ($extensions as $extension) {
+        if (extension_loaded($extension)) {
+            $loaded++;
+        }
+    }
+
+    $expected_status = $loaded === count($extensions)
+        ? 'pass'
+        : ('core' === $group ? 'critical' : 'info');
+
+    foreach ($results as $result) {
+        if (isset($result['name']) && $group_name === $result['name']) {
+            wpdt_server_check(
+                $expected_status === $result['status'],
+                'classifies ' . $group . ' extension group correctly'
+            );
+            break;
+        }
+    }
 }
 
 $extension_names = array('curl', 'json', 'mbstring', 'mysqli', 'openssl', 'xml', 'zip');

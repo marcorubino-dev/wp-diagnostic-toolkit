@@ -73,9 +73,10 @@ Run the current test scripts from the repository root:
 php tests/PluginDiagnosticTest.php
 php tests/RuleResultTest.php
 php tests/ServerDiagnosticTest.php
+php tests/DiskSpaceDiagnosticTest.php
 ```
 
-The server diagnostic test checks the diagnostic interface, result structure, supported status values, unique result names, and the reported state of the inspected PHP extensions.
+The server diagnostic test checks the diagnostic interface, result structure, supported status values, unique result names, and the runtime state and severity classification of inspected PHP extensions. The filesystem diagnostic test checks its result contract and verifies that available disk capacity is classified against the configured warning thresholds.
 
 These checks are a focused regression baseline, not a substitute for integration testing in a real WordPress installation. Run them with a PHP version supported by the plugin.
 

@@ -151,7 +151,7 @@ class ServerDiagnostic implements DiagnosticInterface
             );
 
             foreach ($extensions as $extension) {
-                $is_loaded = extension_loaded($extension);
+                $is_loaded = in_array($extension, $loaded, true);
                 $extension_required = $is_required;
 
                 $results[] = array(

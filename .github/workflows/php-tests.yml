@@ -46,3 +46,5 @@ jobs:
           php tests/DiagnosticManagerTest.php
           php tests/ServerDiagnosticTest.php
           php tests/DiskSpaceDiagnosticTest.php
+          php tests/HttpSslDiagnosticTest.php
+          php tests/EnvironmentDiagnosticTest.php

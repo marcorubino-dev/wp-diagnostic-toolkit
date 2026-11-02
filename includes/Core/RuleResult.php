@@ -49,7 +49,7 @@ final class RuleResult
         }
 
         if (!preg_match('/^[a-z0-9][a-z0-9._-]*$/', $data['module'])) {
-            throw new \\InvalidArgumentException('Field "module" must be a stable lowercase identifier.');
+            throw new \InvalidArgumentException('Field "module" must be a stable lowercase identifier.');
         }
 
         $allowed_outcomes = array(

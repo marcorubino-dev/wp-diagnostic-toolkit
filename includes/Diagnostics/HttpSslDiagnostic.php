@@ -119,7 +119,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
             return $results;
         }
 
-        if ($status_code < 100) {
+        if ($status_code < 200) {
             $results[] = array(
                 'name'           => 'SSL certificate validation',
                 'value'          => 'Not confirmed',

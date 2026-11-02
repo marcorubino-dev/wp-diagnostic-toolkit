@@ -77,9 +77,10 @@ php tests/ServerDiagnosticTest.php
 php tests/DiskSpaceDiagnosticTest.php
 php tests/HttpSslDiagnosticTest.php
 php tests/EnvironmentDiagnosticTest.php
+php tests/ThemeDiagnosticTest.php
 ```
 
-The HTTP/SSL regression test covers successful responses, redirects, client and server errors, HEAD-to-GET fallback, generic transport failures, TLS verification errors, and non-HTTPS URLs. The environment test covers WordPress/database version reporting, HTTPS detection, loopback success, redirects, client/server errors, and transport failures.
+The HTTP/SSL regression test covers successful responses, redirects, client and server errors, HEAD-to-GET fallback, generic transport failures, TLS verification errors, and non-HTTPS URLs. The environment test covers WordPress/database version reporting, HTTPS detection, loopback success, redirects, client/server errors, and transport failures. The theme test covers installed and active themes, child-theme parent detection, missing parents, undeclared versions, and update transient states.
 
 The GitHub Actions workflow runs PHP syntax validation and all CLI regression tests against PHP 7.4 through 8.4.
 

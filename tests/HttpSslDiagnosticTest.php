@@ -122,6 +122,15 @@ $GLOBALS['wpdt_http_head_response'] = array('response' => array('code' => 503), 
 $results = $diagnostic->run();
 wpdt_http_check('critical' === wpdt_http_result($results, 'Home URL HTTP response')['status'], 'classifies an HTTP 5xx response as critical');
 
+$GLOBALS['wpdt_http_head_response'] = array('response' => array('code' => 0), 'headers' => array());
+$results = $diagnostic->run();
+wpdt_http_check('warning' === wpdt_http_result($results, 'Home URL HTTP response')['status'], 'does not treat a missing HTTP status as a successful response');
+wpdt_http_check('info' === wpdt_http_result($results, 'SSL certificate validation')['status'], 'does not claim TLS validation without a valid HTTP response');
+
+$GLOBALS['wpdt_http_head_response'] = array('response' => array('code' => 103), 'headers' => array());
+$results = $diagnostic->run();
+wpdt_http_check('warning' === wpdt_http_result($results, 'Home URL HTTP response')['status'], 'does not treat an informational HTTP status as a completed response');
+
 $GLOBALS['wpdt_http_head_response'] = array('response' => array('code' => 405), 'headers' => array());
 $GLOBALS['wpdt_http_get_response'] = array('response' => array('code' => 200), 'headers' => array());
 $before_get = $GLOBALS['wpdt_http_get_calls'];

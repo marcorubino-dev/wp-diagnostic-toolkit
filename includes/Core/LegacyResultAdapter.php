@@ -3,10 +3,10 @@
 /**
  * Converts existing diagnostic arrays into the normalized result contract.
  *
- * @package WPDT\\Core
+ * @package WPDT\Core
  */
 
-namespace WPDT\\Core;
+namespace WPDT\Core;
 
 final class LegacyResultAdapter
 {
@@ -19,20 +19,20 @@ final class LegacyResultAdapter
      * @param string $module_id Stable diagnostic module identifier.
      * @param array  $legacy   Existing diagnostic result array.
      * @return RuleResult
-     * @throws \\InvalidArgumentException When a legacy result cannot be mapped safely.
+     * @throws \InvalidArgumentException When a legacy result cannot be mapped safely.
      */
     public function adapt($module_id, array $legacy)
     {
         if (!is_string($module_id) || !preg_match('/^[a-z0-9][a-z0-9._-]*$/', $module_id)) {
-            throw new \\InvalidArgumentException('Module ID must be a stable lowercase identifier.');
+            throw new \InvalidArgumentException('Module ID must be a stable lowercase identifier.');
         }
 
         if (!isset($legacy['name']) || !is_string($legacy['name']) || trim($legacy['name']) === '') {
-            throw new \\InvalidArgumentException('Legacy result must include a non-empty name.');
+            throw new \InvalidArgumentException('Legacy result must include a non-empty name.');
         }
 
         if (!isset($legacy['status']) || !is_string($legacy['status'])) {
-            throw new \\InvalidArgumentException('Legacy result must include a recognized status.');
+            throw new \InvalidArgumentException('Legacy result must include a recognized status.');
         }
 
         $status_map = array(
@@ -43,14 +43,14 @@ final class LegacyResultAdapter
         );
 
         if (!isset($status_map[$legacy['status']])) {
-            throw new \\InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 sprintf('Unsupported legacy diagnostic status "%s".', $legacy['status'])
             );
         }
 
         if (array_key_exists('id', $legacy)) {
             if (!is_string($legacy['id']) || trim($legacy['id']) === '') {
-                throw new \\InvalidArgumentException('Explicit legacy result ID must be a non-empty string.');
+                throw new \InvalidArgumentException('Explicit legacy result ID must be a non-empty string.');
             }
 
             $result_id = $legacy['id'];
@@ -60,7 +60,7 @@ final class LegacyResultAdapter
             $slug = trim($slug, '_');
 
             if ($slug === '') {
-                throw new \\InvalidArgumentException('Legacy result name cannot produce a stable identifier.');
+                throw new \InvalidArgumentException('Legacy result name cannot produce a stable identifier.');
             }
 
             $result_id = $module_id . '.' . $slug;
@@ -99,14 +99,14 @@ final class LegacyResultAdapter
 
         foreach ($legacy_results as $legacy_result) {
             if (!is_array($legacy_result)) {
-                throw new \\InvalidArgumentException('Each legacy diagnostic result must be an array.');
+                throw new \InvalidArgumentException('Each legacy diagnostic result must be an array.');
             }
 
             $result = $this->adapt($module_id, $legacy_result);
             $result_id = $result->get('id');
 
             if (isset($results[$result_id])) {
-                throw new \\InvalidArgumentException(
+                throw new \InvalidArgumentException(
                     sprintf('Duplicate legacy diagnostic ID "%s".', $result_id)
                 );
             }

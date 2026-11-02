@@ -50,7 +50,17 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             );
         }
 
-        $status_code = wp_remote_retrieve_response_code($response);
+        $status_code = (int) wp_remote_retrieve_response_code($response);
+
+        if ($status_code < 200) {
+            return array(
+                'status'         => 'warning',
+                'value'          => $status_code > 0 ? $status_code : 'Invalid response',
+                'description'    => 'The loopback request did not return a valid final HTTP response.',
+                'recommendation' => 'Inspect the loopback response and server or proxy behavior before treating this check as successful.',
+                'evidence'       => $request_url . ' | HTTP ' . $status_code,
+            );
+        }
 
         if ($status_code >= 500) {
             return array(

@@ -38,6 +38,9 @@ class HttpSslDiagnostic implements DiagnosticInterface
         $used_fallback = $request['used_fallback'];
 
         $results = array();
+        $status_code = is_wp_error($response)
+            ? 0
+            : (int) wp_remote_retrieve_response_code($response);
 
         if (is_wp_error($response)) {
             $results[] = array(
@@ -49,10 +52,9 @@ class HttpSslDiagnostic implements DiagnosticInterface
                 'recommendation' => 'Check DNS, hosting availability, firewall rules, redirects, and server response.',
             );
         } else {
-            $status_code = (int) wp_remote_retrieve_response_code($response);
             $status = $status_code >= 500
                 ? 'critical'
-                : ($status_code >= 400 || $status_code >= 300 ? 'warning' : 'pass');
+                : ($status_code >= 300 || $status_code < 200 ? 'warning' : 'pass');
 
             $description = $status_code >= 500
                 ? 'The home URL returned a server error.'
@@ -60,7 +62,9 @@ class HttpSslDiagnostic implements DiagnosticInterface
                     ? 'The home URL returned a client error.'
                     : ($status_code >= 300
                         ? 'The home URL returned a redirect after the configured redirect limit.'
-                        : 'The home URL responded successfully.'));
+                        : ($status_code < 200
+                            ? 'The home URL did not return a valid final HTTP response.'
+                            : 'The home URL responded successfully.')));
 
             $evidence = $url . ' | ' . $method . ' | HTTP ' . $status_code;
 
@@ -110,6 +114,19 @@ class HttpSslDiagnostic implements DiagnosticInterface
                 'recommendation' => $ssl_error
                     ? 'Check certificate validity, hostname coverage, certificate chain, and server TLS configuration.'
                     : 'Resolve the connection issue and re-run the diagnostic before drawing conclusions about the certificate.',
+            );
+
+            return $results;
+        }
+
+        if ($status_code < 100) {
+            $results[] = array(
+                'name'           => 'SSL certificate validation',
+                'value'          => 'Not confirmed',
+                'status'         => 'info',
+                'description'    => 'The HTTPS request did not return a valid HTTP response, so TLS validation cannot be confirmed from this result.',
+                'evidence'       => $url . ' | ' . $method . ' | HTTP ' . $status_code,
+                'recommendation' => 'Resolve the incomplete HTTP response and re-run the diagnostic.',
             );
 
             return $results;

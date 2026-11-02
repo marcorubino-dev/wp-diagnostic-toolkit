@@ -132,6 +132,14 @@ $GLOBALS['wpdt_environment_response'] = array('response' => array('code' => 503)
 $results = $diagnostic->run();
 wpdt_environment_check('critical' === wpdt_environment_result($results, 'Loopback request')['status'], 'classifies a loopback 5xx response as critical');
 
+$GLOBALS['wpdt_environment_response'] = array('response' => array('code' => 0));
+$results = $diagnostic->run();
+wpdt_environment_check('warning' === wpdt_environment_result($results, 'Loopback request')['status'], 'does not treat a missing HTTP status as a successful loopback');
+
+$GLOBALS['wpdt_environment_response'] = array('response' => array('code' => 103));
+$results = $diagnostic->run();
+wpdt_environment_check('warning' === wpdt_environment_result($results, 'Loopback request')['status'], 'does not treat an informational HTTP status as a completed loopback response');
+
 $GLOBALS['wpdt_environment_response'] = new WP_Error('http_request_failed', 'Connection timed out');
 $results = $diagnostic->run();
 $loopback = wpdt_environment_result($results, 'Loopback request');

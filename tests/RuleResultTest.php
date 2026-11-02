@@ -9,8 +9,8 @@
 require_once __DIR__ . '/../includes/Core/RuleResult.php';
 require_once __DIR__ . '/../includes/Core/LegacyResultAdapter.php';
 
-use WPDT\\Core\\RuleResult;
-use WPDT\\Core\\LegacyResultAdapter;
+use WPDT\Core\RuleResult;
+use WPDT\Core\LegacyResultAdapter;
 
 $passed = 0;
 $failed = 0;

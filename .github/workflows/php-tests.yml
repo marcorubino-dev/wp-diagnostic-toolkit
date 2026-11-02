@@ -48,3 +48,4 @@ jobs:
           php tests/DiskSpaceDiagnosticTest.php
           php tests/HttpSslDiagnosticTest.php
           php tests/EnvironmentDiagnosticTest.php
+          php tests/ThemeDiagnosticTest.php

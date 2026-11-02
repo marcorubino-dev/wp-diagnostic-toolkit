@@ -57,6 +57,23 @@ function expect_invalid_result($data, $message)
     }
 }
 
+expect_invalid_result(
+    valid_result_data(array('module' => 'Environment')),
+    'rejects an unstable module identifier'
+);
+expect_invalid_result(
+    valid_result_data(array('module' => 'environment diagnostics')),
+    'rejects a module identifier containing spaces'
+);
+expect_invalid_result(
+    valid_result_data(array('recommendation' => array('unexpected'))),
+    'rejects a non-string recommendation'
+);
+expect_invalid_result(
+    valid_result_data(array('evidence' => 123)),
+    'rejects evidence that is neither a string nor an array'
+);
+
 $result = new RuleResult(valid_result_data());
 check_result($result->get('outcome') === 'pass', 'accepts a valid passing result');
 check_result($result->get('severity') === 'none', 'passing result has no severity');
@@ -187,6 +204,16 @@ try {
     check_result(false, 'strict bulk adapter rejects duplicate generated check IDs');
 } catch (InvalidArgumentException $exception) {
     check_result(true, 'strict bulk adapter rejects duplicate generated check IDs');
+}
+
+try {
+    $adapter->adapt_all('woocommerce', array(
+        array('id' => 'cart_session_scope', 'name' => 'Cart session scope', 'status' => 'warning'),
+        array('id' => 'cart_session_scope', 'name' => 'Cart session duplicate', 'status' => 'warning'),
+    ));
+    check_result(false, 'strict bulk adapter rejects duplicate explicit check IDs');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'strict bulk adapter rejects duplicate explicit check IDs');
 }
 
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;

@@ -9,8 +9,8 @@
 require_once __DIR__ . '/../includes/Core/RuleResult.php';
 require_once __DIR__ . '/../includes/Core/LegacyResultAdapter.php';
 
-use WPDT\Core\RuleResult;
-use WPDT\Core\LegacyResultAdapter;
+use WPDT\\Core\\RuleResult;
+use WPDT\\Core\\LegacyResultAdapter;
 
 $passed = 0;
 $failed = 0;
@@ -36,6 +36,7 @@ function valid_result_data($overrides = array())
             'title'          => 'PHP version',
             'outcome'        => RuleResult::OUTCOME_PASS,
             'severity'       => RuleResult::SEVERITY_NONE,
+            'confidence'     => RuleResult::CONFIDENCE_DIRECT,
             'description'    => 'The PHP version meets the configured requirement.',
             'value'          => '8.2.29',
             'recommendation' => null,
@@ -59,8 +60,18 @@ function expect_invalid_result($data, $message)
 $result = new RuleResult(valid_result_data());
 check_result($result->get('outcome') === 'pass', 'accepts a valid passing result');
 check_result($result->get('severity') === 'none', 'passing result has no severity');
+check_result($result->get('confidence') === 'direct', 'preserves direct confidence');
 check_result($result->to_array()['id'] === 'environment.php_version', 'exports the normalized fields');
 check_result($result->get('evidence')['source'] === 'PHP_VERSION', 'preserves structured evidence');
+
+$unknown_confidence = new RuleResult(valid_result_data(array('confidence' => RuleResult::CONFIDENCE_UNKNOWN)));
+check_result($unknown_confidence->get('confidence') === 'unknown', 'accepts unknown confidence');
+
+$inferred_confidence = new RuleResult(valid_result_data(array('confidence' => RuleResult::CONFIDENCE_INFERRED)));
+check_result($inferred_confidence->get('confidence') === 'inferred', 'accepts inferred confidence');
+
+$default_confidence = new RuleResult(valid_result_data(array('confidence' => null)));
+check_result($default_confidence->get('confidence') === 'unknown', 'defaults omitted confidence to unknown');
 
 $finding = new RuleResult(valid_result_data(array(
     'outcome' => RuleResult::OUTCOME_FINDING,
@@ -75,6 +86,10 @@ expect_invalid_result(
 expect_invalid_result(
     valid_result_data(array('severity' => 'urgent')),
     'rejects an unknown severity'
+);
+expect_invalid_result(
+    valid_result_data(array('confidence' => 'speculative')),
+    'rejects an unknown confidence value'
 );
 expect_invalid_result(
     valid_result_data(array('outcome' => 'pass', 'severity' => 'warning')),
@@ -113,11 +128,19 @@ $legacy_pass = $adapter->adapt('environment', array(
     'recommendation' => 'No action required.',
     'evidence' => 'PHP_VERSION',
 ));
-check_result($legacy_pass->get('id') === 'environment.php_version', 'adapter creates a namespaced check ID');
+check_result($legacy_pass->get('id') === 'environment.php_version', 'adapter creates a namespaced check ID when no explicit ID exists');
 check_result($legacy_pass->get('outcome') === 'pass', 'adapter maps legacy pass status');
 check_result($legacy_pass->get('severity') === 'none', 'adapter maps legacy pass severity');
+check_result($legacy_pass->get('confidence') === 'unknown', 'adapter assigns unknown confidence to legacy results');
 check_result($legacy_pass->get('value') === '8.2.29', 'adapter preserves legacy value');
 check_result($legacy_pass->get('evidence') === 'PHP_VERSION', 'adapter preserves legacy evidence');
+
+$legacy_explicit_id = $adapter->adapt('woocommerce', array(
+    'id' => 'cart_session_scope',
+    'name' => 'Cart session scope',
+    'status' => 'warning',
+));
+check_result($legacy_explicit_id->get('id') === 'cart_session_scope', 'adapter preserves an explicit legacy ID');
 
 $legacy_info = $adapter->adapt('plugins', array(
     'name' => 'Installed plugins',
@@ -127,6 +150,13 @@ $legacy_info = $adapter->adapt('plugins', array(
 ));
 check_result($legacy_info->get('outcome') === 'finding', 'adapter maps legacy info to finding');
 check_result($legacy_info->get('severity') === 'info', 'adapter maps legacy info severity');
+
+try {
+    $adapter->adapt('environment', array('id' => 'Invalid ID', 'name' => 'PHP version', 'status' => 'pass'));
+    check_result(false, 'adapter rejects an invalid explicit legacy ID instead of silently replacing it');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects an invalid explicit legacy ID instead of silently replacing it');
+}
 
 try {
     $adapter->adapt('environment', array('name' => 'Unknown status', 'status' => 'mystery'));
@@ -154,9 +184,9 @@ try {
         array('name' => 'PHP version', 'status' => 'pass'),
         array('name' => 'PHP-version', 'status' => 'pass'),
     ));
-    check_result(false, 'adapter rejects duplicate generated check IDs');
+    check_result(false, 'strict bulk adapter rejects duplicate generated check IDs');
 } catch (InvalidArgumentException $exception) {
-    check_result(true, 'adapter rejects duplicate generated check IDs');
+    check_result(true, 'strict bulk adapter rejects duplicate generated check IDs');
 }
 
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;

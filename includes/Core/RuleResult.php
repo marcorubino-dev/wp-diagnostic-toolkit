@@ -6,10 +6,10 @@
  * This class is compatible with PHP 7.4 and intentionally has no WordPress
  * dependencies so its validation can be tested in isolation.
  *
- * @package WPDT\Core
+ * @package WPDT\\Core
  */
 
-namespace WPDT\Core;
+namespace WPDT\\Core;
 
 final class RuleResult
 {
@@ -23,12 +23,16 @@ final class RuleResult
     const SEVERITY_WARNING = 'warning';
     const SEVERITY_CRITICAL = 'critical';
 
+    const CONFIDENCE_DIRECT = 'direct';
+    const CONFIDENCE_INFERRED = 'inferred';
+    const CONFIDENCE_UNKNOWN = 'unknown';
+
     /** @var array<string, mixed> */
     private $data;
 
     /**
      * @param array $data Normalized result data.
-     * @throws \InvalidArgumentException When fields or state combinations are invalid.
+     * @throws \\InvalidArgumentException When fields or state combinations are invalid.
      */
     public function __construct(array $data)
     {
@@ -36,12 +40,12 @@ final class RuleResult
 
         foreach ($required as $field) {
             if (!isset($data[$field]) || !is_string($data[$field]) || trim($data[$field]) === '') {
-                throw new \InvalidArgumentException(sprintf('Field "%s" must be a non-empty string.', $field));
+                throw new \\InvalidArgumentException(sprintf('Field "%s" must be a non-empty string.', $field));
             }
         }
 
         if (!preg_match('/^[a-z0-9][a-z0-9._-]*$/', $data['id'])) {
-            throw new \InvalidArgumentException('Field "id" must be a stable lowercase identifier.');
+            throw new \\InvalidArgumentException('Field "id" must be a stable lowercase identifier.');
         }
 
         $allowed_outcomes = array(
@@ -52,7 +56,7 @@ final class RuleResult
         );
 
         if (!in_array($data['outcome'], $allowed_outcomes, true)) {
-            throw new \InvalidArgumentException('Unsupported outcome.');
+            throw new \\InvalidArgumentException('Unsupported outcome.');
         }
 
         $allowed_severities = array(
@@ -63,36 +67,47 @@ final class RuleResult
         );
 
         if (!in_array($data['severity'], $allowed_severities, true)) {
-            throw new \InvalidArgumentException('Unsupported severity.');
+            throw new \\InvalidArgumentException('Unsupported severity.');
+        }
+
+        $confidence = isset($data['confidence']) ? $data['confidence'] : self::CONFIDENCE_UNKNOWN;
+        $allowed_confidences = array(
+            self::CONFIDENCE_DIRECT,
+            self::CONFIDENCE_INFERRED,
+            self::CONFIDENCE_UNKNOWN,
+        );
+
+        if (!is_string($confidence) || !in_array($confidence, $allowed_confidences, true)) {
+            throw new \\InvalidArgumentException('Unsupported confidence.');
         }
 
         if ($data['outcome'] === self::OUTCOME_PASS && $data['severity'] !== self::SEVERITY_NONE) {
-            throw new \InvalidArgumentException('A passing result must have severity "none".');
+            throw new \\InvalidArgumentException('A passing result must have severity "none".');
         }
 
         if ($data['outcome'] === self::OUTCOME_FINDING && $data['severity'] === self::SEVERITY_NONE) {
-            throw new \InvalidArgumentException('A finding must have a non-none severity.');
+            throw new \\InvalidArgumentException('A finding must have a non-none severity.');
         }
 
         if (in_array($data['outcome'], array(self::OUTCOME_ERROR, self::OUTCOME_SKIPPED), true)
             && $data['severity'] !== self::SEVERITY_NONE
         ) {
-            throw new \InvalidArgumentException('Error and skipped results must have severity "none".');
+            throw new \\InvalidArgumentException('Error and skipped results must have severity "none".');
         }
 
         $value = isset($data['value']) ? $data['value'] : null;
         if (!is_scalar($value) && $value !== null) {
-            throw new \InvalidArgumentException('Field "value" must be scalar or null.');
+            throw new \\InvalidArgumentException('Field "value" must be scalar or null.');
         }
 
         $recommendation = isset($data['recommendation']) ? $data['recommendation'] : null;
         if ($recommendation !== null && !is_string($recommendation)) {
-            throw new \InvalidArgumentException('Field "recommendation" must be a string or null.');
+            throw new \\InvalidArgumentException('Field "recommendation" must be a string or null.');
         }
 
         $evidence = isset($data['evidence']) ? $data['evidence'] : null;
         if ($evidence !== null && !is_string($evidence) && !is_array($evidence)) {
-            throw new \InvalidArgumentException('Field "evidence" must be a string, array, or null.');
+            throw new \\InvalidArgumentException('Field "evidence" must be a string, array, or null.');
         }
 
         $this->data = array(
@@ -100,6 +115,7 @@ final class RuleResult
             'title'          => $data['title'],
             'outcome'        => $data['outcome'],
             'severity'       => $data['severity'],
+            'confidence'     => $confidence,
             'description'    => $data['description'],
             'value'          => $value,
             'recommendation' => $recommendation,
@@ -123,12 +139,12 @@ final class RuleResult
      *
      * @param string $field Field name.
      * @return mixed
-     * @throws \InvalidArgumentException When the field does not exist.
+     * @throws \\InvalidArgumentException When the field does not exist.
      */
     public function get($field)
     {
         if (!array_key_exists($field, $this->data)) {
-            throw new \InvalidArgumentException(sprintf('Unknown result field "%s".', $field));
+            throw new \\InvalidArgumentException(sprintf('Unknown result field "%s".', $field));
         }
 
         return $this->data[$field];

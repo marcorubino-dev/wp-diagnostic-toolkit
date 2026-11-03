@@ -17,10 +17,6 @@ class DiagnosticManager
     /** @var DiagnosticResultPresenter */
     private $presenter;
 
-    /**
-     * @param LegacyResultAdapter|null       $result_adapter Optional legacy adapter.
-     * @param DiagnosticResultPresenter|null $presenter      Optional result presenter.
-     */
     public function __construct(
         LegacyResultAdapter $result_adapter = null,
         DiagnosticResultPresenter $presenter = null
@@ -43,44 +39,91 @@ class DiagnosticManager
     /**
      * Run registered diagnostics and return presenter-compatible normalized data.
      *
+     * All modules are executed before normalization so synthetic error IDs can
+     * avoid IDs declared by valid results in later modules.
+     *
      * @return array
      */
     public function run_all()
     {
-        $results = array();
-        $seen_ids = array();
+        $module_runs = array();
+        $reserved_ids = array();
 
         foreach ($this->diagnostics as $module_id => $diagnostic) {
             $module_name = $module_id;
+            $legacy_results = null;
+            $execution_error = null;
 
             try {
                 $module_name = $diagnostic->get_name();
                 $legacy_results = $diagnostic->run();
-
-                if (!is_array($legacy_results)) {
-                    $module_results = array(
-                        $this->create_error_result(
-                            $module_id,
-                            'module_output',
-                            'Invalid diagnostic output',
-                            'The diagnostic module did not return a result array.',
-                            'Expected an array from DiagnosticInterface::run().',
-                            $seen_ids
-                        ),
-                    );
-                } else {
-                    $module_results = $this->normalize_results($module_id, $legacy_results, $seen_ids);
-                }
             } catch (\Throwable $exception) {
+                $execution_error = $exception;
+            }
+
+            $module_runs[$module_id] = array(
+                'name'            => is_string($module_name) && trim($module_name) !== ''
+                    ? $module_name
+                    : $module_id,
+                'legacy_results'  => $legacy_results,
+                'execution_error' => $execution_error,
+            );
+
+            if (is_array($legacy_results)) {
+                foreach ($legacy_results as $legacy_result) {
+                    $result_id = null;
+
+                    try {
+                        if ($legacy_result instanceof RuleResult) {
+                            $result_id = $legacy_result->get('id');
+                        } elseif (is_array($legacy_result) && isset($legacy_result['id'])) {
+                            $result_id = $legacy_result['id'];
+                        }
+                    } catch (\Throwable $exception) {
+                        // A malformed result must not prevent other IDs being reserved.
+                    }
+
+                    if (is_string($result_id) && trim($result_id) !== '') {
+                        $reserved_ids[$result_id] = true;
+                    }
+                }
+            }
+        }
+
+        $results = array();
+        $seen_ids = array();
+
+        foreach ($module_runs as $module_id => $module_run) {
+            if ($module_run['execution_error'] instanceof \Throwable) {
                 $module_results = array(
                     $this->create_error_result(
                         $module_id,
                         'module_execution',
                         'Diagnostic execution failed',
                         'The diagnostic module could not complete its execution.',
-                        get_class($exception) . ': ' . $exception->getMessage(),
-                        $seen_ids
+                        get_class($module_run['execution_error']) . ': ' . $module_run['execution_error']->getMessage(),
+                        $seen_ids,
+                        $reserved_ids
                     ),
+                );
+            } elseif (!is_array($module_run['legacy_results'])) {
+                $module_results = array(
+                    $this->create_error_result(
+                        $module_id,
+                        'module_output',
+                        'Invalid diagnostic output',
+                        'The diagnostic module did not return a result array.',
+                        'Expected an array from DiagnosticInterface::run().',
+                        $seen_ids,
+                        $reserved_ids
+                    ),
+                );
+            } else {
+                $module_results = $this->normalize_results(
+                    $module_id,
+                    $module_run['legacy_results'],
+                    $seen_ids,
+                    $reserved_ids
                 );
             }
 
@@ -92,9 +135,7 @@ class DiagnosticManager
 
             $results[$module_id] = array(
                 'id'      => $module_id,
-                'name'    => is_string($module_name) && trim($module_name) !== ''
-                    ? $module_name
-                    : $module_id,
+                'name'    => $module_run['name'],
                 'results' => $presented_results,
             );
         }
@@ -105,12 +146,13 @@ class DiagnosticManager
     /**
      * Normalize each result independently and detect IDs across all modules.
      *
-     * @param string $module_id    Diagnostic module ID.
-     * @param array  $legacy_results Raw diagnostic results.
-     * @param array  $seen_ids      IDs already accepted or generated.
+     * @param string $module_id       Diagnostic module ID.
+     * @param array  $legacy_results  Raw diagnostic results.
+     * @param array  $seen_ids        IDs already accepted or generated.
+     * @param array  $reserved_ids    IDs declared by source results.
      * @return RuleResult[]
      */
-    private function normalize_results($module_id, array $legacy_results, array &$seen_ids)
+    private function normalize_results($module_id, array $legacy_results, array &$seen_ids, array &$reserved_ids)
     {
         $normalized = array();
 
@@ -141,7 +183,8 @@ class DiagnosticManager
                         'Duplicate diagnostic result ID',
                         'A diagnostic result reused an ID already emitted by this or another module. The earlier result was preserved.',
                         $result_id,
-                        $seen_ids
+                        $seen_ids,
+                        $reserved_ids
                     );
                     continue;
                 }
@@ -155,7 +198,8 @@ class DiagnosticManager
                     'Invalid diagnostic result',
                     'This result could not be normalized. Other results from the module were retained.',
                     get_class($exception) . ': ' . $exception->getMessage(),
-                    $seen_ids
+                    $seen_ids,
+                    $reserved_ids
                 );
             }
         }
@@ -164,14 +208,15 @@ class DiagnosticManager
     }
 
     /**
-     * Create a unique error result without replacing an existing result.
+     * Create a unique error result without replacing a source result ID.
      *
-     * @param string $module_id   Diagnostic module ID.
-     * @param string $suffix      Error identifier suffix.
-     * @param string $title       Error title.
-     * @param string $description Error description.
-     * @param string $evidence    Supporting evidence.
-     * @param array  $seen_ids    IDs already emitted; updated by reference.
+     * @param string $module_id    Diagnostic module ID.
+     * @param string $suffix       Error identifier suffix.
+     * @param string $title        Error title.
+     * @param string $description  Error description.
+     * @param string $evidence     Supporting evidence.
+     * @param array  $seen_ids     IDs already emitted; updated by reference.
+     * @param array  $reserved_ids IDs declared by source results.
      * @return RuleResult
      */
     private function create_error_result(
@@ -180,14 +225,15 @@ class DiagnosticManager
         $title,
         $description,
         $evidence,
-        array &$seen_ids
+        array &$seen_ids,
+        array &$reserved_ids
     ) {
         $safe_suffix = preg_replace('/[^a-z0-9._-]+/', '_', strtolower((string) $suffix));
         $base_id = $module_id . '.error.' . $safe_suffix;
         $result_id = $base_id;
         $counter = 2;
 
-        while (isset($seen_ids[$result_id])) {
+        while (isset($seen_ids[$result_id]) || isset($reserved_ids[$result_id])) {
             $result_id = $base_id . '.' . $counter;
             $counter++;
         }

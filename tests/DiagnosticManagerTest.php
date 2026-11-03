@@ -150,7 +150,7 @@ wpdt_manager_check(
 );
 wpdt_manager_check(
     $environment_results[1]['outcome'] === RuleResult::OUTCOME_ERROR
-        && $environment_results[1]['status'] === 'error',
+        && $environment_results[1]['status'] === 'warning',
     'isolates a malformed result as an explicit error'
 );
 wpdt_manager_check(
@@ -196,6 +196,7 @@ $native_result = new RuleResult(array(
     'confidence' => RuleResult::CONFIDENCE_DIRECT,
     'description' => 'A native normalized result.',
     'module' => 'native',
+    'evidence' => array('source' => 'unit-test', 'count' => 1),
 ));
 
 $native_manager = new DiagnosticManager();
@@ -206,6 +207,25 @@ wpdt_manager_check(
     $native_output['native']['results'][0]['id'] === 'native.check'
         && $native_output['native']['results'][0]['status'] === 'critical',
     'accepts native RuleResult instances and presents their severity'
+);
+wpdt_manager_check(
+    $native_output['native']['results'][0]['evidence'] === '{"source":"unit-test","count":1}'
+        && $native_output['native']['results'][0]['evidence_data']['count'] === 1,
+    'serializes structured evidence for legacy templates while retaining the original data'
+);
+
+$presenter = new \\WPDT\\Core\\DiagnosticResultPresenter();
+$skipped_result = new RuleResult(array(
+    'id' => 'native.optional_check',
+    'title' => 'Optional check',
+    'outcome' => RuleResult::OUTCOME_SKIPPED,
+    'severity' => RuleResult::SEVERITY_NONE,
+    'description' => 'The check was not applicable.',
+    'module' => 'native',
+));
+wpdt_manager_check(
+    $presenter->present($skipped_result)['status'] === 'info',
+    'presents skipped checks as informational without changing their normalized outcome'
 );
 
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;

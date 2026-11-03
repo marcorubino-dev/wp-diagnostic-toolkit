@@ -15,6 +15,7 @@ require_once __DIR__ . '/../includes/Core/DiagnosticManager.php';
 use WPDT\Core\DiagnosticInterface;
 use WPDT\Core\DiagnosticManager;
 use WPDT\Core\RuleResult;
+use WPDT\Core\DiagnosticResultPresenter;
 
 $passed = 0;
 $failed = 0;
@@ -214,7 +215,7 @@ wpdt_manager_check(
     'serializes structured evidence for legacy templates while retaining the original data'
 );
 
-$presenter = new \\WPDT\\Core\\DiagnosticResultPresenter();
+$presenter = new DiagnosticResultPresenter();
 $skipped_result = new RuleResult(array(
     'id' => 'native.optional_check',
     'title' => 'Optional check',

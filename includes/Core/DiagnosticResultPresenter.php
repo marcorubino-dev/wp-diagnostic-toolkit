@@ -6,7 +6,7 @@
  * @package WPDT\\Core
  */
 
-namespace WPDT\\Core;
+namespace WPDT\Core;
 
 final class DiagnosticResultPresenter
 {

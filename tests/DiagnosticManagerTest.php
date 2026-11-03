@@ -229,5 +229,38 @@ wpdt_manager_check(
     'presents skipped checks as informational without changing their normalized outcome'
 );
 
+
+$collision_manager = new DiagnosticManager();
+$collision_manager->register(wpdt_test_diagnostic(
+    'environment',
+    'Environment',
+    array('malformed result')
+));
+$collision_manager->register(wpdt_test_diagnostic(
+    'later_module',
+    'Later module',
+    array(
+        array(
+            'id' => 'environment.error.invalid_result_0',
+            'name' => 'Valid result after malformed output',
+            'status' => 'pass',
+        ),
+    )
+));
+$collision_output = $collision_manager->run_all();
+$synthetic_id = $collision_output['environment']['results'][0]['id'];
+$valid_later_result = $collision_output['later_module']['results'][0];
+
+wpdt_manager_check(
+    $synthetic_id !== 'environment.error.invalid_result_0',
+    'does not assign a synthetic error ID reserved by a later module result'
+);
+wpdt_manager_check(
+    $valid_later_result['id'] === 'environment.error.invalid_result_0'
+        && $valid_later_result['name'] === 'Valid result after malformed output'
+        && $valid_later_result['status'] === 'pass',
+    'preserves a valid later-module result when its ID matches a potential synthetic error ID'
+);
+
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;
 exit($failed === 0 ? 0 : 1);

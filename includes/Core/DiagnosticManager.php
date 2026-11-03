@@ -76,8 +76,14 @@ class DiagnosticManager
                     try {
                         if ($legacy_result instanceof RuleResult) {
                             $result_id = $legacy_result->get('id');
-                        } elseif (is_array($legacy_result) && isset($legacy_result['id'])) {
-                            $result_id = $legacy_result['id'];
+                        } elseif (is_array($legacy_result)) {
+                            if (isset($legacy_result['id'])) {
+                                $result_id = $legacy_result['id'];
+                            } elseif (!array_key_exists('id', $legacy_result)) {
+                                // Reserve adapter-generated IDs as well as explicit source IDs.
+                                $adapted_result = $this->result_adapter->adapt($module_id, $legacy_result);
+                                $result_id = $adapted_result->get('id');
+                            }
                         }
                     } catch (\Throwable $exception) {
                         // A malformed result must not prevent other IDs being reserved.

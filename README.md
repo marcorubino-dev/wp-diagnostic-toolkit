@@ -94,7 +94,10 @@ The plugin uses a modular architecture to keep diagnostic logic separate from th
 WP Diagnostic Toolkit
 ├── Core
 │   ├── DiagnosticInterface
-│   └── DiagnosticManager
+│   ├── DiagnosticManager
+│   ├── RuleResult
+│   ├── LegacyResultAdapter
+│   └── DiagnosticResultPresenter
 ├── Diagnostics
 │   ├── EnvironmentDiagnostic
 │   ├── HttpSslDiagnostic
@@ -117,7 +120,11 @@ Each diagnostic module implements a common interface that defines its identifier
 
 ### Diagnostic manager
 
-The manager registers diagnostic modules, normalizes legacy arrays and native `RuleResult` objects, and isolates malformed results without discarding valid siblings. Duplicate result IDs are reported as integrity errors; the first result is retained. Module execution failures are represented explicitly so other modules can continue.\n\n### Normalized result contract\n\n`RuleResult` defines a stable result shape with an identifier, title, outcome, severity, confidence, description, value, recommendation, evidence, and module identifier. `LegacyResultAdapter` provides a migration path for existing diagnostic arrays. `DiagnosticResultPresenter` preserves the field names and status values expected by the current admin templates while exposing the normalized fields.
+The manager registers diagnostic modules, normalizes legacy arrays and native `RuleResult` objects, and isolates malformed results without discarding valid siblings. Duplicate result IDs are reported as integrity errors; the first result is retained. Module execution failures are represented explicitly so other modules can continue.
+
+### Normalized result contract
+
+`RuleResult` defines a stable result shape with an identifier, title, outcome, severity, confidence, description, value, recommendation, evidence, and module identifier. `LegacyResultAdapter` provides a migration path for existing diagnostic arrays. `DiagnosticResultPresenter` preserves the field names and status values expected by the current admin templates while exposing the normalized fields.
 
 ### Admin interface
 

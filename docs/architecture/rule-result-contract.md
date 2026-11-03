@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Normalize diagnostic output so collectors, rules, reporting, and the admin UI do not depend on module-specific associative arrays. This is a design contract; existing runtime behavior is unchanged until an adapter and tests are added.
+Normalize diagnostic output so collectors, rules, reporting, and the admin UI do not depend on module-specific associative arrays. This document defines the normalized result contract used by the current migration implementation. Legacy diagnostic arrays are adapted by `LegacyResultAdapter`, normalized results are validated by `RuleResult`, and `DiagnosticResultPresenter` maintains compatibility with the existing admin templates.
 
 ## Required fields
 
@@ -36,7 +36,7 @@ The current Toolkit uses `status` values `pass`, `info`, `warning`, and `critica
 | `warning` | `finding` | `warning` |
 | `critical` | `finding` | `critical` |
 
-The legacy mapping is intentionally explicit. Execution failures and skipped checks will be introduced only where the implementation can reliably distinguish them from actual findings.
+The legacy mapping is intentionally explicit. The manager represents module execution failures and malformed outputs as `error` results; native `RuleResult` instances may also use `skipped` when a check is intentionally not applicable. The legacy presenter maps both to an informational or warning-compatible status while retaining the normalized `outcome` field.
 
 ## Non-goals for v1
 

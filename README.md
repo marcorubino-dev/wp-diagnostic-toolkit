@@ -65,7 +65,7 @@ For local development, install the plugin in a test WordPress environment before
 
 ## Testing
 
-The repository includes lightweight PHP CLI tests. They do not require PHPUnit or a WordPress bootstrap; tests that exercise WordPress-dependent diagnostics provide controlled stubs for the WordPress HTTP and environment APIs.
+The repository includes lightweight PHP CLI tests. They do not require PHPUnit or a WordPress bootstrap; tests that exercise WordPress-dependent diagnostics provide controlled stubs for the WordPress HTTP and environment APIs. The result-model tests cover normalized field validation, legacy adaptation, malformed-result isolation, duplicate-ID integrity errors, cross-module ID collisions, module exceptions, and compatibility with the existing admin presentation.
 
 Run the test scripts from the repository root:
 
@@ -117,7 +117,7 @@ Each diagnostic module implements a common interface that defines its identifier
 
 ### Diagnostic manager
 
-The manager registers diagnostic modules and runs them through a shared entry point.
+The manager registers diagnostic modules, normalizes legacy arrays and native `RuleResult` objects, and isolates malformed results without discarding valid siblings. Duplicate result IDs are reported as integrity errors; the first result is retained. Module execution failures are represented explicitly so other modules can continue.\n\n### Normalized result contract\n\n`RuleResult` defines a stable result shape with an identifier, title, outcome, severity, confidence, description, value, recommendation, evidence, and module identifier. `LegacyResultAdapter` provides a migration path for existing diagnostic arrays. `DiagnosticResultPresenter` preserves the field names and status values expected by the current admin templates while exposing the normalized fields.
 
 ### Admin interface
 

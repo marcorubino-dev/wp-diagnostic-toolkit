@@ -4,7 +4,7 @@
  * Manages registered diagnostic modules and normalizes their results.
  */
 
-namespace WPDT\\Core;
+namespace WPDT\Core;
 
 class DiagnosticManager
 {
@@ -74,7 +74,7 @@ class DiagnosticManager
                             'Expected an array from DiagnosticInterface::run().'
                         ),
                     );
-            } catch (\\Throwable $exception) {
+            } catch (\Throwable $exception) {
                 $normalized_results = array(
                     $this->create_error_result(
                         $module_id,
@@ -118,13 +118,13 @@ class DiagnosticManager
                 } elseif (is_array($legacy_result)) {
                     $result = $this->result_adapter->adapt($module_id, $legacy_result);
                 } else {
-                    throw new \\InvalidArgumentException(
+                    throw new \InvalidArgumentException(
                         'Each diagnostic result must be an array or RuleResult instance.'
                     );
                 }
 
                 if ($result->get('module') !== $module_id) {
-                    throw new \\InvalidArgumentException(
+                    throw new \InvalidArgumentException(
                         'The result module does not match its registered diagnostic module.'
                     );
                 }
@@ -146,7 +146,7 @@ class DiagnosticManager
 
                 $seen_ids[$result_id] = true;
                 $entries[] = array('result' => $result);
-            } catch (\\Throwable $exception) {
+            } catch (\Throwable $exception) {
                 $entries[] = array(
                     'error' => array(
                         'base_id' => 'invalid_result_' . $index,

@@ -3,7 +3,7 @@
 /**
  * Presents normalized diagnostic results to the existing admin interface.
  *
- * @package WPDT\\Core
+ * @package WPDT\Core
  */
 
 namespace WPDT\Core;
@@ -25,13 +25,25 @@ final class DiagnosticResultPresenter
         } elseif ($data['outcome'] === RuleResult::OUTCOME_FINDING) {
             $status = $data['severity'];
         } elseif ($data['outcome'] === RuleResult::OUTCOME_ERROR) {
-            $status = 'error';
+            $status = 'warning';
         } else {
-            $status = 'skipped';
+            $status = 'info';
         }
 
         $data['name'] = $data['title'];
         $data['status'] = $status;
+
+        if (is_array($data['evidence'])) {
+            $data['evidence_data'] = $data['evidence'];
+            $encoded_evidence = json_encode(
+                $data['evidence'],
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            );
+
+            $data['evidence'] = $encoded_evidence !== false
+                ? $encoded_evidence
+                : 'Structured evidence could not be encoded.';
+        }
 
         return $data;
     }

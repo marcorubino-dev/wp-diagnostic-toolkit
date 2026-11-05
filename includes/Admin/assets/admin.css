@@ -20,6 +20,14 @@
     --wpdt-color-warning-bg: #fffbeb;
     --wpdt-color-critical: #b91c1c;
     --wpdt-color-critical-bg: #fef2f2;
+    --wpdt-color-info-ink: #334155;
+    --wpdt-color-warning-ink: #475569;
+    --wpdt-color-table-text: #475569;
+    --wpdt-color-table-border: #edf1f5;
+    --wpdt-color-table-hover: #fafcff;
+    --wpdt-color-warning-accent: #d69e24;
+    --wpdt-color-success-border: #bbf7d0;
+    --wpdt-color-focus-halo: #ffffff;
     --wpdt-radius-sm: 6px;
     --wpdt-radius-md: 10px;
     --wpdt-radius-lg: 14px;
@@ -247,7 +255,7 @@
     align-items: flex-start;
     gap: 14px;
     padding: 20px;
-    border-left: 4px solid #d69e24;
+    border-left: 4px solid var(--wpdt-color-warning-accent);
 }
 
 .wpdt-issue-critical {
@@ -329,7 +337,7 @@
     border-left: 3px solid var(--wpdt-color-primary);
     border-radius: 0 var(--wpdt-radius-sm) var(--wpdt-radius-sm) 0;
     background: var(--wpdt-color-info-bg);
-    color: #334155 !important;
+    color: var(--wpdt-color-info-ink) !important;
 }
 
 .wpdt-issue-status {
@@ -379,7 +387,7 @@
     flex: 0 0 30px;
     align-items: center;
     justify-content: center;
-    border: 1px solid #bbf7d0;
+    border: 1px solid var(--wpdt-color-success-border);
     border-radius: 9px;
     background: var(--wpdt-color-success-bg);
     color: var(--wpdt-color-success);
@@ -442,8 +450,8 @@
 
 .wpdt-module-table td {
     padding: 15px;
-    border-bottom: 1px solid #edf1f5;
-    color: #475569;
+    border-bottom: 1px solid var(--wpdt-color-table-border);
+    color: var(--wpdt-color-table-text);
     font-size: 13px;
     line-height: 1.55;
     vertical-align: top;
@@ -454,7 +462,7 @@
 }
 
 .wpdt-module-table tbody tr:hover td {
-    background: #fafcff;
+    background: var(--wpdt-color-table-hover);
 }
 
 .wpdt-module-table td strong {
@@ -491,10 +499,10 @@
 .wpdt-check-recommendation {
     margin-top: 10px;
     padding: 9px 11px;
-    border-left: 3px solid #d69e24;
+    border-left: 3px solid var(--wpdt-color-warning-accent);
     border-radius: 0 var(--wpdt-radius-sm) var(--wpdt-radius-sm) 0;
     background: var(--wpdt-color-warning-bg);
-    color: #475569;
+    color: var(--wpdt-color-warning-ink);
     font-size: 12px;
     line-height: 1.5;
 }
@@ -539,7 +547,7 @@
 .wpdt-admin textarea:focus-visible {
     outline: 2px solid var(--wpdt-color-primary);
     outline-offset: 2px;
-    box-shadow: 0 0 0 2px #ffffff;
+    box-shadow: 0 0 0 2px var(--wpdt-color-focus-halo);
 }
 
 /* Responsive layout */
@@ -703,128 +711,40 @@
     outline-offset: 2px;
 }
 
-/* Dark theme tokens are scoped to the plugin UI only. */
+/* Dark theme tokens. System resolves through data-theme-resolved in admin.js. */
 
-.wpdt-admin[data-theme="dark"] {
-    --wpdt-color-ink: #e6edf7;
-    --wpdt-color-muted: #a5b4c8;
-    --wpdt-color-subtle: #8293aa;
-    --wpdt-color-border: #2b3a50;
-    --wpdt-color-border-strong: #40536d;
-    --wpdt-color-surface: #142033;
-    --wpdt-color-canvas: #0e1929;
-    --wpdt-color-primary: #72a7ff;
-    --wpdt-color-primary-dark: #91b9ff;
-    --wpdt-color-success: #5bd69a;
-    --wpdt-color-success-bg: #123629;
-    --wpdt-color-info: #83b6ff;
-    --wpdt-color-info-bg: #172f4d;
-    --wpdt-color-warning: #f4c66e;
-    --wpdt-color-warning-bg: #3a2e19;
-    --wpdt-color-critical: #ff8585;
-    --wpdt-color-critical-bg: #3d2228;
-    --wpdt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.22), 0 8px 24px rgba(0, 0, 0, 0.16);
+.wpdt-admin[data-theme-resolved="dark"] {
+    --wpdt-color-ink: #e4e7eb;
+    --wpdt-color-muted: #aeb6c0;
+    --wpdt-color-subtle: #89939e;
+    --wpdt-color-border: #3b424a;
+    --wpdt-color-border-strong: #515b66;
+    --wpdt-color-surface: #292e34;
+    --wpdt-color-canvas: #202327;
+    --wpdt-color-primary: #8ab4f8;
+    --wpdt-color-primary-dark: #a4c5fa;
+    --wpdt-color-success: #83c99b;
+    --wpdt-color-success-bg: #263b2e;
+    --wpdt-color-info: #91baf0;
+    --wpdt-color-info-bg: #293746;
+    --wpdt-color-warning: #e4bd76;
+    --wpdt-color-warning-bg: #403725;
+    --wpdt-color-critical: #e99595;
+    --wpdt-color-critical-bg: #432f31;
+    --wpdt-color-info-ink: #c6d4e4;
+    --wpdt-color-warning-ink: #d0d5dc;
+    --wpdt-color-table-text: #c2c8d0;
+    --wpdt-color-table-border: #3a4149;
+    --wpdt-color-table-hover: #30363d;
+    --wpdt-color-warning-accent: #c69b50;
+    --wpdt-color-success-border: #3d6049;
+    --wpdt-color-focus-halo: #292e34;
+    --wpdt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.16), 0 5px 16px rgba(0, 0, 0, 0.12);
     color-scheme: dark;
 }
 
-.wpdt-admin[data-theme="dark"] .wpdt-header {
-    background: linear-gradient(115deg, #17263b 0%, #101c2d 100%);
-}
-
-.wpdt-admin[data-theme="dark"] .wpdt-recommendation {
-    color: #c8d8ed !important;
-}
-
-.wpdt-admin[data-theme="dark"] .wpdt-issue-detail {
-    border-left-color: var(--wpdt-color-border-strong);
-}
-
-.wpdt-admin[data-theme="dark"] .wpdt-module-table td {
-    border-bottom-color: #26364b;
-    color: #bdcadd;
-}
-
-.wpdt-admin[data-theme="dark"] .wpdt-module-table tbody tr:hover td {
-    background: #192a40;
-}
-
-.wpdt-admin[data-theme="dark"] .wpdt-check-recommendation {
-    color: #c8d8ed;
-}
-
-.wpdt-admin[data-theme="dark"] .wpdt-module-icon {
-    border-color: #24543f;
-}
-
-.wpdt-admin[data-theme="dark"] a:focus-visible,
-.wpdt-admin[data-theme="dark"] button:focus-visible,
-.wpdt-admin[data-theme="dark"] input:focus-visible,
-.wpdt-admin[data-theme="dark"] select:focus-visible,
-.wpdt-admin[data-theme="dark"] textarea:focus-visible {
-    box-shadow: 0 0 0 2px #142033;
-}
-
-.wpdt-admin[data-theme="dark"] .wpdt-theme-select {
-    border-color: var(--wpdt-color-border-strong);
-    background-color: var(--wpdt-color-surface);
-    color: var(--wpdt-color-ink);
-}
-
-@media (prefers-color-scheme: dark) {
-    .wpdt-admin[data-theme="system"] {
-        --wpdt-color-ink: #e6edf7;
-        --wpdt-color-muted: #a5b4c8;
-        --wpdt-color-subtle: #8293aa;
-        --wpdt-color-border: #2b3a50;
-        --wpdt-color-border-strong: #40536d;
-        --wpdt-color-surface: #142033;
-        --wpdt-color-canvas: #0e1929;
-        --wpdt-color-primary: #72a7ff;
-        --wpdt-color-primary-dark: #91b9ff;
-        --wpdt-color-success: #5bd69a;
-        --wpdt-color-success-bg: #123629;
-        --wpdt-color-info: #83b6ff;
-        --wpdt-color-info-bg: #172f4d;
-        --wpdt-color-warning: #f4c66e;
-        --wpdt-color-warning-bg: #3a2e19;
-        --wpdt-color-critical: #ff8585;
-        --wpdt-color-critical-bg: #3d2228;
-        --wpdt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.22), 0 8px 24px rgba(0, 0, 0, 0.16);
-        color-scheme: dark;
-    }
-
-    .wpdt-admin[data-theme="system"] .wpdt-header {
-        background: linear-gradient(115deg, #17263b 0%, #101c2d 100%);
-    }
-
-    .wpdt-admin[data-theme="system"] .wpdt-recommendation {
-        color: #c8d8ed !important;
-    }
-
-    .wpdt-admin[data-theme="system"] .wpdt-module-table td {
-        border-bottom-color: #26364b;
-        color: #bdcadd;
-    }
-
-    .wpdt-admin[data-theme="system"] .wpdt-module-table tbody tr:hover td {
-        background: #192a40;
-    }
-
-    .wpdt-admin[data-theme="system"] .wpdt-check-recommendation {
-        color: #c8d8ed;
-    }
-
-    .wpdt-admin[data-theme="system"] .wpdt-module-icon {
-        border-color: #24543f;
-    }
-
-    .wpdt-admin[data-theme="system"] a:focus-visible,
-    .wpdt-admin[data-theme="system"] button:focus-visible,
-    .wpdt-admin[data-theme="system"] input:focus-visible,
-    .wpdt-admin[data-theme="system"] select:focus-visible,
-    .wpdt-admin[data-theme="system"] textarea:focus-visible {
-        box-shadow: 0 0 0 2px #142033;
-    }
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-header {
+    background: linear-gradient(115deg, #30363d 0%, #292e34 100%);
 }
 
 @media screen and (max-width: 782px) {

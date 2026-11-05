@@ -25,7 +25,7 @@ interface DiagnosticInterface
     /**
      * Run the diagnostic.
      *
-     * @return array
+     * @return array<int, array|RuleResult>
      */
     public function run();
 }

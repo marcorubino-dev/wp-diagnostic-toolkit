@@ -293,5 +293,49 @@ wpdt_manager_check(
     'preserves a valid adapter-generated ID that collides with a potential synthetic error ID'
 );
 
+$registration_manager = new DiagnosticManager();
+
+$registration_manager->register(wpdt_test_diagnostic(
+    'duplicate_module',
+    'Original module',
+    array(
+        array(
+            'name' => 'Original result',
+            'status' => 'pass',
+        ),
+    )
+));
+
+$duplicate_registration_thrown = false;
+
+try {
+    $registration_manager->register(wpdt_test_diagnostic(
+        'duplicate_module',
+        'Replacement module',
+        array(
+            array(
+                'name' => 'Replacement result',
+                'status' => 'warning',
+            ),
+        )
+    ));
+} catch (\InvalidArgumentException $exception) {
+    $duplicate_registration_thrown = true;
+}
+
+$registration_output = $registration_manager->run_all();
+$registered_module = $registration_output['duplicate_module'];
+
+wpdt_manager_check(
+    $duplicate_registration_thrown,
+    'rejects registration of a module with an already registered ID'
+);
+
+wpdt_manager_check(
+    $registered_module['name'] === 'Original module'
+        && $registered_module['results'][0]['name'] === 'Original result',
+    'preserves the original module when duplicate registration is rejected'
+);
+
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;
 exit($failed === 0 ? 0 : 1);

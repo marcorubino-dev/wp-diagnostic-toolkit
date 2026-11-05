@@ -30,10 +30,19 @@ class DiagnosticManager
      *
      * @param DiagnosticInterface $diagnostic Diagnostic module.
      * @return void
+     * @throws \InvalidArgumentException If the diagnostic ID is already registered.
      */
     public function register(DiagnosticInterface $diagnostic)
     {
-        $this->diagnostics[$diagnostic->get_id()] = $diagnostic;
+        $module_id = $diagnostic->get_id();
+
+        if (array_key_exists($module_id, $this->diagnostics)) {
+            throw new \InvalidArgumentException(
+                sprintf('A diagnostic module with ID "%s" is already registered.', $module_id)
+            );
+        }
+
+        $this->diagnostics[$module_id] = $diagnostic;
     }
 
     /**

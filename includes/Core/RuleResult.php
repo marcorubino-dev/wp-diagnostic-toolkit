@@ -23,6 +23,10 @@ final class RuleResult
     const SEVERITY_WARNING = 'warning';
     const SEVERITY_CRITICAL = 'critical';
 
+    const CONFIDENCE_DIRECT = 'direct';
+    const CONFIDENCE_INFERRED = 'inferred';
+    const CONFIDENCE_UNKNOWN = 'unknown';
+
     /** @var array<string, mixed> */
     private $data;
 
@@ -42,6 +46,10 @@ final class RuleResult
 
         if (!preg_match('/^[a-z0-9][a-z0-9._-]*$/', $data['id'])) {
             throw new \InvalidArgumentException('Field "id" must be a stable lowercase identifier.');
+        }
+
+        if (!preg_match('/^[a-z0-9][a-z0-9._-]*$/', $data['module'])) {
+            throw new \InvalidArgumentException('Field "module" must be a stable lowercase identifier.');
         }
 
         $allowed_outcomes = array(
@@ -64,6 +72,17 @@ final class RuleResult
 
         if (!in_array($data['severity'], $allowed_severities, true)) {
             throw new \InvalidArgumentException('Unsupported severity.');
+        }
+
+        $confidence = isset($data['confidence']) ? $data['confidence'] : self::CONFIDENCE_UNKNOWN;
+        $allowed_confidences = array(
+            self::CONFIDENCE_DIRECT,
+            self::CONFIDENCE_INFERRED,
+            self::CONFIDENCE_UNKNOWN,
+        );
+
+        if (!is_string($confidence) || !in_array($confidence, $allowed_confidences, true)) {
+            throw new \InvalidArgumentException('Unsupported confidence.');
         }
 
         if ($data['outcome'] === self::OUTCOME_PASS && $data['severity'] !== self::SEVERITY_NONE) {
@@ -100,6 +119,7 @@ final class RuleResult
             'title'          => $data['title'],
             'outcome'        => $data['outcome'],
             'severity'       => $data['severity'],
+            'confidence'     => $confidence,
             'description'    => $data['description'],
             'value'          => $value,
             'recommendation' => $recommendation,

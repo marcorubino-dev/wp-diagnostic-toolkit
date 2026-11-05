@@ -13,8 +13,8 @@ final class LegacyResultAdapter
     /**
      * Adapt one legacy diagnostic result.
      *
-     * IDs are derived from the existing label only during this migration phase.
-     * They should become explicit constants in each check before labels change.
+     * Explicit IDs are preserved when valid. A deterministic ID derived from
+     * the module and label is used only when the legacy result has no ID.
      *
      * @param string $module_id Stable diagnostic module identifier.
      * @param array  $legacy   Existing diagnostic result array.
@@ -48,19 +48,30 @@ final class LegacyResultAdapter
             );
         }
 
-        $slug = strtolower($legacy['name']);
-        $slug = preg_replace('/[^a-z0-9]+/', '_', $slug);
-        $slug = trim($slug, '_');
+        if (array_key_exists('id', $legacy)) {
+            if (!is_string($legacy['id']) || trim($legacy['id']) === '') {
+                throw new \InvalidArgumentException('Explicit legacy result ID must be a non-empty string.');
+            }
 
-        if ($slug === '') {
-            throw new \InvalidArgumentException('Legacy result name cannot produce a stable identifier.');
+            $result_id = $legacy['id'];
+        } else {
+            $slug = strtolower($legacy['name']);
+            $slug = preg_replace('/[^a-z0-9]+/', '_', $slug);
+            $slug = trim($slug, '_');
+
+            if ($slug === '') {
+                throw new \InvalidArgumentException('Legacy result name cannot produce a stable identifier.');
+            }
+
+            $result_id = $module_id . '.' . $slug;
         }
 
         return new RuleResult(array(
-            'id'             => $module_id . '.' . $slug,
+            'id'             => $result_id,
             'title'          => $legacy['name'],
             'outcome'        => $status_map[$legacy['status']][0],
             'severity'       => $status_map[$legacy['status']][1],
+            'confidence'     => RuleResult::CONFIDENCE_UNKNOWN,
             'description'    => isset($legacy['description']) && is_string($legacy['description'])
                 ? $legacy['description']
                 : 'No description provided by the legacy diagnostic.',
@@ -73,6 +84,10 @@ final class LegacyResultAdapter
 
     /**
      * Adapt a list of legacy result arrays.
+     *
+     * This strict convenience method throws when an item is invalid or an ID
+     * repeats. The DiagnosticManager must use adapt() per item so it can isolate
+     * malformed entries and continue processing the remaining results.
      *
      * @param string $module_id Stable diagnostic module identifier.
      * @param array  $legacy_results List of legacy diagnostic result arrays.

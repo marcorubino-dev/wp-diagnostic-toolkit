@@ -818,7 +818,7 @@
         border-color: #24543f;
     }
 
-    .wpdt-admin[data-theme="system"] .wpdt-admin a:focus-visible,
+    .wpdt-admin[data-theme="system"] a:focus-visible,
     .wpdt-admin[data-theme="system"] button:focus-visible,
     .wpdt-admin[data-theme="system"] input:focus-visible,
     .wpdt-admin[data-theme="system"] select:focus-visible,

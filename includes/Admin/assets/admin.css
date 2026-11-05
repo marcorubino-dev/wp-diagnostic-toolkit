@@ -34,7 +34,9 @@
     --wpdt-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 5px 18px rgba(15, 23, 42, 0.035);
     box-sizing: border-box;
     max-width: 1280px;
+    min-height: calc(100vh - 32px);
     padding-top: 20px;
+    background-color: var(--wpdt-color-canvas);
     color: var(--wpdt-color-ink);
 }
 

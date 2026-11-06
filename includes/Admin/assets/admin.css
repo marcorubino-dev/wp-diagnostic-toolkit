@@ -777,3 +777,30 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
         max-width: 180px;
     }
 }
+
+
+/* Diagnostic module navigation */
+.wpdt-admin a.wpdt-module {
+    color: inherit;
+    text-decoration: none;
+}
+
+.wpdt-admin a.wpdt-module:hover {
+    color: inherit;
+}
+
+.wpdt-admin a.wpdt-module:focus-visible {
+    outline: 2px solid var(--wpdt-color-primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px var(--wpdt-color-focus-halo);
+}
+
+.wpdt-admin a.wpdt-module .wpdt-module-content h3 {
+    color: var(--wpdt-color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wpdt-admin a.wpdt-module:hover {
+        transform: none;
+    }
+}

@@ -97,6 +97,16 @@ foreach ($diagnostics as $diagnostic) {
 }
 
 $report_text = implode("\n", $report_lines);
+
+$module_pages = array(
+    'environment'              => 'wpdt-environment',
+    'http_ssl'                 => 'wpdt-http-ssl',
+    'plugins'                  => 'wpdt-plugins',
+    'themes'                   => 'wpdt-themes',
+    'server'                   => 'wpdt-server',
+    'disk_space'               => 'wpdt-disk-space',
+    'multilingual_woocommerce' => 'wpdt-multilingual-woocommerce',
+);
 ?>
 
 <div class="wrap wpdt-admin">
@@ -352,7 +362,11 @@ $report_text = implode("\n", $report_lines);
 
             <?php foreach ($diagnostics as $diagnostic) : ?>
 
-                <div class="wpdt-module">
+                <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
+                    <a class="wpdt-module" href="<?php echo esc_url(admin_url('admin.php?page=' . $module_pages[$diagnostic['id']])); ?>">
+                <?php else : ?>
+                    <div class="wpdt-module">
+                <?php endif; ?>
 
                     <div class="wpdt-module-icon" aria-hidden="true">
                         ✓
@@ -375,7 +389,11 @@ $report_text = implode("\n", $report_lines);
 
                     </div>
 
-                </div>
+                <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
+                    </a>
+                <?php else : ?>
+                    </div>
+                <?php endif; ?>
 
             <?php endforeach; ?>
 

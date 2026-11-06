@@ -688,8 +688,8 @@
 .wpdt-theme-control {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin-left: 4px;
+    gap: 12px;
+    margin-left: 16px;
 }
 
 .wpdt-theme-control label {
@@ -699,10 +699,10 @@
 }
 
 .wpdt-theme-select {
-    min-height: 34px;
-    padding: 3px 28px 3px 9px;
+    min-height: 38px;
+    padding: 4px 32px 4px 12px;
     border: 1px solid var(--wpdt-color-border-strong);
-    border-radius: var(--wpdt-radius-sm);
+    border-radius: 9px;
     background-color: var(--wpdt-color-surface);
     color: var(--wpdt-color-ink);
     font-size: 12px;
@@ -716,37 +716,42 @@
 /* Dark theme tokens. System resolves through data-theme-resolved in admin.js. */
 
 .wpdt-admin[data-theme-resolved="dark"] {
-    --wpdt-color-ink: #e4e7eb;
-    --wpdt-color-muted: #aeb6c0;
-    --wpdt-color-subtle: #89939e;
-    --wpdt-color-border: #3b424a;
-    --wpdt-color-border-strong: #515b66;
-    --wpdt-color-surface: #292e34;
-    --wpdt-color-canvas: #202327;
+    --wpdt-color-ink: #e5ecf7;
+    --wpdt-color-muted: #a8b8d0;
+    --wpdt-color-subtle: #8498b8;
+    --wpdt-color-border: #30496a;
+    --wpdt-color-border-strong: #3d5b82;
+    --wpdt-color-surface: #1c304d;
+    --wpdt-color-canvas: #14243d;
     --wpdt-color-primary: #8ab4f8;
-    --wpdt-color-primary-dark: #a4c5fa;
-    --wpdt-color-success: #83c99b;
-    --wpdt-color-success-bg: #263b2e;
+    --wpdt-color-primary-dark: #bfdbfe;
+    --wpdt-color-success: #86d3a0;
+    --wpdt-color-success-bg: #1d3b39;
     --wpdt-color-info: #91baf0;
-    --wpdt-color-info-bg: #293746;
-    --wpdt-color-warning: #e4bd76;
-    --wpdt-color-warning-bg: #403725;
-    --wpdt-color-critical: #e99595;
-    --wpdt-color-critical-bg: #432f31;
-    --wpdt-color-info-ink: #c6d4e4;
-    --wpdt-color-warning-ink: #d0d5dc;
-    --wpdt-color-table-text: #c2c8d0;
-    --wpdt-color-table-border: #3a4149;
-    --wpdt-color-table-hover: #30363d;
-    --wpdt-color-warning-accent: #c69b50;
-    --wpdt-color-success-border: #3d6049;
-    --wpdt-color-focus-halo: #292e34;
-    --wpdt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.16), 0 5px 16px rgba(0, 0, 0, 0.12);
+    --wpdt-color-info-bg: #254568;
+    --wpdt-color-warning: #f0c674;
+    --wpdt-color-warning-bg: #403820;
+    --wpdt-color-critical: #f09a9a;
+    --wpdt-color-critical-bg: #482d3b;
+    --wpdt-color-info-ink: #d4e4f8;
+    --wpdt-color-warning-ink: #e2e8f0;
+    --wpdt-color-table-text: #c8d5e8;
+    --wpdt-color-table-border: #30496a;
+    --wpdt-color-table-hover: #243b5c;
+    --wpdt-color-warning-accent: #d6a94f;
+    --wpdt-color-success-border: #315d52;
+    --wpdt-color-focus-halo: #1c304d;
+    --wpdt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 5px 16px rgba(0, 0, 0, 0.16);
     color-scheme: dark;
 }
 
+/* Extend the dark canvas across this plugin screen, not the WordPress sidebar. */
+body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
+    background-color: #14243d;
+}
+
 .wpdt-admin[data-theme-resolved="dark"] .wpdt-header {
-    background: linear-gradient(115deg, #30363d 0%, #292e34 100%);
+    background: linear-gradient(115deg, #25466f 0%, #1c304d 100%);
 }
 
 @media screen and (max-width: 782px) {

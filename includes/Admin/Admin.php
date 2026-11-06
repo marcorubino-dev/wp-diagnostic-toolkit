@@ -82,6 +82,42 @@ class Admin
 
         add_submenu_page(
             'wp-diagnostic-toolkit',
+            'HTTP & SSL',
+            'HTTP & SSL',
+            'manage_options',
+            'wpdt-http-ssl',
+            array($this, 'render_http_ssl')
+        );
+
+        add_submenu_page(
+            'wp-diagnostic-toolkit',
+            'Themes',
+            'Themes',
+            'manage_options',
+            'wpdt-themes',
+            array($this, 'render_themes')
+        );
+
+        add_submenu_page(
+            'wp-diagnostic-toolkit',
+            'Disk Space',
+            'Disk Space',
+            'manage_options',
+            'wpdt-disk-space',
+            array($this, 'render_disk_space')
+        );
+
+        add_submenu_page(
+            'wp-diagnostic-toolkit',
+            'Multilingual & WooCommerce',
+            'Multilingual & WooCommerce',
+            'manage_options',
+            'wpdt-multilingual-woocommerce',
+            array($this, 'render_multilingual_woocommerce')
+        );
+
+        add_submenu_page(
+            'wp-diagnostic-toolkit',
             'Settings',
             'Settings',
             'manage_options',
@@ -173,6 +209,46 @@ class Admin
     }
 
     /**
+     * Render HTTP and SSL diagnostics.
+     *
+     * @return void
+     */
+    public function render_http_ssl()
+    {
+        $this->render_diagnostic_module('http_ssl');
+    }
+
+    /**
+     * Render theme diagnostics.
+     *
+     * @return void
+     */
+    public function render_themes()
+    {
+        $this->render_diagnostic_module('themes');
+    }
+
+    /**
+     * Render disk space diagnostics.
+     *
+     * @return void
+     */
+    public function render_disk_space()
+    {
+        $this->render_diagnostic_module('disk_space');
+    }
+
+    /**
+     * Render multilingual and WooCommerce diagnostics.
+     *
+     * @return void
+     */
+    public function render_multilingual_woocommerce()
+    {
+        $this->render_diagnostic_module('multilingual_woocommerce');
+    }
+
+    /**
      * Render settings.
      *
      * @return void
@@ -206,8 +282,13 @@ class Admin
 
         $diagnostic = $diagnostics[$module_id];
 
+        $legacy_templates = array('environment', 'plugins', 'server');
+        $template = in_array($module_id, $legacy_templates, true)
+            ? $module_id
+            : 'module';
+
         $this->render_template(
-            $module_id,
+            $template,
             array(
                 'diagnostic' => $diagnostic,
             )

@@ -56,6 +56,7 @@
         });
 
         var currentTheme = getSavedTheme();
+        var activeTheme = currentTheme;
         select.value = currentTheme;
         applyTheme(currentTheme, root);
 
@@ -75,6 +76,8 @@
                 ? select.value
                 : 'system';
 
+            activeTheme = selectedTheme;
+
             try {
                 window.localStorage.setItem(themeStorageKey, selectedTheme);
             } catch (error) {
@@ -87,7 +90,7 @@
         if (window.matchMedia) {
             var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
             var handleSystemChange = function () {
-                if (getSavedTheme() === 'system') {
+                if (activeTheme === 'system') {
                     applyTheme('system', root);
                 }
             };

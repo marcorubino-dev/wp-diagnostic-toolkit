@@ -804,3 +804,217 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
         transform: none;
     }
 }
+
+
+/* -------------------------------------------------------------
+   Visual refinement — dashboard and diagnostic navigation
+   ------------------------------------------------------------- */
+
+.wpdt-admin {
+    padding-right: 18px;
+    padding-bottom: 32px;
+}
+
+.wpdt-header {
+    gap: 28px;
+    border-color: var(--wpdt-color-border);
+    box-shadow: var(--wpdt-shadow-card);
+}
+
+.wpdt-header h1 {
+    font-size: clamp(24px, 2.2vw, 29px);
+    font-weight: 700;
+}
+
+.wpdt-header-action .button {
+    min-height: 38px;
+    padding: 5px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.wpdt-header-action .button-primary {
+    border-color: var(--wpdt-color-primary);
+    background: var(--wpdt-color-primary);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .12);
+}
+
+.wpdt-header-action .button-primary:hover {
+    border-color: var(--wpdt-color-primary-dark);
+    background: var(--wpdt-color-primary-dark);
+    transform: translateY(-1px);
+}
+
+.wpdt-header-action .button-secondary {
+    border-color: var(--wpdt-color-border-strong);
+    background: var(--wpdt-color-surface);
+    color: var(--wpdt-color-ink);
+}
+
+.wpdt-header-action .button-secondary:hover {
+    border-color: var(--wpdt-color-primary);
+    color: var(--wpdt-color-primary);
+}
+
+.wpdt-status-card {
+    border-color: var(--wpdt-color-border);
+    box-shadow: var(--wpdt-shadow-card);
+}
+
+.wpdt-status-card-header {
+    padding: 28px;
+}
+
+.wpdt-status {
+    letter-spacing: -0.025em;
+}
+
+.wpdt-summary-item {
+    border-color: var(--wpdt-color-border);
+    background: var(--wpdt-color-surface);
+    transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.wpdt-summary-item:hover {
+    transform: translateY(-1px);
+    border-color: var(--wpdt-color-border-strong);
+}
+
+.wpdt-section-header h2 {
+    font-size: 18px;
+    letter-spacing: -0.02em;
+}
+
+.wpdt-issue {
+    border-color: var(--wpdt-color-border);
+    box-shadow: var(--wpdt-shadow-card);
+}
+
+.wpdt-issue-critical {
+    border-left-width: 4px;
+}
+
+.wpdt-module {
+    position: relative;
+    min-height: 96px;
+    align-items: center;
+    padding: 20px;
+    border-color: var(--wpdt-color-border);
+}
+
+.wpdt-admin a.wpdt-module {
+    padding-right: 42px;
+}
+
+.wpdt-admin a.wpdt-module::after {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    color: var(--wpdt-color-subtle);
+    content: "→";
+    font-size: 17px;
+    line-height: 1;
+    transform: translateY(-50%);
+    transition: color 140ms ease, transform 140ms ease;
+}
+
+.wpdt-admin a.wpdt-module:hover {
+    transform: translateY(-2px);
+    border-color: var(--wpdt-color-primary);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
+}
+
+.wpdt-admin a.wpdt-module:hover::after {
+    color: var(--wpdt-color-primary);
+    transform: translate(3px, -50%);
+}
+
+.wpdt-module-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.wpdt-module-content h3 {
+    font-size: 14px;
+    letter-spacing: -0.01em;
+}
+
+.wpdt-module-content p {
+    line-height: 1.55;
+}
+
+.wpdt-module-table {
+    box-shadow: var(--wpdt-shadow-card);
+}
+
+.wpdt-module-table th {
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+.wpdt-module-table td {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.wpdt-copy-button {
+    transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
+}
+
+.wpdt-admin .button.wpdt-copy-button:hover {
+    border-color: var(--wpdt-color-primary);
+    color: var(--wpdt-color-primary);
+}
+
+.wpdt-admin button:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+
+@media screen and (max-width: 782px) {
+    .wpdt-admin {
+        padding-right: 12px;
+    }
+
+    .wpdt-status-card-header {
+        padding: 22px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .wpdt-admin {
+        padding-right: 10px;
+    }
+
+    .wpdt-header {
+        gap: 16px;
+    }
+
+    .wpdt-header-action .button,
+    .wpdt-header-action .wpdt-copy-control {
+        min-height: 40px;
+    }
+
+    .wpdt-status-card-header {
+        padding: 18px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wpdt-summary-item,
+    .wpdt-header-action .button,
+    .wpdt-admin a.wpdt-module::after,
+    .wpdt-copy-button {
+        transition: none;
+    }
+
+    .wpdt-summary-item:hover,
+    .wpdt-admin a.wpdt-module:hover,
+    .wpdt-header-action .button-primary:hover {
+        transform: none;
+    }
+}

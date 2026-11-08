@@ -163,7 +163,7 @@
 
 .wpdt-summary {
     display: grid;
-    grid-template-columns: repeat(5, minmax(88px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
     gap: 10px;
     width: min(100%, 650px);
     min-width: 0;

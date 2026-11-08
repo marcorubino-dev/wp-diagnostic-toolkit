@@ -1018,3 +1018,50 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
         transform: none;
     }
 }
+
+
+/* Dark-mode contrast corrections for WordPress controls and striped tables. */
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-header-action .button-primary {
+    border-color: #3b82f6;
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-header-action .button-primary:hover,
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-header-action .button-primary:focus {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-header-action .button-secondary,
+.wpdt-admin[data-theme-resolved="dark"] .button.wpdt-copy-button {
+    border-color: var(--wpdt-color-border-strong);
+    background: var(--wpdt-color-surface);
+    color: var(--wpdt-color-ink);
+}
+
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-header-action .button-secondary:hover,
+.wpdt-admin[data-theme-resolved="dark"] .button.wpdt-copy-button:hover {
+    border-color: var(--wpdt-color-primary);
+    background: var(--wpdt-color-table-hover);
+    color: var(--wpdt-color-ink);
+}
+
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat.striped > tbody > :nth-child(odd),
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat.striped > tbody > :nth-child(odd) th {
+    background-color: #192d48;
+}
+
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat.striped > tbody > :nth-child(even) {
+    background-color: var(--wpdt-color-surface);
+}
+
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat.striped > tbody tr:hover td {
+    background-color: var(--wpdt-color-table-hover);
+}
+
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat td,
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat th {
+    border-color: var(--wpdt-color-table-border);
+}

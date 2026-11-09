@@ -141,9 +141,12 @@ $report_text = implode("\n", $report_lines);
                         $status = isset($check['status']) && is_string($check['status'])
                             ? strtolower(trim($check['status']))
                             : 'unclassified';
+                        if (! isset($counts[$status])) {
+                            $status = 'unclassified';
+                        }
                         $icon = $status === 'critical'
                             ? '✕'
-                            : ($status === 'warning' ? '⚠' : ($status === 'pass' ? '✓' : 'ℹ'));
+                            : ($status === 'warning' ? '⚠' : ($status === 'pass' ? '✓' : ($status === 'unclassified' ? '?' : 'ℹ')));
                         ?>
                         <tr>
                             <td><strong><?php echo esc_html(isset($check['name']) ? $check['name'] : 'Unnamed check'); ?></strong></td>

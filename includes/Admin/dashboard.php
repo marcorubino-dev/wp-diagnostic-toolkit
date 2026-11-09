@@ -26,8 +26,9 @@ foreach ($diagnostics as $diagnostic) {
             $warning_count++;
 
             $issues[] = array(
-                'module' => $diagnostic['name'],
-                'check'  => $check,
+                'module'    => $diagnostic['name'],
+                'module_id' => isset($diagnostic['id']) ? $diagnostic['id'] : '',
+                'check'     => $check,
             );
         } elseif ($status === 'critical') {
             $critical_count++;
@@ -273,6 +274,12 @@ $module_pages = array(
                                 <?php echo esc_html($issue['module']); ?>
                             </p>
 
+                            <?php if (! empty($issue['module_id']) && isset($module_pages[$issue['module_id']])) : ?>
+                                <a class="wpdt-issue-module-link" href="<?php echo esc_url(admin_url('admin.php?page=' . $module_pages[$issue['module_id']])); ?>">
+                                    Open diagnostic module <span aria-hidden="true">→</span>
+                                </a>
+                            <?php endif; ?>
+
                             <p class="wpdt-issue-interpretation">
                                 <strong>Interpretation:</strong>
                                 <?php echo esc_html($check['description']); ?>
@@ -308,6 +315,7 @@ $module_pages = array(
                             <?php
                             $finding_lines = array(
                                 'Module: ' . $issue['module'],
+                                'Module ID: ' . $issue['module_id'],
                                 'Check: ' . $check['name'],
                                 'Status: ' . strtoupper($status),
                                 'Interpretation: ' . $check['description'],

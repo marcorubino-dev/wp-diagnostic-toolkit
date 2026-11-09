@@ -10,8 +10,8 @@ $counts = array(
     'pass'     => 0,
     'info'     => 0,
     'warning'  => 0,
-    'critical' => 0,
-    'other'    => 0,
+    'critical'     => 0,
+    'unclassified' => 0,
 );
 
 $report_lines = array(
@@ -25,11 +25,11 @@ foreach ($results as $check) {
         ? strtolower(trim($check['status']))
         : 'unclassified';
 
-    if (isset($counts[$status])) {
-        $counts[$status]++;
-    } else {
-        $counts['other']++;
+    if (! isset($counts[$status])) {
+        $status = 'unclassified';
     }
+
+    $counts[$status]++;
 
     $report_lines[] = 'Check: ' . (isset($check['name']) ? $check['name'] : 'Unnamed check');
     $report_lines[] = 'Status: ' . strtoupper($status);
@@ -46,11 +46,13 @@ foreach ($results as $check) {
 
 $module_status = $counts['critical'] > 0
     ? 'CRITICAL'
-    : ($counts['warning'] > 0 ? 'NEEDS ATTENTION' : 'OK');
+    : ($counts['warning'] > 0
+        ? 'NEEDS ATTENTION'
+        : ($counts['unclassified'] > 0 ? 'NEEDS REVIEW' : 'OK'));
 
 $status_class = $counts['critical'] > 0
     ? 'critical'
-    : ($counts['warning'] > 0 ? 'warning' : 'pass');
+    : (($counts['warning'] > 0 || $counts['unclassified'] > 0) ? 'warning' : 'pass');
 
 $report_text = implode("\n", $report_lines);
 ?>
@@ -70,6 +72,8 @@ $report_text = implode("\n", $report_lines);
                 <h2 class="wpdt-status wpdt-status-<?php echo esc_attr($status_class); ?>">
                     <?php if ($status_class === 'critical') : ?>
                         <span aria-hidden="true">✕</span>
+                    <?php elseif ($status_class === 'warning' && $counts['unclassified'] > 0 && $counts['warning'] === 0) : ?>
+                        <span aria-hidden="true">?</span>
                     <?php elseif ($status_class === 'warning') : ?>
                         <span aria-hidden="true">⚠</span>
                     <?php else : ?>
@@ -78,15 +82,25 @@ $report_text = implode("\n", $report_lines);
                     <?php echo esc_html($module_status); ?>
                 </h2>
                 <p class="wpdt-status-description">
-                    <?php echo esc_html(count($results)); ?> diagnostic checks.
+                    <?php
+                    if ($counts['critical'] > 0) {
+                        echo esc_html(sprintf('%d critical finding(s) require attention.', $counts['critical']));
+                    } elseif ($counts['warning'] > 0) {
+                        echo esc_html(sprintf('%d warning(s) require attention.', $counts['warning']));
+                    } elseif ($counts['unclassified'] > 0) {
+                        echo esc_html(sprintf('%d check(s) have an unknown or missing status and need review.', $counts['unclassified']));
+                    } else {
+                        echo esc_html(count($results) . ' diagnostic checks. No warnings or unclassified results.');
+                    }
+                    ?>
                 </p>
             </div>
 
             <div class="wpdt-summary">
-                <?php foreach (array('pass' => 'passed', 'info' => 'info', 'warning' => 'warnings', 'critical' => 'critical') as $status => $label) : ?>
-                    <div class="wpdt-summary-item wpdt-summary-<?php echo esc_attr($status); ?>">
+                <?php foreach (array('pass' => 'passed', 'info' => 'info', 'warning' => 'warnings', 'critical' => 'critical', 'unclassified' => 'unclassified') as $status => $label) : ?>
+                    <div class="wpdt-summary-item wpdt-summary-<?php echo $status === 'unclassified' ? 'info' : esc_attr($status); ?>">
                         <span class="wpdt-summary-icon" aria-hidden="true">
-                            <?php echo $status === 'pass' ? '✓' : ($status === 'warning' ? '⚠' : ($status === 'critical' ? '✕' : 'ℹ')); ?>
+                            <?php echo $status === 'pass' ? '✓' : ($status === 'warning' ? '⚠' : ($status === 'critical' ? '✕' : ($status === 'unclassified' ? '?' : 'ℹ'))); ?>
                         </span>
                         <strong><?php echo esc_html($counts[$status]); ?></strong>
                         <span><?php echo esc_html($label); ?></span>

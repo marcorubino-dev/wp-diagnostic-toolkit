@@ -33,9 +33,9 @@ foreach ($results as $check) {
 
     $report_lines[] = 'Check: ' . (isset($check['name']) ? $check['name'] : 'Unnamed check');
     $report_lines[] = 'Status: ' . strtoupper($status);
-    $report_lines[] = 'Value: ' . (isset($check['value']) ? $check['value'] : '');
+    $report_lines[] = 'Observed value: ' . (isset($check['value']) ? $check['value'] : '');
 
-    foreach (array('description' => 'Description', 'evidence' => 'Evidence', 'recommendation' => 'Recommendation') as $key => $label) {
+    foreach (array('description' => 'Interpretation', 'evidence' => 'Observed evidence', 'recommendation' => 'Next step') as $key => $label) {
         if (! empty($check[$key])) {
             $report_lines[] = $label . ': ' . $check[$key];
         }
@@ -114,7 +114,7 @@ $report_text = implode("\n", $report_lines);
         <div class="wpdt-section-header wpdt-section-header-actions">
             <div>
                 <h2>Diagnostic Checks</h2>
-                <p>Individual findings, observed values, and recommended actions.</p>
+                <p>What the check observed, what it means, and what to investigate next.</p>
             </div>
             <div class="wpdt-copy-control">
                 <button type="button" class="button button-secondary wpdt-copy-button" data-wpdt-copy>
@@ -132,7 +132,7 @@ $report_text = implode("\n", $report_lines);
                         <th>Check</th>
                         <th>Value</th>
                         <th>Status</th>
-                        <th>Description</th>
+                        <th>Interpretation and next step</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -158,16 +158,19 @@ $report_text = implode("\n", $report_lines);
                                 </span>
                             </td>
                             <td>
-                                <div><?php echo esc_html(isset($check['description']) ? $check['description'] : ''); ?></div>
+                                <div class="wpdt-check-interpretation">
+                                    <strong>Interpretation:</strong>
+                                    <?php echo esc_html(isset($check['description']) ? $check['description'] : ''); ?>
+                                </div>
                                 <?php if (! empty($check['recommendation'])) : ?>
                                     <div class="wpdt-check-recommendation">
-                                        <strong>Recommendation:</strong>
+                                        <strong>Next step:</strong>
                                         <?php echo esc_html($check['recommendation']); ?>
                                     </div>
                                 <?php endif; ?>
                                 <?php if (! empty($check['evidence'])) : ?>
                                     <div class="wpdt-check-evidence">
-                                        <strong>Evidence:</strong>
+                                        <strong>Observed evidence:</strong>
                                         <?php echo esc_html($check['evidence']); ?>
                                         <div class="wpdt-copy-control wpdt-copy-control-inline">
                                             <button type="button" class="button button-small wpdt-copy-button" data-wpdt-copy>Copy evidence</button>

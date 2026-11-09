@@ -78,18 +78,18 @@ foreach ($diagnostics as $diagnostic) {
             ? strtoupper(trim($check['status']))
             : 'UNCLASSIFIED';
         $report_lines[] = 'Status: ' . $report_status;
-        $report_lines[] = 'Description: ' . $check['description'];
+        $report_lines[] = 'Interpretation: ' . $check['description'];
 
         if (isset($check['value']) && $check['value'] !== '') {
-            $report_lines[] = 'Value: ' . $check['value'];
+            $report_lines[] = 'Observed value: ' . $check['value'];
         }
 
         if (! empty($check['evidence'])) {
-            $report_lines[] = 'Evidence: ' . $check['evidence'];
+            $report_lines[] = 'Observed evidence: ' . $check['evidence'];
         }
 
         if (! empty($check['recommendation'])) {
-            $report_lines[] = 'Recommendation: ' . $check['recommendation'];
+            $report_lines[] = 'Next step: ' . $check['recommendation'];
         }
     }
 
@@ -273,14 +273,15 @@ $module_pages = array(
                                 <?php echo esc_html($issue['module']); ?>
                             </p>
 
-                            <p>
+                            <p class="wpdt-issue-interpretation">
+                                <strong>Interpretation:</strong>
                                 <?php echo esc_html($check['description']); ?>
                             </p>
 
                             <?php if (isset($check['value']) && $check['value'] !== '') : ?>
 
                                 <p class="wpdt-issue-detail">
-                                    <strong>Observed value:</strong>
+                                    <strong>Observed:</strong>
                                     <?php echo esc_html($check['value']); ?>
                                 </p>
 
@@ -298,7 +299,7 @@ $module_pages = array(
                             <?php if (! empty($check['recommendation'])) : ?>
 
                                 <p class="wpdt-recommendation">
-                                    <strong>Recommendation:</strong>
+                                    <strong>Next step:</strong>
                                     <?php echo esc_html($check['recommendation']); ?>
                                 </p>
 
@@ -309,7 +310,7 @@ $module_pages = array(
                                 'Module: ' . $issue['module'],
                                 'Check: ' . $check['name'],
                                 'Status: ' . strtoupper($status),
-                                'Description: ' . $check['description'],
+                                'Interpretation: ' . $check['description'],
                             );
 
                             if (isset($check['value']) && $check['value'] !== '') {
@@ -317,11 +318,11 @@ $module_pages = array(
                             }
 
                             if (! empty($check['evidence'])) {
-                                $finding_lines[] = 'Evidence: ' . $check['evidence'];
+                                $finding_lines[] = 'Observed evidence: ' . $check['evidence'];
                             }
 
                             if (! empty($check['recommendation'])) {
-                                $finding_lines[] = 'Recommendation: ' . $check['recommendation'];
+                                $finding_lines[] = 'Next step: ' . $check['recommendation'];
                             }
                             ?>
 

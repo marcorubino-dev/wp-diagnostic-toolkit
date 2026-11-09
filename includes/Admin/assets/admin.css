@@ -1065,3 +1065,33 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
 .wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat th {
     border-color: var(--wpdt-color-table-border);
 }
+
+/* Make diagnostic interpretation and next steps easier to scan. */
+.wpdt-issue-interpretation {
+    padding: 9px 11px;
+    border-left: 3px solid var(--wpdt-color-border-strong);
+    border-radius: 0 var(--wpdt-radius-sm) var(--wpdt-radius-sm) 0;
+    background: var(--wpdt-color-canvas);
+}
+
+.wpdt-issue-interpretation strong,
+.wpdt-check-interpretation strong {
+    color: var(--wpdt-color-ink);
+    font-weight: 650;
+}
+
+.wpdt-check-interpretation {
+    color: var(--wpdt-color-muted);
+    line-height: 1.55;
+}
+
+.wpdt-check-interpretation strong {
+    display: block;
+    margin-bottom: 3px;
+}
+
+.wpdt-check-recommendation,
+.wpdt-recommendation {
+    overflow-wrap: anywhere;
+}
+

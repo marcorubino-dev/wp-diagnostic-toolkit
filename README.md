@@ -1,6 +1,15 @@
+<div align="center">
+
 # WP Diagnostic Toolkit
 
-**A lightweight diagnostic toolkit for WordPress developers and small agencies.**
+**Evidence-driven, modular diagnostics for WordPress developers and small agencies.**
+
+<img src="https://img.shields.io/badge/Platform-WordPress-21759B?logo=wordpress&logoColor=white" alt="WordPress" />
+<img src="https://img.shields.io/badge/PHP-7.4%2B-777BB4?logo=php&logoColor=white" alt="PHP 7.4+" />
+<img src="https://img.shields.io/badge/License-GPL--2.0--or--later-2B7A4B" alt="GPL 2.0 or later" />
+<img src="https://img.shields.io/badge/Status-Active%20development-64748B" alt="Active development" />
+
+</div>
 
 WP Diagnostic Toolkit helps developers inspect a WordPress installation's environment, plugins, active theme, server configuration, filesystem capacity, HTTP/SSL behavior, and selected WooCommerce/multilingual integration signals from the WordPress admin dashboard.
 

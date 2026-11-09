@@ -1095,3 +1095,26 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     overflow-wrap: anywhere;
 }
 
+/* Direct navigation from a finding to its originating diagnostic module. */
+.wpdt-issue-module-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    color: var(--wpdt-color-primary);
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.wpdt-issue-module-link:hover {
+    color: var(--wpdt-color-primary-hover, var(--wpdt-color-primary));
+    text-decoration: underline;
+}
+
+.wpdt-issue-module-link:focus-visible {
+    border-radius: 3px;
+    outline: 2px solid var(--wpdt-color-primary);
+    outline-offset: 3px;
+}
+

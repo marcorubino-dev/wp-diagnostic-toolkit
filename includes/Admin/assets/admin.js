@@ -63,9 +63,12 @@
         label.appendChild(select);
         control.appendChild(label);
 
+        var settingsControl = root.querySelector('.wpdt-settings-appearance-control');
         var headerActions = header.querySelector('.wpdt-header-action');
 
-        if (headerActions) {
+        if (settingsControl) {
+            settingsControl.appendChild(control);
+        } else if (headerActions) {
             headerActions.appendChild(control);
         } else {
             header.appendChild(control);

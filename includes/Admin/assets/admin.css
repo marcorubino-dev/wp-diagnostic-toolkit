@@ -1118,3 +1118,64 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     outline-offset: 3px;
 }
 
+
+
+/* Dark theme table headings: override WordPress widefat header defaults. */
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table thead th,
+.wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat thead th {
+    border-bottom-color: var(--wpdt-color-border-strong);
+    background-color: #243d5d;
+    color: #dce8f8;
+}
+
+/* Settings */
+.wpdt-settings-card {
+    max-width: 760px;
+    padding: 24px;
+    border: 1px solid var(--wpdt-color-border);
+    border-radius: var(--wpdt-radius-lg);
+    background: var(--wpdt-color-surface);
+    box-shadow: var(--wpdt-shadow-card);
+}
+
+.wpdt-settings-card h2 {
+    margin: 0 0 8px;
+    color: var(--wpdt-color-ink);
+    font-size: 17px;
+    font-weight: 650;
+}
+
+.wpdt-settings-card p {
+    max-width: 620px;
+    margin: 0;
+    color: var(--wpdt-color-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.wpdt-settings-appearance-control {
+    margin-top: 18px;
+}
+
+.wpdt-settings-appearance-control .wpdt-theme-control {
+    margin: 0;
+}
+
+.wpdt-settings-appearance-control .wpdt-theme-control label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+@media screen and (max-width: 600px) {
+    .wpdt-settings-card {
+        padding: 18px;
+    }
+
+    .wpdt-settings-appearance-control .wpdt-theme-control,
+    .wpdt-settings-appearance-control .wpdt-theme-control label {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+}

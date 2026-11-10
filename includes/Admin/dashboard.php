@@ -96,6 +96,11 @@ foreach ($diagnostics as $diagnostic) {
             ? strtoupper(trim($check['status']))
             : 'UNCLASSIFIED';
         $report_lines[] = 'Status: ' . $report_status;
+
+        if (isset($check['outcome']) && is_string($check['outcome'])) {
+            $report_lines[] = 'Outcome: ' . strtoupper(trim($check['outcome']));
+        }
+
         $report_lines[] = 'Interpretation: ' . $check['description'];
 
         if (isset($check['value']) && $check['value'] !== '') {

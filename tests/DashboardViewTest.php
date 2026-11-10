@@ -138,6 +138,53 @@ wpdt_dashboard_check(
     'includes the normalized outcome in the copied full report'
 );
 
+$combined_output = wpdt_render_dashboard(array(
+    array(
+        'id' => 'plugins',
+        'name' => 'WordPress Plugins',
+        'results' => array(
+            array(
+                'name' => 'Plugin compatibility',
+                'status' => 'warning',
+                'description' => 'A plugin compatibility warning.',
+            ),
+            array(
+                'name' => 'Diagnostic execution error',
+                'status' => 'critical',
+                'outcome' => 'error',
+                'description' => 'The diagnostic failed while checking a plugin.',
+            ),
+            array(
+                'name' => 'Critical plugin issue',
+                'status' => 'critical',
+                'description' => 'A plugin issue requires immediate attention.',
+            ),
+        ),
+    ),
+));
+
+wpdt_dashboard_check(
+    strpos($combined_output, 'CRITICAL') !== false,
+    'keeps critical findings as the highest-priority global system status'
+);
+wpdt_dashboard_check(
+    strpos($combined_output, 'Warnings: 1') !== false
+        && strpos($combined_output, 'Diagnostic errors: 1') !== false
+        && strpos($combined_output, 'Critical: 1') !== false,
+    'keeps global warning, diagnostic-error, and critical counters mutually consistent'
+);
+wpdt_dashboard_check(
+    strpos($combined_output, '1 warnings') !== false
+        && strpos($combined_output, '1 diagnostic errors') !== false
+        && strpos($combined_output, '1 critical') !== false,
+    'keeps module-level counts aligned with global classification'
+);
+wpdt_dashboard_check(
+    strpos($combined_output, 'wpdt-issue-error') !== false
+        && strpos($combined_output, 'wpdt-issue-critical') !== false,
+    'renders execution errors and genuine critical findings with distinct issue styles'
+);
+
 $layout_output = wpdt_render_dashboard(array(
     array(
         'id' => 'environment',

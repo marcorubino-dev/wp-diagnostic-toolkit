@@ -91,7 +91,7 @@ The example is illustrative, not a claim about current runtime output or the cur
 
 Status semantics:
 
-- `completed`: the module ran to completion, even if one or more individual checks returned an `error) outcome.
+- `completed`: the module ran to completion, even if one or more individual checks returned an `error` outcome.
 - `error`: the module itself failed or returned an invalid module-level result.
 - `skipped`: the module was deliberately not executed because a documented prerequisite or policy prevented it.
 - `unavailable`: the requested module ID is not registered in this Toolkit version. The public API should normally return a `WP_Error` for unknown requested IDs rather than silently omit them.

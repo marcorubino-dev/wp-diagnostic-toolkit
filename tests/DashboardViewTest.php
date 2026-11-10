@@ -138,6 +138,26 @@ wpdt_dashboard_check(
     'includes the normalized outcome in the copied full report'
 );
 
+$layout_output = wpdt_render_dashboard(array(
+    array(
+        'id' => 'environment',
+        'name' => 'WordPress Environment',
+        'results' => array(
+            array(
+                'name' => 'PHP version',
+                'status' => 'warning',
+                'description' => 'The PHP version should be reviewed.',
+            ),
+        ),
+    ),
+));
+
+wpdt_dashboard_check(
+    strpos($layout_output, '<h2>Diagnostic Modules</h2>')
+        < strpos($layout_output, '<h2>Issues Requiring Attention</h2>'),
+    'places diagnostic modules before the issues section'
+);
+
 $arrow_output = wpdt_render_dashboard(array(
     array(
         'id' => 'environment',

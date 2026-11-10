@@ -44,6 +44,7 @@ jobs:
           php tests/PluginDiagnosticTest.php
           php tests/RuleResultTest.php
           php tests/DiagnosticManagerTest.php
+          php tests/DashboardViewTest.php
           php tests/ServerDiagnosticTest.php
           php tests/DiskSpaceDiagnosticTest.php
           php tests/HttpSslDiagnosticTest.php

@@ -77,12 +77,14 @@ Proposed states:
 
 `draft` → `validated` → `previewed` → `awaiting_confirmation` → `executing` → `completed`
 
-Terminal or exceptional states:
+Exceptional or terminal states:
 
-- `failed`
-- `verification_failed`
-- `cancelled`
-- `expired`
+- `failed`: execution did not complete successfully.
+- `verification_failed`: execution returned, but the required postcondition was not observed.
+- `cancelled`: the user or system cancelled before execution.
+- `expired`: the preview expired or its target fingerprint changed.
+
+A completed execution also stores a separate verification result: `verified` or `unknown`. Do not overload the lifecycle state with the verifier's three-valued result.
 
 Expected flow:
 
@@ -97,7 +99,7 @@ Expected flow:
 9. The executor uses the server-stored normalized arguments, not arguments resubmitted by the browser.
 10. The action executes once under an idempotency/concurrency guard.
 11. The result is persisted in the audit log.
-12. The verifier checks the postcondition and records `verified`, `failed`, or `unknown`.
+12. The verifier checks the postcondition. A confirmed postcondition produces `completed` with verification `verified`; an indeterminate postcondition produces `completed` with verification `unknown`; a disproven required postcondition produces `verification_failed`.
 
 A preview is not a reservation of the target's state. The target may change between preview and confirmation, so all relevant preconditions must be checked again immediately before execution.
 

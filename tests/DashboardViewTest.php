@@ -174,7 +174,7 @@ wpdt_dashboard_check(
     'keeps global warning, diagnostic-error, and critical counters mutually consistent'
 );
 wpdt_dashboard_check(
-    strpos($combined_output, '1 warnings') !== false
+    strpos($combined_output, '1 warning') !== false
         && strpos($combined_output, '1 diagnostic errors') !== false
         && strpos($combined_output, '1 critical') !== false,
     'keeps module-level counts aligned with global classification'

@@ -23,16 +23,20 @@ foreach ($diagnostics as $diagnostic) {
             ? strtolower(trim($check['outcome']))
             : '';
 
-        if ($status === 'pass') {
+        if ($outcome === 'error') {
+            $diagnostic_error_count++;
+
+            $issues[] = array(
+                'module'    => $diagnostic['name'],
+                'module_id' => isset($diagnostic['id']) ? $diagnostic['id'] : '',
+                'check'     => $check,
+            );
+        } elseif ($status === 'pass') {
             $pass_count++;
         } elseif ($status === 'info') {
             $info_count++;
         } elseif ($status === 'warning') {
-            if ($outcome === 'error') {
-                $diagnostic_error_count++;
-            } else {
-                $warning_count++;
-            }
+            $warning_count++;
 
             $issues[] = array(
                 'module'    => $diagnostic['name'],

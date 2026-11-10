@@ -7,6 +7,7 @@ $pass_count      = 0;
 $info_count      = 0;
 $warning_count   = 0;
 $critical_count  = 0;
+$diagnostic_error_count = 0;
 $unclassified_count = 0;
 $issues          = array();
 
@@ -18,12 +19,20 @@ foreach ($diagnostics as $diagnostic) {
             ? strtolower(trim($check['status']))
             : '';
 
+        $outcome = isset($check['outcome']) && is_string($check['outcome'])
+            ? strtolower(trim($check['outcome']))
+            : '';
+
         if ($status === 'pass') {
             $pass_count++;
         } elseif ($status === 'info') {
             $info_count++;
         } elseif ($status === 'warning') {
-            $warning_count++;
+            if ($outcome === 'error') {
+                $diagnostic_error_count++;
+            } else {
+                $warning_count++;
+            }
 
             $issues[] = array(
                 'module'    => $diagnostic['name'],
@@ -34,8 +43,9 @@ foreach ($diagnostics as $diagnostic) {
             $critical_count++;
 
             $issues[] = array(
-                'module' => $diagnostic['name'],
-                'check'  => $check,
+                'module'    => $diagnostic['name'],
+                'module_id' => isset($diagnostic['id']) ? $diagnostic['id'] : '',
+                'check'     => $check,
             );
         } else {
             $unclassified_count++;
@@ -43,9 +53,15 @@ foreach ($diagnostics as $diagnostic) {
     }
 }
 
-if ($critical_count > 0) {
+if ($total_checks === 0) {
+    $system_status = 'NO DATA';
+    $status_class  = 'empty';
+} elseif ($critical_count > 0) {
     $system_status = 'CRITICAL';
     $status_class  = 'critical';
+} elseif ($diagnostic_error_count > 0) {
+    $system_status = 'DIAGNOSTIC ERRORS';
+    $status_class  = 'error';
 } elseif ($warning_count > 0) {
     $system_status = 'NEEDS ATTENTION';
     $status_class  = 'warning';
@@ -64,6 +80,7 @@ $report_lines = array(
     'Passed: ' . $pass_count,
     'Info: ' . $info_count,
     'Warnings: ' . $warning_count,
+    'Diagnostic errors: ' . $diagnostic_error_count,
     'Critical: ' . $critical_count,
     'Unclassified: ' . $unclassified_count,
     '',
@@ -144,10 +161,14 @@ $module_pages = array(
                 <h2 class="wpdt-status wpdt-status-<?php echo esc_attr($status_class); ?>">
                     <?php if ($status_class === 'critical') : ?>
                         <span aria-hidden="true">✕</span>
+                    <?php elseif ($status_class === 'error') : ?>
+                        <span aria-hidden="true">!</span>
                     <?php elseif ($system_status === 'NEEDS REVIEW') : ?>
                         <span aria-hidden="true">?</span>
                     <?php elseif ($status_class === 'warning') : ?>
                         <span aria-hidden="true">⚠</span>
+                    <?php elseif ($status_class === 'empty') : ?>
+                        <span aria-hidden="true">—</span>
                     <?php else : ?>
                         <span aria-hidden="true">✓</span>
                     <?php endif; ?>
@@ -157,11 +178,22 @@ $module_pages = array(
 
                 <p class="wpdt-status-description">
                     <?php
-                    if ($critical_count > 0) {
+                    if ($total_checks === 0) {
+                        echo esc_html(
+                            'No diagnostic checks are available. Run diagnostics again after confirming that the diagnostic modules are registered.'
+                        );
+                    } elseif ($critical_count > 0) {
                         echo esc_html(
                             sprintf(
                                 '%d critical issue(s) require attention.',
                                 $critical_count
+                            )
+                        );
+                    } elseif ($diagnostic_error_count > 0) {
+                        echo esc_html(
+                            sprintf(
+                                '%d diagnostic error(s) occurred. Review the affected modules before trusting their results.',
+                                $diagnostic_error_count
                             )
                         );
                     } elseif ($warning_count > 0) {
@@ -210,6 +242,12 @@ $module_pages = array(
                     <span>warnings</span>
                 </div>
 
+                <div class="wpdt-summary-item wpdt-summary-error">
+                    <span class="wpdt-summary-icon" aria-hidden="true">!</span>
+                    <strong><?php echo esc_html($diagnostic_error_count); ?></strong>
+                    <span>diagnostic errors</span>
+                </div>
+
                 <div class="wpdt-summary-item wpdt-summary-critical">
                     <span class="wpdt-summary-icon" aria-hidden="true">✕</span>
                     <strong><?php echo esc_html($critical_count); ?></strong>
@@ -239,7 +277,7 @@ $module_pages = array(
             <div class="wpdt-section-header">
                 <div>
                     <h2>Issues Requiring Attention</h2>
-                    <p>Checks that returned a warning or critical status.</p>
+                    <p>Warnings, critical findings, and diagnostic execution errors that need review.</p>
                 </div>
             </div>
 
@@ -249,16 +287,30 @@ $module_pages = array(
 
                     <?php
                     $check = $issue['check'];
-                    $status = strtolower($check['status']);
+                    $status = isset($check['status']) && is_string($check['status'])
+                        ? strtolower(trim($check['status']))
+                        : 'warning';
+                    $outcome = isset($check['outcome']) && is_string($check['outcome'])
+                        ? strtolower(trim($check['outcome']))
+                        : '';
+                    $is_diagnostic_error = $outcome === 'error';
+                    $issue_class = $is_diagnostic_error
+                        ? 'wpdt-issue-error'
+                        : 'wpdt-issue-' . $status;
+                    $issue_label = $is_diagnostic_error
+                        ? 'DIAGNOSTIC ERROR'
+                        : strtoupper($status);
 
-                    if ($status === 'critical') {
+                    if ($is_diagnostic_error) {
+                        $icon = '!';
+                    } elseif ($status === 'critical') {
                         $icon = '✕';
                     } else {
                         $icon = '⚠';
                     }
                     ?>
 
-                    <div class="wpdt-issue wpdt-issue-<?php echo esc_attr($status); ?>">
+                    <div class="wpdt-issue <?php echo esc_attr($issue_class); ?>">
 
                         <div class="wpdt-issue-icon" aria-hidden="true">
                             <?php echo esc_html($icon); ?>
@@ -315,9 +367,10 @@ $module_pages = array(
                             <?php
                             $finding_lines = array(
                                 'Module: ' . $issue['module'],
-                                'Module ID: ' . $issue['module_id'],
+                                'Module ID: ' . (isset($issue['module_id']) ? $issue['module_id'] : ''),
                                 'Check: ' . $check['name'],
                                 'Status: ' . strtoupper($status),
+                                'Outcome: ' . ($outcome !== '' ? strtoupper($outcome) : 'LEGACY'),
                                 'Interpretation: ' . $check['description'],
                             );
 
@@ -345,7 +398,7 @@ $module_pages = array(
                         </div>
 
                         <div class="wpdt-issue-status">
-                            <?php echo esc_html(strtoupper($status)); ?>
+                            <?php echo esc_html($issue_label); ?>
                         </div>
 
                     </div>
@@ -376,8 +429,9 @@ $module_pages = array(
                     'pass'          => 0,
                     'info'          => 0,
                     'warning'       => 0,
-                    'critical'      => 0,
-                    'unclassified'  => 0,
+                    'critical'         => 0,
+                    'diagnostic_error' => 0,
+                    'unclassified'     => 0,
                 );
 
                 foreach ($diagnostic['results'] as $module_check) {
@@ -385,7 +439,13 @@ $module_pages = array(
                         ? strtolower(trim($module_check['status']))
                         : '';
 
-                    if (isset($module_counts[$module_check_status])) {
+                    $module_check_outcome = isset($module_check['outcome']) && is_string($module_check['outcome'])
+                        ? strtolower(trim($module_check['outcome']))
+                        : '';
+
+                    if ($module_check_outcome === 'error') {
+                        $module_counts['diagnostic_error']++;
+                    } elseif (isset($module_counts[$module_check_status])) {
                         $module_counts[$module_check_status]++;
                     } else {
                         $module_counts['unclassified']++;
@@ -398,6 +458,10 @@ $module_pages = array(
                     $module_status_class = 'critical';
                     $module_status_label = 'Critical';
                     $module_status_icon  = '✕';
+                } elseif ($module_counts['diagnostic_error'] > 0) {
+                    $module_status_class = 'error';
+                    $module_status_label = 'Diagnostic error';
+                    $module_status_icon  = '!';
                 } elseif ($module_counts['warning'] > 0) {
                     $module_status_class = 'warning';
                     $module_status_label = 'Needs attention';
@@ -422,9 +486,12 @@ $module_pages = array(
                     $module_summary_parts[] = $module_total . ' checks';
                 }
 
-                foreach (array('pass', 'info', 'warning', 'critical', 'unclassified') as $count_key) {
+                foreach (array('pass', 'info', 'warning', 'diagnostic_error', 'critical', 'unclassified') as $count_key) {
                     if ($module_counts[$count_key] > 0) {
-                        $module_summary_parts[] = $module_counts[$count_key] . ' ' . $count_key;
+                        $summary_label = $count_key === 'diagnostic_error'
+                            ? 'diagnostic errors'
+                            : $count_key;
+                        $module_summary_parts[] = $module_counts[$count_key] . ' ' . $summary_label;
                     }
                 }
 

@@ -22,12 +22,6 @@ This document describes a target contract. It does not claim that the public fun
 
 ## 3. Proposed public entry point
 
-The proposed public API is:
-
-```php
-wpdt_get_diagnostic_snapshot( $args = array() );
-```
-
 The function will be guarded by `function_exists()` and documented as the supported integration entry point. Its implementation must be added only after the contract and tests are approved.
 
 The proposed entry point requires an explicit, non-empty list of module IDs:
@@ -86,7 +80,7 @@ The example is illustrative, not a claim about current runtime output or the cur
 
 ### Module fields
 
-- `status`: `completed`, `error`, `skipped`, or `unavailable`.
+- `status`: `completed`, `error`, or `skipped`.
 - `findings`: list of normalized findings. An empty list is valid and does not, by itself, mean that execution failed.
 
 Status semantics:
@@ -94,8 +88,6 @@ Status semantics:
 - `completed`: the module ran to completion, even if one or more individual checks returned an `error` outcome.
 - `error`: the module itself failed or returned an invalid module-level result.
 - `skipped`: the module was deliberately not executed because a documented prerequisite or policy prevented it.
-- `unavailable`: the requested module ID is not registered in this Toolkit version. The public API should normally return a `WP_Error` for unknown requested IDs rather than silently omit them.
-
 ### Finding fields
 
 | Field | Type | Contract |
@@ -133,7 +125,7 @@ Requirements:
 3. Do not execute unrequested modules as a side effect of rendering a single-module screen or fulfilling an integration request.
 4. Reject or explicitly report unknown IDs.
 5. Apply bounded execution and safe error handling to modules that perform HTTP or filesystem checks.
-6. Do not let caller-supplied context or module IDs bypass WordPress capability checks in the consumer's own UI.
+6. Module selection is not authorization. The consumer must enforce its own WordPress capability checks before calling the API.
 
 The public API is not a permission system. A consuming plugin must authorize its own user-facing operation independently.
 

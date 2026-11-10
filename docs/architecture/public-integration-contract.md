@@ -30,14 +30,17 @@ wpdt_get_diagnostic_snapshot( $args = array() );
 
 The function will be guarded by `function_exists()` and documented as the supported integration entry point. Its implementation must be added only after the contract and tests are approved.
 
-Proposed arguments:
+The proposed entry point requires an explicit, non-empty list of module IDs:
 
-| Argument | Type | Meaning |
-| --- | --- | --- |
-| `module_ids` | `string[]|null` | Explicit module IDs to execute. `null` may mean all modules only for a trusted first-party admin request; integrations should pass an explicit list. |
-| `context` | `string` | Optional caller context for diagnostics and audit-free tracing. It must not grant permissions or alter diagnostic behavior. |
+```php
+wpdt_get_diagnostic_snapshot( array $module_ids );
+```
 
-Unknown module IDs must be reported as unavailable or rejected consistently; they must not silently broaden the request to all modules.
+There is deliberately no "all modules" default on the public integration boundary. The Toolkit may retain an internal all-modules operation for its own dashboard, but external consumers must request only the modules they need.
+
+- Every item must be a valid registered module ID.
+- An empty list, malformed ID, or unknown module ID returns a `WP_Error`; it must never broaden the request.
+- The API does not accept caller context, capabilities, or arbitrary execution options. Those concerns belong to the calling plugin and its own authorization layer.
 
 The implementation should return a `WP_Error` for invalid arguments or an unavailable API condition, and an array for a successful snapshot. It must not throw implementation exceptions across the public boundary.
 
@@ -76,7 +79,7 @@ The example is illustrative, not a claim about current runtime output or the cur
 
 ### Top-level fields
 
-- `contract_version`: semantic version of this public data contract.
+- `contract_version`: semantic version of this public data contract, matching the public constant `WPDT_PUBLIC_API_VERSION` exposed by the Toolkit.
 - `toolkit_version`: installed WPDT release version.
 - `generated_at`: ISO 8601 timestamp with timezone.
 - `modules`: map keyed by stable module ID.
@@ -85,6 +88,13 @@ The example is illustrative, not a claim about current runtime output or the cur
 
 - `status`: `completed`, `error`, `skipped`, or `unavailable`.
 - `findings`: list of normalized findings. An empty list is valid and does not, by itself, mean that execution failed.
+
+Status semantics:
+
+- `completed`: the module ran to completion, even if one or more individual checks returned an `error) outcome.
+- `error`: the module itself failed or returned an invalid module-level result.
+- `skipped`: the module was deliberately not executed because a documented prerequisite or policy prevented it.
+- `unavailable`: the requested module ID is not registered in this Toolkit version. The public API should normally return a `WP_Error` for unknown requested IDs rather than silently omit them.
 
 ### Finding fields
 
@@ -114,7 +124,7 @@ Module status describes execution of the module; finding outcome describes an in
 
 ## 6. Selective execution and resource boundaries
 
-The current manager exposes `run_all()`. A future implementation must add a selective execution path (for example, `run_selected( array $module_ids )`) before this public API is offered to other plugins.
+The current manager exposes `run_all()`, which returns presenter-compatible data rather than a public integration payload. A future implementation must add a selective execution path (for example, `run_selected( array $module_ids )`) that returns normalized module results before the public projection is built. The public function must not call `run_all()` and then discard unrequested modules: that would still execute their checks and could trigger unnecessary HTTP or filesystem work.
 
 Requirements:
 
@@ -161,9 +171,10 @@ A companion plugin may detect WPDT with `function_exists( 'wpdt_get_diagnostic_s
 ## 10. Implementation sequence
 
 1. Approve this contract and freeze the v1 field semantics.
-2. Add and test selective module execution in WPDT.
-3. Add the public projection and version constant/function.
-4. Add contract-level tests and documentation examples.
-5. Only then implement the companion adapter.
+2. Define and document the supported minimum WordPress version for the public API.
+3. Add and test selective module execution in WPDT.
+4. Add the public projection, `WPDT_PUBLIC_API_VERSION` constant, and function.
+5. Add contract-level tests and documentation examples.
+6. Only then implement the companion adapter.
 
 Until these steps are complete, integrations must treat the API as a design proposal, not a callable interface.

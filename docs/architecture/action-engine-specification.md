@@ -140,6 +140,8 @@ Before execution, recompute the target fingerprint and revalidate preconditions.
 ### Input and SQL safety
 
 - Validate exact argument types, lengths, allowed values, and target identity.
+- Define the minimum supported WordPress version before implementation. The current Toolkit documents a PHP minimum but does not yet declare a WordPress minimum; the companion must not assume that every helper or function signature is available on every supported installation.
+- Isolate WordPress-version differences behind tested adapters. In particular, verify the availability and supported parameters of the cron inspection and unscheduling APIs before choosing the implementation path.
 - Use WordPress APIs for WordPress-managed data whenever available.
 - Use `$wpdb->prepare()` for SQL when SQL is necessary.
 - Never accept SQL fragments, table names, or arbitrary hook names from an untrusted request without strict registry/schema validation.
@@ -182,7 +184,7 @@ A successful return from a WordPress API is not always proof that the desired ex
 
 ### 8.1 Delete one transient
 
-The action accepts an exact transient key and an explicit transient scope (site transient or regular transient). It must not accept wildcard patterns or a “delete all” mode.
+The action accepts an exact transient key and an explicit transient scope (site transient or regular transient). It must not accept wildcard patterns or a “delete all” mode. Validate the key as a bounded string, reject empty values and control characters, and do not silently normalize two different keys into the same target. The exact normalized key must be bound to the preview fingerprint.
 
 Preview:
 
@@ -212,11 +214,14 @@ The action identifies one exact event using:
 - Exact normalized argument set.
 - Site/blog scope.
 
+Cron arguments are part of event identity, not merely display metadata. The implementation must preserve their PHP types and array structure. For the MVP, accept only bounded, recursively nested arrays of scalar/null values; reject objects, resources, closures, and unsupported values. Do not reorder associative keys or coerce numeric strings to integers, because that can change the serialized argument identity used by WordPress. Store a safe summary for display and a server-side representation for execution; never place the full argument payload in the audit log.
+
 Preview must display the hook, timestamp, and safe argument summary. It must not infer that an event is orphaned solely because a callback is not currently visible; callbacks may be registered dynamically.
 
 Execution:
 
-- Use `wp_unschedule_event( $timestamp, $hook, $args, true )` and handle its return or `WP_Error` according to the supported WordPress version.
+- Use `wp_unschedule_event()` with the exact timestamp, hook, and argument array. Pass optional parameters such as the `$wp_error` flag only when supported by the minimum WordPress version established for the companion.
+- Treat a false return, `WP_Error`, and an already-missing event as distinct outcomes; never interpret a failed lookup as permission to unschedule a different event.
 - Do not use a broad hook-clearing operation in the MVP.
 - Revalidate that the exact event still exists and matches the preview immediately before unscheduling.
 - If the event changed or disappeared, expire the preview or record a no-op; do not unschedule a different matching event.
@@ -229,6 +234,7 @@ Verification:
 ## 9. WordPress compatibility and platform boundaries
 
 - Maintain PHP 7.4 compatibility in the first release.
+- Declare and test an explicit minimum WordPress version before implementing the cron action.
 - Use documented WordPress APIs where available and isolate version-dependent behavior behind adapters.
 - Operate only on the current site/blog in the MVP.
 - Multisite network-wide operations require a separate design, explicit network capability checks, and dedicated tests.

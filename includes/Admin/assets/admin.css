@@ -1080,6 +1080,7 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
 @media (prefers-reduced-motion: reduce) {
     .wpdt-summary-item,
     .wpdt-header-action .button,
+    .wpdt-module-arrow,
     .wpdt-copy-button {
         transition: none;
     }

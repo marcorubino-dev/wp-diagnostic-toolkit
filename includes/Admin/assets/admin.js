@@ -37,31 +37,71 @@
         var control = document.createElement('div');
         control.className = 'wpdt-theme-control';
 
-        var label = document.createElement('label');
+        var label = document.createElement('span');
+        label.className = 'wpdt-theme-label';
         label.textContent = 'Appearance';
 
-        var select = document.createElement('select');
-        select.className = 'wpdt-theme-select';
-        select.setAttribute('aria-label', 'Choose plugin appearance');
+        var options = document.createElement('div');
+        options.className = 'wpdt-theme-options';
+        options.setAttribute('role', 'group');
+        options.setAttribute('aria-label', 'Choose plugin appearance');
 
-        [
-            { value: 'system', label: 'System' },
-            { value: 'light', label: 'Light' },
-            { value: 'dark', label: 'Dark' }
-        ].forEach(function (optionData) {
-            var option = document.createElement('option');
-            option.value = optionData.value;
-            option.textContent = optionData.label;
-            select.appendChild(option);
-        });
+        var themeOptions = [
+            {
+                value: 'system',
+                label: 'System',
+                icon: '<rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8m-4-4v4"></path>'
+            },
+            {
+                value: 'light',
+                label: 'Light',
+                icon: '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>'
+            },
+            {
+                value: 'dark',
+                label: 'Dark',
+                icon: '<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5Z"></path>'
+            }
+        ];
 
         var currentTheme = getSavedTheme();
         var activeTheme = currentTheme;
-        select.value = currentTheme;
-        applyTheme(currentTheme, root);
 
-        label.appendChild(select);
+        themeOptions.forEach(function (optionData) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'wpdt-theme-option';
+            button.setAttribute('data-theme-option', optionData.value);
+            button.setAttribute('aria-label', optionData.label);
+            button.setAttribute('title', optionData.label);
+            button.setAttribute('aria-pressed', optionData.value === currentTheme ? 'true' : 'false');
+
+            var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            icon.setAttribute('viewBox', '0 0 24 24');
+            icon.setAttribute('aria-hidden', 'true');
+            icon.setAttribute('focusable', 'false');
+            icon.innerHTML = optionData.icon;
+
+            button.appendChild(icon);
+            button.addEventListener('click', function () {
+                activeTheme = optionData.value;
+
+                try {
+                    window.localStorage.setItem(themeStorageKey, activeTheme);
+                } catch (error) {
+                    // The selected theme still applies for the current page.
+                }
+
+                updateThemeButtons(options, activeTheme);
+                applyTheme(activeTheme, root);
+            });
+
+            options.appendChild(button);
+        });
+
         control.appendChild(label);
+        control.appendChild(options);
+        applyTheme(currentTheme, root);
 
         var settingsControl = root.querySelector('.wpdt-settings-appearance-control');
         var headerActions = header.querySelector('.wpdt-header-action');
@@ -73,22 +113,6 @@
         } else {
             header.appendChild(control);
         }
-
-        select.addEventListener('change', function () {
-            var selectedTheme = allowedThemes.indexOf(select.value) !== -1
-                ? select.value
-                : 'system';
-
-            activeTheme = selectedTheme;
-
-            try {
-                window.localStorage.setItem(themeStorageKey, selectedTheme);
-            } catch (error) {
-                // The selected theme still applies for the current page.
-            }
-
-            applyTheme(selectedTheme, root);
-        });
 
         if (window.matchMedia) {
             var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -104,6 +128,15 @@
                 colorScheme.addListener(handleSystemChange);
             }
         }
+    }
+
+    function updateThemeButtons(container, activeTheme) {
+        container.querySelectorAll('[data-theme-option]').forEach(function (button) {
+            button.setAttribute(
+                'aria-pressed',
+                button.getAttribute('data-theme-option') === activeTheme ? 'true' : 'false'
+            );
+        });
     }
 
     function fallbackCopy(text) {

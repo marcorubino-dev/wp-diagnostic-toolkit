@@ -34,6 +34,7 @@
     --wpdt-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 5px 18px rgba(15, 23, 42, 0.035);
     box-sizing: border-box;
     max-width: 1280px;
+    margin-inline: auto;
     min-height: calc(100vh - 32px);
     padding-top: 20px;
     background-color: var(--wpdt-color-canvas);
@@ -140,7 +141,9 @@
 
 .wpdt-status-pass { color: var(--wpdt-color-success); }
 .wpdt-status-warning { color: var(--wpdt-color-warning); }
+.wpdt-status-error { color: var(--wpdt-color-critical); }
 .wpdt-status-critical { color: var(--wpdt-color-critical); }
+.wpdt-status-empty { color: var(--wpdt-color-muted); }
 
 .wpdt-status-description {
     max-width: 480px;
@@ -209,6 +212,7 @@
 .wpdt-summary-pass .wpdt-summary-icon { color: var(--wpdt-color-success); }
 .wpdt-summary-info .wpdt-summary-icon { color: var(--wpdt-color-info); }
 .wpdt-summary-warning .wpdt-summary-icon { color: var(--wpdt-color-warning); }
+.wpdt-summary-error .wpdt-summary-icon { color: var(--wpdt-color-critical); }
 .wpdt-summary-critical .wpdt-summary-icon { color: var(--wpdt-color-critical); }
 
 /* Content sections */
@@ -247,9 +251,10 @@
 /* Findings */
 
 .wpdt-issues {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 14px;
 }
 
 .wpdt-issue {
@@ -260,7 +265,8 @@
     border-left: 4px solid var(--wpdt-color-warning-accent);
 }
 
-.wpdt-issue-critical {
+.wpdt-issue-critical,
+.wpdt-issue-error {
     border-left-color: var(--wpdt-color-critical);
 }
 
@@ -272,7 +278,8 @@
     line-height: 1.4;
 }
 
-.wpdt-issue-critical .wpdt-issue-icon {
+.wpdt-issue-critical .wpdt-issue-icon,
+.wpdt-issue-error .wpdt-issue-icon {
     color: var(--wpdt-color-critical);
 }
 
@@ -354,7 +361,8 @@
     line-height: 1.4;
 }
 
-.wpdt-issue-critical .wpdt-issue-status {
+.wpdt-issue-critical .wpdt-issue-status,
+.wpdt-issue-error .wpdt-issue-status {
     background: var(--wpdt-color-critical-bg);
     color: var(--wpdt-color-critical);
 }
@@ -363,46 +371,78 @@
 
 .wpdt-modules {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 18px;
 }
 
 .wpdt-module {
+    position: relative;
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    min-height: 88px;
-    padding: 19px;
+    min-width: 0;
+    min-height: 112px;
+    padding: 20px 42px 20px 20px;
     transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
 .wpdt-module:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     border-color: var(--wpdt-color-border-strong);
-    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.07);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.09);
 }
 
 .wpdt-module-icon {
     display: flex;
-    width: 30px;
-    height: 30px;
-    flex: 0 0 30px;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--wpdt-color-success-border);
-    border-radius: 9px;
+    border-radius: 10px;
     background: var(--wpdt-color-success-bg);
     color: var(--wpdt-color-success);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
+}
+
+.wpdt-module-warning .wpdt-module-icon,
+.wpdt-module-review .wpdt-module-icon {
+    border-color: var(--wpdt-color-warning-bg);
+    background: var(--wpdt-color-warning-bg);
+    color: var(--wpdt-color-warning);
+}
+
+.wpdt-module-critical .wpdt-module-icon,
+.wpdt-module-error .wpdt-module-icon {
+    border-color: var(--wpdt-color-critical-bg);
+    background: var(--wpdt-color-critical-bg);
+    color: var(--wpdt-color-critical);
+}
+
+.wpdt-module-empty .wpdt-module-icon {
+    border-color: var(--wpdt-color-border);
+    background: var(--wpdt-color-canvas);
+    color: var(--wpdt-color-muted);
 }
 
 .wpdt-module-content {
     min-width: 0;
+    flex: 1;
+}
+
+.wpdt-module-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin: 1px 0 8px;
 }
 
 .wpdt-module-content h3 {
-    margin: 1px 0 5px;
+    margin: 0;
     color: var(--wpdt-color-ink);
     font-size: 14px;
     font-weight: 650;
@@ -412,8 +452,60 @@
 .wpdt-module-content p {
     margin: 0;
     color: var(--wpdt-color-muted);
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 11px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.wpdt-module-status {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border: 1px solid var(--wpdt-color-success-border);
+    border-radius: 999px;
+    background: var(--wpdt-color-success-bg);
+    color: var(--wpdt-color-success);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.wpdt-module-status-warning,
+.wpdt-module-status-review {
+    border-color: var(--wpdt-color-warning-bg);
+    background: var(--wpdt-color-warning-bg);
+    color: var(--wpdt-color-warning);
+}
+
+.wpdt-module-status-critical,
+.wpdt-module-status-error {
+    border-color: var(--wpdt-color-critical-bg);
+    background: var(--wpdt-color-critical-bg);
+    color: var(--wpdt-color-critical);
+}
+
+.wpdt-module-status-empty {
+    border-color: var(--wpdt-color-border);
+    background: var(--wpdt-color-canvas);
+    color: var(--wpdt-color-muted);
+}
+
+.wpdt-module-arrow {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    color: var(--wpdt-color-subtle);
+    font-size: 18px;
+    line-height: 1;
+    transform: translateY(-50%);
+    transition: color 140ms ease, transform 140ms ease;
+}
+
+.wpdt-admin a.wpdt-module:hover .wpdt-module-arrow {
+    color: var(--wpdt-color-primary);
+    transform: translate(3px, -50%);
 }
 
 /* Diagnostic tables */
@@ -668,7 +760,6 @@
     }
 }
 
-
 /* Product identity and theme preference control */
 
 .wpdt-header {
@@ -683,34 +774,6 @@
 .wpdt-header h1 {
     font-size: 28px;
     letter-spacing: -0.035em;
-}
-
-.wpdt-theme-control {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    margin-left: 16px;
-}
-
-.wpdt-theme-control label {
-    color: var(--wpdt-color-muted);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.wpdt-theme-select {
-    min-height: 38px;
-    padding: 4px 32px 4px 12px;
-    border: 1px solid var(--wpdt-color-border-strong);
-    border-radius: 9px;
-    background-color: var(--wpdt-color-surface);
-    color: var(--wpdt-color-ink);
-    font-size: 12px;
-}
-
-.wpdt-theme-select:focus-visible {
-    outline: 2px solid var(--wpdt-color-primary);
-    outline-offset: 2px;
 }
 
 /* Dark theme tokens. System resolves through data-theme-resolved in admin.js. */
@@ -761,23 +824,7 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
         padding: 16px;
     }
 
-    .wpdt-theme-control {
-        margin: 0;
-    }
 }
-
-@media screen and (max-width: 600px) {
-    .wpdt-theme-control {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .wpdt-theme-select {
-        flex: 1;
-        max-width: 180px;
-    }
-}
-
 
 /* Diagnostic module navigation */
 .wpdt-admin a.wpdt-module {
@@ -804,7 +851,6 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
         transform: none;
     }
 }
-
 
 /* -------------------------------------------------------------
    Visual refinement — dashboard and diagnostic navigation
@@ -907,27 +953,10 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     padding-right: 42px;
 }
 
-.wpdt-admin a.wpdt-module::after {
-    position: absolute;
-    top: 50%;
-    right: 18px;
-    color: var(--wpdt-color-subtle);
-    content: "→";
-    font-size: 17px;
-    line-height: 1;
-    transform: translateY(-50%);
-    transition: color 140ms ease, transform 140ms ease;
-}
-
 .wpdt-admin a.wpdt-module:hover {
     transform: translateY(-2px);
     border-color: var(--wpdt-color-primary);
     box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
-}
-
-.wpdt-admin a.wpdt-module:hover::after {
-    color: var(--wpdt-color-primary);
-    transform: translate(3px, -50%);
 }
 
 .wpdt-module-icon {
@@ -1007,7 +1036,7 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
 @media (prefers-reduced-motion: reduce) {
     .wpdt-summary-item,
     .wpdt-header-action .button,
-    .wpdt-admin a.wpdt-module::after,
+    .wpdt-module-arrow,
     .wpdt-copy-button {
         transition: none;
     }
@@ -1018,7 +1047,6 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
         transform: none;
     }
 }
-
 
 /* Dark-mode contrast corrections for WordPress controls and striped tables. */
 .wpdt-admin[data-theme-resolved="dark"] .wpdt-header-action .button-primary {
@@ -1118,8 +1146,6 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     outline-offset: 3px;
 }
 
-
-
 /* Dark theme table headings: override WordPress widefat header defaults. */
 .wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table thead th,
 .wpdt-admin[data-theme-resolved="dark"] .wpdt-module-table .widefat thead th {
@@ -1128,54 +1154,105 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     color: #dce8f8;
 }
 
-/* Settings */
-.wpdt-settings-card {
-    max-width: 760px;
-    padding: 24px;
-    border: 1px solid var(--wpdt-color-border);
-    border-radius: var(--wpdt-radius-lg);
-    background: var(--wpdt-color-surface);
-    box-shadow: var(--wpdt-shadow-card);
+/* Dashboard issue grid: responsive two- and three-column layouts. */
+@media screen and (min-width: 1440px) {
+    .wpdt-issues {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
-.wpdt-settings-card h2 {
-    margin: 0 0 8px;
-    color: var(--wpdt-color-ink);
-    font-size: 17px;
-    font-weight: 650;
+@media screen and (max-width: 782px) {
+    .wpdt-issues {
+        grid-template-columns: 1fr;
+    }
 }
 
-.wpdt-settings-card p {
-    max-width: 620px;
-    margin: 0;
+/* Compact theme preference control. */
+.wpdt-theme-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 0 10px;
+}
+
+.wpdt-theme-label {
     color: var(--wpdt-color-muted);
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.wpdt-theme-options {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid var(--wpdt-color-border);
+    border-radius: 999px;
+    background: var(--wpdt-color-canvas);
+}
+
+.wpdt-theme-option {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--wpdt-color-muted);
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.wpdt-theme-option:hover {
+    background: var(--wpdt-color-surface);
+    color: var(--wpdt-color-ink);
+}
+
+.wpdt-theme-option[aria-pressed="true"] {
+    background: var(--wpdt-color-surface);
+    color: var(--wpdt-color-primary);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+}
+
+.wpdt-theme-option:focus-visible {
+    outline: 2px solid var(--wpdt-color-primary);
+    outline-offset: 2px;
+}
+
+.wpdt-theme-option svg {
+    display: block;
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .wpdt-settings-appearance-control {
-    margin-top: 18px;
+    margin: 0;
 }
 
 .wpdt-settings-appearance-control .wpdt-theme-control {
     margin: 0;
 }
 
-.wpdt-settings-appearance-control .wpdt-theme-control label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.wpdt-settings-appearance-control .wpdt-theme-label {
+    display: none;
 }
 
-@media screen and (max-width: 600px) {
-    .wpdt-settings-card {
-        padding: 18px;
+@media screen and (max-width: 782px) {
+    .wpdt-theme-control {
+        margin-left: 0;
     }
+}
 
-    .wpdt-settings-appearance-control .wpdt-theme-control,
-    .wpdt-settings-appearance-control .wpdt-theme-control label {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 8px;
+@media (prefers-reduced-motion: reduce) {
+    .wpdt-theme-option {
+        transition: none;
     }
 }

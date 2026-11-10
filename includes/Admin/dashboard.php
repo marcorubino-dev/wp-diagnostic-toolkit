@@ -275,6 +275,135 @@ $module_pages = array(
 
     </div>
 
+    <section class="wpdt-section">
+
+        <div class="wpdt-section-header">
+            <div>
+                <h2>Diagnostic Modules</h2>
+                <p>Available diagnostic areas.</p>
+            </div>
+        </div>
+
+        <div class="wpdt-modules">
+
+            <?php foreach ($diagnostics as $diagnostic) : ?>
+
+                <?php
+                $module_counts = array(
+                    'pass'          => 0,
+                    'info'          => 0,
+                    'warning'       => 0,
+                    'critical'         => 0,
+                    'diagnostic_error' => 0,
+                    'unclassified'     => 0,
+                );
+
+                foreach ($diagnostic['results'] as $module_check) {
+                    $module_check_status = isset($module_check['status']) && is_string($module_check['status'])
+                        ? strtolower(trim($module_check['status']))
+                        : '';
+
+                    $module_check_outcome = isset($module_check['outcome']) && is_string($module_check['outcome'])
+                        ? strtolower(trim($module_check['outcome']))
+                        : '';
+
+                    if ($module_check_outcome === 'error') {
+                        $module_counts['diagnostic_error']++;
+                    } elseif (isset($module_counts[$module_check_status])) {
+                        $module_counts[$module_check_status]++;
+                    } else {
+                        $module_counts['unclassified']++;
+                    }
+                }
+
+                $module_total = count($diagnostic['results']);
+
+                if ($module_counts['critical'] > 0) {
+                    $module_status_class = 'critical';
+                    $module_status_label = 'Critical';
+                    $module_status_icon  = '✕';
+                } elseif ($module_counts['diagnostic_error'] > 0) {
+                    $module_status_class = 'error';
+                    $module_status_label = 'Diagnostic error';
+                    $module_status_icon  = '!';
+                } elseif ($module_counts['warning'] > 0) {
+                    $module_status_class = 'warning';
+                    $module_status_label = 'Needs attention';
+                    $module_status_icon  = '⚠';
+                } elseif ($module_counts['unclassified'] > 0) {
+                    $module_status_class = 'review';
+                    $module_status_label = 'Needs review';
+                    $module_status_icon  = '?';
+                } elseif ($module_total > 0) {
+                    $module_status_class = 'pass';
+                    $module_status_label = 'No warnings';
+                    $module_status_icon  = '✓';
+                } else {
+                    $module_status_class = 'empty';
+                    $module_status_label = 'No checks';
+                    $module_status_icon  = '—';
+                }
+
+                $module_summary_parts = array();
+
+                if ($module_total > 0) {
+                    $module_summary_parts[] = $module_total . ' checks';
+                }
+
+                foreach (array('pass', 'info', 'warning', 'diagnostic_error', 'critical', 'unclassified') as $count_key) {
+                    if ($module_counts[$count_key] > 0) {
+                        $summary_label = $count_key === 'diagnostic_error'
+                            ? 'diagnostic errors'
+                            : $count_key;
+                        $module_summary_parts[] = $module_counts[$count_key] . ' ' . $summary_label;
+                    }
+                }
+
+                $module_summary = ! empty($module_summary_parts)
+                    ? implode(' · ', $module_summary_parts)
+                    : 'No diagnostic checks available';
+                ?>
+
+                <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
+                    <a class="wpdt-module wpdt-module-<?php echo esc_attr($module_status_class); ?>" href="<?php echo esc_url(admin_url('admin.php?page=' . $module_pages[$diagnostic['id']])); ?>">
+                <?php else : ?>
+                    <div class="wpdt-module wpdt-module-<?php echo esc_attr($module_status_class); ?>">
+                <?php endif; ?>
+
+                    <div class="wpdt-module-icon" aria-hidden="true">
+                        <?php echo esc_html($module_status_icon); ?>
+                    </div>
+
+                    <div class="wpdt-module-content">
+
+                        <div class="wpdt-module-heading">
+                            <h3><?php echo esc_html($diagnostic['name']); ?></h3>
+                            <span class="wpdt-module-status wpdt-module-status-<?php echo esc_attr($module_status_class); ?>">
+                                <?php echo esc_html($module_status_label); ?>
+                            </span>
+                        </div>
+
+                        <p><?php echo esc_html($module_summary); ?></p>
+
+                    </div>
+
+                    <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
+                        <span class="wpdt-module-arrow" aria-hidden="true">→</span>
+                    <?php endif; ?>
+
+                <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
+                    </a>
+                <?php else : ?>
+                    </div>
+                <?php endif; ?>
+
+            <?php endforeach; ?>
+
+        </div>
+
+    </section>
+
+
     <?php if (! empty($issues)) : ?>
 
         <section class="wpdt-section">
@@ -415,133 +544,4 @@ $module_pages = array(
         </section>
 
     <?php endif; ?>
-
-    <section class="wpdt-section">
-
-        <div class="wpdt-section-header">
-            <div>
-                <h2>Diagnostic Modules</h2>
-                <p>Available diagnostic areas.</p>
-            </div>
-        </div>
-
-        <div class="wpdt-modules">
-
-            <?php foreach ($diagnostics as $diagnostic) : ?>
-
-                <?php
-                $module_counts = array(
-                    'pass'          => 0,
-                    'info'          => 0,
-                    'warning'       => 0,
-                    'critical'         => 0,
-                    'diagnostic_error' => 0,
-                    'unclassified'     => 0,
-                );
-
-                foreach ($diagnostic['results'] as $module_check) {
-                    $module_check_status = isset($module_check['status']) && is_string($module_check['status'])
-                        ? strtolower(trim($module_check['status']))
-                        : '';
-
-                    $module_check_outcome = isset($module_check['outcome']) && is_string($module_check['outcome'])
-                        ? strtolower(trim($module_check['outcome']))
-                        : '';
-
-                    if ($module_check_outcome === 'error') {
-                        $module_counts['diagnostic_error']++;
-                    } elseif (isset($module_counts[$module_check_status])) {
-                        $module_counts[$module_check_status]++;
-                    } else {
-                        $module_counts['unclassified']++;
-                    }
-                }
-
-                $module_total = count($diagnostic['results']);
-
-                if ($module_counts['critical'] > 0) {
-                    $module_status_class = 'critical';
-                    $module_status_label = 'Critical';
-                    $module_status_icon  = '✕';
-                } elseif ($module_counts['diagnostic_error'] > 0) {
-                    $module_status_class = 'error';
-                    $module_status_label = 'Diagnostic error';
-                    $module_status_icon  = '!';
-                } elseif ($module_counts['warning'] > 0) {
-                    $module_status_class = 'warning';
-                    $module_status_label = 'Needs attention';
-                    $module_status_icon  = '⚠';
-                } elseif ($module_counts['unclassified'] > 0) {
-                    $module_status_class = 'review';
-                    $module_status_label = 'Needs review';
-                    $module_status_icon  = '?';
-                } elseif ($module_total > 0) {
-                    $module_status_class = 'pass';
-                    $module_status_label = 'No warnings';
-                    $module_status_icon  = '✓';
-                } else {
-                    $module_status_class = 'empty';
-                    $module_status_label = 'No checks';
-                    $module_status_icon  = '—';
-                }
-
-                $module_summary_parts = array();
-
-                if ($module_total > 0) {
-                    $module_summary_parts[] = $module_total . ' checks';
-                }
-
-                foreach (array('pass', 'info', 'warning', 'diagnostic_error', 'critical', 'unclassified') as $count_key) {
-                    if ($module_counts[$count_key] > 0) {
-                        $summary_label = $count_key === 'diagnostic_error'
-                            ? 'diagnostic errors'
-                            : $count_key;
-                        $module_summary_parts[] = $module_counts[$count_key] . ' ' . $summary_label;
-                    }
-                }
-
-                $module_summary = ! empty($module_summary_parts)
-                    ? implode(' · ', $module_summary_parts)
-                    : 'No diagnostic checks available';
-                ?>
-
-                <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
-                    <a class="wpdt-module wpdt-module-<?php echo esc_attr($module_status_class); ?>" href="<?php echo esc_url(admin_url('admin.php?page=' . $module_pages[$diagnostic['id']])); ?>">
-                <?php else : ?>
-                    <div class="wpdt-module wpdt-module-<?php echo esc_attr($module_status_class); ?>">
-                <?php endif; ?>
-
-                    <div class="wpdt-module-icon" aria-hidden="true">
-                        <?php echo esc_html($module_status_icon); ?>
-                    </div>
-
-                    <div class="wpdt-module-content">
-
-                        <div class="wpdt-module-heading">
-                            <h3><?php echo esc_html($diagnostic['name']); ?></h3>
-                            <span class="wpdt-module-status wpdt-module-status-<?php echo esc_attr($module_status_class); ?>">
-                                <?php echo esc_html($module_status_label); ?>
-                            </span>
-                        </div>
-
-                        <p><?php echo esc_html($module_summary); ?></p>
-
-                    </div>
-
-                    <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
-                        <span class="wpdt-module-arrow" aria-hidden="true">→</span>
-                    <?php endif; ?>
-
-                <?php if (isset($diagnostic['id'], $module_pages[$diagnostic['id']])) : ?>
-                    </a>
-                <?php else : ?>
-                    </div>
-                <?php endif; ?>
-
-            <?php endforeach; ?>
-
-        </div>
-
-    </section>
-
 </div>

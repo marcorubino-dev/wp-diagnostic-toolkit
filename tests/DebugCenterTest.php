@@ -86,14 +86,17 @@ $sibling_target = $inspector->inspect(
 );
 wpdt_debug_check($sibling_target['status'] === 'unsupported_external_path', 'rejects sibling-directory prefix collisions');
 
-$directory_target = $inspector->inspect(WP_CONTENT_DIR, 'enabled', WP_CONTENT_DIR);
+$directory = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'logs';
+mkdir($directory);
+$directory_target = $inspector->inspect($directory, 'enabled', WP_CONTENT_DIR);
 wpdt_debug_check($directory_target['status'] === 'unsupported_file_type', 'rejects directories as log files');
+rmdir($directory);
 
 $symlink = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'linked.log';
 
 if (function_exists('symlink') && @symlink($outside, $symlink)) {
     $linked = $inspector->inspect($symlink, 'enabled', WP_CONTENT_DIR);
-    wpdt_debug_check($linked['status'] === 'unsupported_external_path', 'rejects symlinks that resolve outside wp-content');
+    wpdt_debug_check($linked['status'] === 'unsupported_file_type', 'rejects symlinks without following their targets');
 } else {
     echo 'SKIP: symlink creation is unavailable in this environment.' . PHP_EOL;
 }

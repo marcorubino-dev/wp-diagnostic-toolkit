@@ -46,12 +46,14 @@ class ThemeDiagnostic implements DiagnosticInterface
         $results = array(
             array(
                 'name'        => 'Installed themes',
+                'id' => 'themes.installed_themes',
                 'value'       => count($themes),
                 'status'      => 'info',
                 'description' => 'Total number of themes installed on this site.',
             ),
             array(
                 'name'        => 'Active theme',
+                'id' => 'themes.active_theme',
                 'value'       => $active_theme->get('Name'),
                 'status'      => 'info',
                 'description' => 'Theme currently active on this site.',
@@ -59,6 +61,7 @@ class ThemeDiagnostic implements DiagnosticInterface
             ),
             array(
                 'name'        => 'Active theme version',
+                'id' => 'themes.active_theme_version',
                 'value'       => $active_theme->get('Version')
                     ? $active_theme->get('Version')
                     : 'Not declared',
@@ -73,6 +76,7 @@ class ThemeDiagnostic implements DiagnosticInterface
 
             $results[] = array(
                 'name'           => 'Child theme parent',
+                'id' => 'themes.child_theme_parent',
                 'value'          => $parent_exists
                     ? $parent_theme->get('Name') . ' (' . $template . ')'
                     : $template . ' (missing)',
@@ -87,6 +91,7 @@ class ThemeDiagnostic implements DiagnosticInterface
         } else {
             $results[] = array(
                 'name'        => 'Child theme parent',
+                'id' => 'themes.child_theme_parent',
                 'value'       => 'Not applicable',
                 'status'      => 'info',
                 'description' => 'The active theme is not a child theme.',
@@ -97,6 +102,7 @@ class ThemeDiagnostic implements DiagnosticInterface
 
         $results[] = array(
             'name'           => 'Active theme updates',
+            'id' => 'themes.active_theme_updates',
             'value'          => $update_result['value'],
             'status'         => $update_result['status'],
             'description'    => $update_result['description'],

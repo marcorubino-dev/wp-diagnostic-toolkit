@@ -69,7 +69,7 @@ class MultilingualWooCommerceDiagnostic implements DiagnosticInterface
         }
 
         $results[] = array(
-            'id' => 'woocommerce_detected',
+            'id' => 'multilingual_woocommerce.woocommerce_detected',
             'name' => 'WooCommerce availability',
             'status' => $woocommerce_status,
             'description' => $woocommerce_description,
@@ -123,7 +123,7 @@ class MultilingualWooCommerceDiagnostic implements DiagnosticInterface
         }
 
         $results[] = array(
-            'id' => 'multilingual_plugin_detection',
+            'id' => 'multilingual_woocommerce.multilingual_plugin_detection',
             'name' => 'Multilingual integration detection',
             'status' => $multilingual_status,
             'description' => $multilingual_description,
@@ -133,7 +133,7 @@ class MultilingualWooCommerceDiagnostic implements DiagnosticInterface
         );
 
         $results[] = array(
-            'id' => 'cart_session_scope',
+            'id' => 'multilingual_woocommerce.cart_session_scope',
             'name' => 'Cart/session diagnostic limitation',
             'status' => 'info',
             'description' => 'The admin snapshot does not represent a visitor’s live WooCommerce cart or prove whether the session survives a language switch.',
@@ -143,7 +143,7 @@ class MultilingualWooCommerceDiagnostic implements DiagnosticInterface
         );
 
         $results[] = array(
-            'id' => 'translation_mapping',
+            'id' => 'multilingual_woocommerce.translation_mapping',
             'name' => 'Product translation mapping',
             'status' => 'info',
             'description' => 'Translation mappings are not inferred from matching product IDs. Different languages may legitimately use different product IDs.',

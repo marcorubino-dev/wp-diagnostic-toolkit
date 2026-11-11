@@ -62,6 +62,11 @@ expect_invalid_result(
     'rejects an unstable module identifier'
 );
 expect_invalid_result(
+    valid_result_data(array('module' => '123', 'id' => '123.check')),
+    'rejects a numeric-only module identifier'
+);
+
+expect_invalid_result(
     valid_result_data(array('module' => 'environment diagnostics')),
     'rejects a module identifier containing spaces'
 );
@@ -80,6 +85,19 @@ check_result($result->get('severity') === 'none', 'passing result has no severit
 check_result($result->get('confidence') === 'direct', 'preserves direct confidence');
 check_result($result->to_array()['id'] === 'environment.php_version', 'exports the normalized fields');
 check_result($result->get('evidence')['source'] === 'PHP_VERSION', 'preserves structured evidence');
+
+$renamed_result = new RuleResult(valid_result_data(array(
+    'title' => 'PHP runtime',
+)));
+$changed_state_result = new RuleResult(valid_result_data(array(
+    'outcome' => RuleResult::OUTCOME_FINDING,
+    'severity' => RuleResult::SEVERITY_WARNING,
+)));
+check_result(
+    $renamed_result->get('id') === $result->get('id')
+        && $changed_state_result->get('id') === $result->get('id'),
+    'keeps check identity independent from title and diagnostic state'
+);
 
 $unknown_confidence = new RuleResult(valid_result_data(array('confidence' => RuleResult::CONFIDENCE_UNKNOWN)));
 check_result($unknown_confidence->get('confidence') === 'unknown', 'accepts unknown confidence');
@@ -125,6 +143,27 @@ expect_invalid_result(
     'rejects an unstable identifier format'
 );
 expect_invalid_result(
+    valid_result_data(array('id' => 'php_version')),
+    'rejects a check ID without its module namespace'
+);
+expect_invalid_result(
+    valid_result_data(array('id' => 'environment.123_check')),
+    'rejects a check ID that does not start with a letter'
+);
+
+expect_invalid_result(
+    valid_result_data(array('id' => 'plugins.php_version')),
+    'rejects an ID namespaced to a different module'
+);
+expect_invalid_result(
+    valid_result_data(array('module' => 'environment.runtime')),
+    'rejects a module identifier containing a namespace separator'
+);
+expect_invalid_result(
+    valid_result_data(array('module' => 'environment__runtime')),
+    'rejects consecutive separators in a module identifier'
+);
+expect_invalid_result(
     valid_result_data(array('value' => array('unexpected'))),
     'rejects a non-scalar value'
 );
@@ -157,7 +196,14 @@ $legacy_explicit_id = $adapter->adapt('woocommerce', array(
     'name' => 'Cart session scope',
     'status' => 'warning',
 ));
-check_result($legacy_explicit_id->get('id') === 'cart_session_scope', 'adapter preserves an explicit legacy ID');
+check_result($legacy_explicit_id->get('id') === 'woocommerce.cart_session_scope', 'adapter qualifies an unnamespaced legacy ID with its module');
+
+$legacy_namespaced_id = $adapter->adapt('environment', array(
+    'id' => 'environment.php_version',
+    'name' => 'PHP runtime',
+    'status' => 'pass',
+));
+check_result($legacy_namespaced_id->get('id') === 'environment.php_version', 'adapter preserves an already namespaced legacy ID');
 
 $legacy_info = $adapter->adapt('plugins', array(
     'name' => 'Installed plugins',
@@ -167,6 +213,20 @@ $legacy_info = $adapter->adapt('plugins', array(
 ));
 check_result($legacy_info->get('outcome') === 'finding', 'adapter maps legacy info to finding');
 check_result($legacy_info->get('severity') === 'info', 'adapter maps legacy info severity');
+
+try {
+    $adapter->adapt('environment', array('id' => '123_check', 'name' => 'Numeric check ID', 'status' => 'pass'));
+    check_result(false, 'adapter rejects explicit legacy check IDs that start with a digit');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects explicit legacy check IDs that start with a digit');
+}
+
+try {
+    $adapter->adapt('environment', array('id' => 'plugins.php_version', 'name' => 'PHP version', 'status' => 'pass'));
+    check_result(false, 'adapter rejects an explicit legacy ID belonging to another module');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects an explicit legacy ID belonging to another module');
+}
 
 try {
     $adapter->adapt('environment', array('id' => 'Invalid ID', 'name' => 'PHP version', 'status' => 'pass'));
@@ -187,6 +247,13 @@ try {
     check_result(false, 'adapter rejects a legacy result without status');
 } catch (InvalidArgumentException $exception) {
     check_result(true, 'adapter rejects a legacy result without status');
+}
+
+try {
+    $adapter->adapt('123', array('name' => 'PHP version', 'status' => 'pass'));
+    check_result(false, 'adapter rejects numeric-only module IDs');
+} catch (InvalidArgumentException $exception) {
+    check_result(true, 'adapter rejects numeric-only module IDs');
 }
 
 try {

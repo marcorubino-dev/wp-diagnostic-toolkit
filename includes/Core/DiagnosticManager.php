@@ -36,6 +36,10 @@ class DiagnosticManager
     {
         $module_id = $diagnostic->get_id();
 
+        if (!is_string($module_id) || !preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $module_id)) {
+            throw new \InvalidArgumentException('Diagnostic module ID must be a stable lowercase identifier without dots.');
+        }
+
         if (array_key_exists($module_id, $this->diagnostics)) {
             throw new \InvalidArgumentException(
                 sprintf('A diagnostic module with ID "%s" is already registered.', $module_id)
@@ -301,13 +305,14 @@ class DiagnosticManager
         array &$seen_ids,
         array &$reserved_ids
     ) {
-        $safe_suffix = preg_replace('/[^a-z0-9._-]+/', '_', strtolower((string) $suffix));
-        $base_id = $module_id . '.error.' . $safe_suffix;
+        $safe_suffix = trim(preg_replace('/[^a-z0-9]+/', '_', strtolower((string) $suffix)), '_');
+        $safe_suffix = '' !== $safe_suffix ? $safe_suffix : 'unknown';
+        $base_id = $module_id . '.error_' . $safe_suffix;
         $result_id = $base_id;
         $counter = 2;
 
         while (isset($seen_ids[$result_id]) || isset($reserved_ids[$result_id])) {
-            $result_id = $base_id . '.' . $counter;
+            $result_id = $base_id . '_' . $counter;
             $counter++;
         }
 

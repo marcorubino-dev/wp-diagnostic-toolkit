@@ -162,10 +162,6 @@ class DebugConfigurationInspector
             return 'syslog_or_sapi';
         }
 
-        if (defined('WP_CONTENT_DIR') && $this->is_path_within_content_directory($value)) {
-            return 'in_content_path';
-        }
-
         return 'external_or_host_managed';
     }
 

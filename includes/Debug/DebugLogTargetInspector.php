@@ -123,7 +123,7 @@ class DebugLogTargetInspector
     {
         return isset($path[0]) && (
             $path[0] === '/'
-            || preg_match('/^[A-Za-z]:[\\\\\\/]/', $path)
+            || preg_match('~^[A-Za-z]:[\\\\/]~', $path) === 1
         );
     }
 

@@ -27,6 +27,11 @@ function esc_attr($value)
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+function esc_textarea($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
 require_once __DIR__ . '/../includes/Debug/DebugConfigurationInspector.php';
 require_once __DIR__ . '/../includes/Debug/DebugLogTargetInspector.php';
 
@@ -77,6 +82,12 @@ $rendered = ob_get_clean();
 wpdt_debug_check(strpos($rendered, $root) === false, 'does not render absolute filesystem paths');
 wpdt_debug_check(strpos($rendered, 'SENSITIVE_TEST_CONTENT') === false, 'does not render log contents');
 wpdt_debug_check(strpos($rendered, 'wp-content/debug.log') !== false, 'renders the safe relative log location');
+wpdt_debug_check(strpos($rendered, 'data-wpdt-copy') !== false, 'renders the copy summary control');
+wpdt_debug_check(strpos($rendered, 'WP_DEBUG: Enabled') !== false, 'includes WordPress debug state in the copy summary');
+wpdt_debug_check(strpos($rendered, 'PHP error log target:') !== false, 'includes PHP logging configuration in the copy summary');
+wpdt_debug_check(strpos($rendered, 'WordPress debug log location: wp-content/debug.log') !== false, 'includes the safe relative log location in the copy summary');
+wpdt_debug_check(strpos($rendered, $root) === false, 'does not expose absolute paths in the copy summary');
+wpdt_debug_check(strpos($rendered, 'SENSITIVE_TEST_CONTENT') === false, 'does not expose log contents in the copy summary');
 
 $custom_log = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'custom.log';
 file_put_contents($custom_log, 'CUSTOM_TEST_CONTENT');

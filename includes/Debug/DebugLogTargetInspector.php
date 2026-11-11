@@ -72,6 +72,10 @@ class DebugLogTargetInspector
             );
         }
 
+        if (is_link($target)) {
+            return $this->result('unsupported_file_type');
+        }
+
         $parent = realpath(dirname($target));
 
         if ($parent === false || ! $this->is_within_directory($parent, $content_root)) {

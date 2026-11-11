@@ -34,18 +34,20 @@ function wpdt_manager_check($condition, $message)
     fwrite(STDERR, 'FAIL: ' . $message . PHP_EOL);
 }
 
-function wpdt_test_diagnostic($id, $name, $results)
+function wpdt_test_diagnostic($id, $name, $results, $on_run = null)
 {
-    return new class($id, $name, $results) implements DiagnosticInterface {
+    return new class($id, $name, $results, $on_run) implements DiagnosticInterface {
         private $id;
         private $name;
         private $results;
+        private $on_run;
 
-        public function __construct($id, $name, $results)
+        public function __construct($id, $name, $results, $on_run)
         {
             $this->id = $id;
             $this->name = $name;
             $this->results = $results;
+            $this->on_run = $on_run;
         }
 
         public function get_id()
@@ -60,6 +62,10 @@ function wpdt_test_diagnostic($id, $name, $results)
 
         public function run()
         {
+            if (is_callable($this->on_run)) {
+                call_user_func($this->on_run);
+            }
+
             if ($this->results instanceof Exception) {
                 throw $this->results;
             }
@@ -335,6 +341,145 @@ wpdt_manager_check(
     $registered_module['name'] === 'Original module'
         && $registered_module['results'][0]['name'] === 'Original result',
     'preserves the original module when duplicate registration is rejected'
+);
+
+$selective_counts = array(
+    'environment' => 0,
+    'plugins' => 0,
+);
+
+$selective_manager = new DiagnosticManager();
+$selective_manager->register(wpdt_test_diagnostic(
+    'environment',
+    'Environment',
+    array(array('name' => 'Environment check', 'status' => 'pass')),
+    function () use (&$selective_counts) {
+        $selective_counts['environment']++;
+    }
+));
+$selective_manager->register(wpdt_test_diagnostic(
+    'plugins',
+    'Plugins',
+    array(array('name' => 'Plugin check', 'status' => 'pass')),
+    function () use (&$selective_counts) {
+        $selective_counts['plugins']++;
+    }
+));
+
+$selected_plugins = $selective_manager->run_selected(array('plugins'));
+
+wpdt_manager_check(
+    array('plugins') === array_keys($selected_plugins),
+    'returns only the requested registered module'
+);
+wpdt_manager_check(
+    $selective_counts['plugins'] === 1 && $selective_counts['environment'] === 0,
+    'does not execute unrequested modules'
+);
+
+$selected_in_registration_order = $selective_manager->run_selected(array('plugins', 'environment'));
+
+wpdt_manager_check(
+    array('environment', 'plugins') === array_keys($selected_in_registration_order),
+    'returns selected modules in registration order rather than request order'
+);
+
+wpdt_manager_check(
+    $selective_counts['plugins'] === 2 && $selective_counts['environment'] === 1,
+    'executes each requested module exactly once'
+);
+
+wpdt_manager_check(
+    array() === $selective_manager->run_selected(array()),
+    'returns an empty collection for an empty selection without executing modules'
+);
+
+$counts_before_invalid_selection = $selective_counts;
+$unknown_id_thrown = false;
+
+try {
+    $selective_manager->run_selected(array('missing_module'));
+} catch (\InvalidArgumentException $exception) {
+    $unknown_id_thrown = true;
+}
+
+wpdt_manager_check(
+    $unknown_id_thrown && $selective_counts === $counts_before_invalid_selection,
+    'rejects unknown IDs before executing any selected module'
+);
+
+$duplicate_selection_thrown = false;
+
+try {
+    $selective_manager->run_selected(array('environment', 'environment'));
+} catch (\InvalidArgumentException $exception) {
+    $duplicate_selection_thrown = true;
+}
+
+wpdt_manager_check(
+    $duplicate_selection_thrown && $selective_counts === $counts_before_invalid_selection,
+    'rejects duplicate requested IDs before executing any module'
+);
+
+$invalid_selection_thrown = false;
+
+try {
+    $selective_manager->run_selected(array(123));
+} catch (\InvalidArgumentException $exception) {
+    $invalid_selection_thrown = true;
+}
+
+wpdt_manager_check(
+    $invalid_selection_thrown && $selective_counts === $counts_before_invalid_selection,
+    'rejects malformed module IDs before executing any module'
+);
+
+$selective_failure_manager = new DiagnosticManager();
+$selective_failure_manager->register(wpdt_test_diagnostic(
+    'broken_selected',
+    'Broken selected module',
+    new RuntimeException('Selected module failure.')
+));
+$selective_failure_manager->register(wpdt_test_diagnostic(
+    'healthy_selected',
+    'Healthy selected module',
+    array(array('name' => 'Healthy check', 'status' => 'pass'))
+));
+$selective_failure_output = $selective_failure_manager->run_selected(
+    array('broken_selected', 'healthy_selected')
+);
+
+wpdt_manager_check(
+    $selective_failure_output['broken_selected']['results'][0]['outcome'] === RuleResult::OUTCOME_ERROR
+        && $selective_failure_output['healthy_selected']['results'][0]['name'] === 'Healthy check',
+    'isolates a selected module exception and continues with other selected modules'
+);
+
+$selective_scope_manager = new DiagnosticManager();
+$selective_scope_manager->register(wpdt_test_diagnostic(
+    'environment',
+    'Environment',
+    array('malformed result')
+));
+$unselected_runs = 0;
+$selective_scope_manager->register(wpdt_test_diagnostic(
+    'other_module',
+    'Other module',
+    array(array(
+        'id' => 'environment.error.invalid_result_0',
+        'name' => 'Unselected source ID',
+        'status' => 'pass',
+    )),
+    function () use (&$unselected_runs) {
+        $unselected_runs++;
+    }
+));
+$selective_scope_output = $selective_scope_manager->run_selected(array('environment'));
+
+wpdt_manager_check(
+    $selective_scope_output['environment']['results'][0]['id'] === 'environment.error.invalid_result_0'
+        && $unselected_runs === 0,
+    'limits synthetic ID reservation to the selected execution set without running unselected modules'
 );
 
 echo PHP_EOL . sprintf('%d passed, %d failed.', $passed, $failed) . PHP_EOL;

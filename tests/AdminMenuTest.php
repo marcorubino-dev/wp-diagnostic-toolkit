@@ -16,6 +16,30 @@ if (! defined('WPDT_PATH')) {
     define('WPDT_PATH', dirname(__DIR__) . '/');
 }
 
+if (! defined('ABSPATH')) {
+    define('ABSPATH', dirname(__DIR__) . '/');
+}
+
+function current_user_can($capability)
+{
+    return 'manage_options' === $capability;
+}
+
+function esc_html($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+function esc_attr($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+function esc_textarea($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
 $GLOBALS['wpdt_test_menus'] = array();
 
 function add_menu_page()
@@ -52,7 +76,34 @@ function wpdt_admin_check($condition, $message)
 
 require_once __DIR__ . '/../includes/Admin/Admin.php';
 
-$admin = new WPDT\Admin\Admin(new WPDT\Core\DiagnosticManager());
+class WPDT_Admin_Test_Diagnostic_Manager extends WPDT\Core\DiagnosticManager
+{
+    public $run_all_calls = 0;
+    public $run_selected_calls = array();
+
+    public function run_all()
+    {
+        $this->run_all_calls++;
+        return array();
+    }
+
+    public function run_selected(array $module_ids)
+    {
+        $this->run_selected_calls[] = $module_ids;
+        $module_id = $module_ids[0];
+
+        return array(
+            $module_id => array(
+                'id' => $module_id,
+                'name' => 'HTTP & SSL',
+                'results' => array(),
+            ),
+        );
+    }
+}
+
+$manager = new WPDT_Admin_Test_Diagnostic_Manager();
+$admin = new WPDT\Admin\Admin($manager);
 $admin->register_menu();
 
 $expected = array(
@@ -95,6 +146,23 @@ wpdt_admin_check(
         && isset($GLOBALS['wpdt_test_menus']['wpdt-plugins'])
         && isset($GLOBALS['wpdt_test_menus']['wpdt-server']),
     'preserves the existing diagnostic submenus'
+);
+
+ob_start();
+$admin->render_http_ssl();
+$http_ssl_output = ob_get_clean();
+
+wpdt_admin_check(
+    array(array('http_ssl')) === $manager->run_selected_calls,
+    'renders an individual diagnostic screen using only its requested module'
+);
+wpdt_admin_check(
+    0 === $manager->run_all_calls,
+    'does not invoke run_all() when rendering an individual diagnostic screen'
+);
+wpdt_admin_check(
+    false !== strpos($http_ssl_output, 'HTTP &amp; SSL'),
+    'renders the selected module result through the existing admin template'
 );
 
 $totals = $GLOBALS['wpdt_admin_test_totals'];

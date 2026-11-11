@@ -313,7 +313,7 @@ class Admin
             return;
         }
 
-        $diagnostics = $this->manager->run_all();
+        $diagnostics = $this->manager->run_selected(array($module_id));
 
         if (! isset($diagnostics[$module_id])) {
             wp_die('Diagnostic module not found.');

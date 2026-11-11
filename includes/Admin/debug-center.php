@@ -7,7 +7,7 @@ $target_labels = array('not_configured'=>'Not configured','unsupported_external_
 <header class="wpdt-header"><div><h1>Debug Center</h1><p>Read-only overview of WordPress and PHP debugging configuration.</p></div></header>
 <section class="wpdt-section"><div class="wpdt-section-header"><div><h2>Debug configuration</h2><p>Values are inspected without changing site or server settings.</p></div></div>
 <table class="widefat striped"><tbody>
-<tr><th scope="row">WordPress debugging (WP_DEBUG)</th><td><?php echo esc_html($labels[$configuration['wordpress_debug']] ?? 'Unknown'); ?></td></tr>
+<tr><th scope="row">WordPress environment</th><td><?php echo esc_html($configuration['environment_type']); ?></td></tr>\n<tr><th scope="row">WordPress debugging (WP_DEBUG)</th><td><?php echo esc_html($labels[$configuration['wordpress_debug']] ?? 'Unknown'); ?></td></tr>
 <tr><th scope="row">WordPress debug logging (WP_DEBUG_LOG)</th><td><?php echo esc_html($labels[$configuration['wordpress_debug_log']] ?? 'Unknown'); ?></td></tr>
 <tr><th scope="row">Error display (WP_DEBUG_DISPLAY)</th><td><?php echo esc_html($labels[$configuration['wordpress_debug_display']] ?? 'Unknown'); ?></td></tr>
 <tr><th scope="row">PHP error logging (log_errors)</th><td><?php echo esc_html($labels[$configuration['php_log_errors']] ?? 'Unknown'); ?></td></tr>

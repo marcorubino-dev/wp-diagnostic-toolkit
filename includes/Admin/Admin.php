@@ -7,6 +7,8 @@
 namespace WPDT\Admin;
 
 use WPDT\Core\DiagnosticManager;
+use WPDT\Debug\DebugConfigurationInspector;
+use WPDT\Debug\DebugLogTargetInspector;
 
 class Admin
 {
@@ -114,6 +116,15 @@ class Admin
             'manage_options',
             'wpdt-multilingual-woocommerce',
             array($this, 'render_multilingual_woocommerce')
+        );
+
+        add_submenu_page(
+            'wp-diagnostic-toolkit',
+            'Debug Center',
+            'Debug Center',
+            'manage_options',
+            'wpdt-debug-center',
+            array($this, 'render_debug_center')
         );
 
         add_submenu_page(
@@ -246,6 +257,34 @@ class Admin
     public function render_multilingual_woocommerce()
     {
         $this->render_diagnostic_module('multilingual_woocommerce');
+    }
+
+    /**
+     * Render the read-only Debug Center.
+     *
+     * @return void
+     */
+    public function render_debug_center()
+    {
+        if (! current_user_can('manage_options')) {
+            return;
+        }
+
+        $configuration = (new DebugConfigurationInspector())->inspect();
+        $debug_log_value = defined('WP_DEBUG_LOG') ? constant('WP_DEBUG_LOG') : null;
+        $target = (new DebugLogTargetInspector())->inspect(
+            $debug_log_value,
+            $configuration['wordpress_debug'],
+            defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : ''
+        );
+
+        $this->render_template(
+            'debug-center',
+            array(
+                'configuration' => $configuration,
+                'target' => $target,
+            )
+        );
     }
 
     /**

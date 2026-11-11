@@ -60,6 +60,7 @@ $expected = array(
     'wpdt-themes' => 'render_themes',
     'wpdt-disk-space' => 'render_disk_space',
     'wpdt-multilingual-woocommerce' => 'render_multilingual_woocommerce',
+    'wpdt-debug-center' => 'render_debug_center',
 );
 
 foreach ($expected as $slug => $callback) {

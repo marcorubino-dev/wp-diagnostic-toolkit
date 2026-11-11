@@ -22,6 +22,11 @@ function esc_html($value)
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+function esc_attr($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
 require_once __DIR__ . '/../includes/Debug/DebugConfigurationInspector.php';
 require_once __DIR__ . '/../includes/Debug/DebugLogTargetInspector.php';
 

@@ -10,11 +10,17 @@ $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'wpdt-debug-' . uniqid();
 $content_dir = $root . DIRECTORY_SEPARATOR . 'wp-content';
 mkdir($content_dir, 0777, true);
 
+define('ABSPATH', $root . DIRECTORY_SEPARATOR);
 define('WP_CONTENT_DIR', $content_dir);
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
 define('WP_DEBUG_DISPLAY', false);
 define('WP_ENVIRONMENT_TYPE', 'staging');
+
+function esc_html($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
 
 require_once __DIR__ . '/../includes/Debug/DebugConfigurationInspector.php';
 require_once __DIR__ . '/../includes/Debug/DebugLogTargetInspector.php';
@@ -56,6 +62,16 @@ file_put_contents($log, 'SENSITIVE_TEST_CONTENT');
 $detected = $inspector->inspect(true, 'enabled', WP_CONTENT_DIR);
 wpdt_debug_check($detected['status'] === 'detected_readable', 'detects a regular readable file');
 wpdt_debug_check($detected['relative_location'] === 'wp-content/debug.log', 'does not disclose an absolute path');
+
+$configuration = (new WPDT\Debug\DebugConfigurationInspector())->inspect();
+$target = $detected;
+ob_start();
+include __DIR__ . '/../includes/Admin/debug-center.php';
+$rendered = ob_get_clean();
+
+wpdt_debug_check(strpos($rendered, $root) === false, 'does not render absolute filesystem paths');
+wpdt_debug_check(strpos($rendered, 'SENSITIVE_TEST_CONTENT') === false, 'does not render log contents');
+wpdt_debug_check(strpos($rendered, 'wp-content/debug.log') !== false, 'renders the safe relative log location');
 
 $custom_log = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'custom.log';
 file_put_contents($custom_log, 'CUSTOM_TEST_CONTENT');

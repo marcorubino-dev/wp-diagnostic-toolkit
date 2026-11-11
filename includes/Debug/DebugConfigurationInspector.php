@@ -34,6 +34,7 @@ class DebugConfigurationInspector
 
         return array(
             'wordpress_debug' => $debug['state'],
+            'environment_type' => $this->environment_type(),
             'wordpress_debug_log' => $logging_state,
             'wordpress_debug_display' => $debug_display['state'],
             'php_log_errors' => $log_errors,
@@ -166,54 +167,21 @@ class DebugConfigurationInspector
     }
 
     /**
-     * Check whether a configured PHP log path is lexically under WP_CONTENT_DIR.
+     * Return a supported WordPress environment type.
      *
-     * This is classification only. It does not inspect or open the path.
-     *
-     * @param string $path Configured PHP error log value.
-     * @return bool
-     */
-    private function is_path_within_content_directory($path)
-    {
-        $content_dir = realpath(WP_CONTENT_DIR);
-
-        if ($content_dir === false || ! $this->is_absolute_path($path)) {
-            return false;
-        }
-
-        $normalized_path = $this->normalize_path($path);
-        $normalized_root = rtrim($this->normalize_path($content_dir), '/');
-
-        if (DIRECTORY_SEPARATOR === '\\') {
-            $normalized_path = strtolower($normalized_path);
-            $normalized_root = strtolower($normalized_root);
-        }
-
-        return strpos($normalized_path, $normalized_root . '/') === 0;
-    }
-
-    /**
-     * Determine whether a path is absolute.
-     *
-     * @param string $path Path.
-     * @return bool
-     */
-    private function is_absolute_path($path)
-    {
-        return isset($path[0]) && (
-            $path[0] === '/'
-            || preg_match('/^[A-Za-z]:[\\\\\\/]/', $path)
-        );
-    }
-
-    /**
-     * Normalize separators for path comparison.
-     *
-     * @param string $path Path.
      * @return string
      */
-    private function normalize_path($path)
+    private function environment_type()
     {
-        return str_replace('\\', '/', $path);
+        if (! defined('WP_ENVIRONMENT_TYPE')) {
+            return 'unknown';
+        }
+
+        $value = constant('WP_ENVIRONMENT_TYPE');
+        $allowed = array('local', 'development', 'staging', 'production');
+
+        return is_string($value) && in_array(strtolower($value), $allowed, true)
+            ? strtolower($value)
+            : 'unknown';
     }
 }

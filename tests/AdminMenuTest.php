@@ -92,10 +92,20 @@ class WPDT_Admin_Test_Diagnostic_Manager extends WPDT\Core\DiagnosticManager
         $this->run_selected_calls[] = $module_ids;
         $module_id = $module_ids[0];
 
+        $module_names = array(
+            'environment' => 'Environment',
+            'plugins' => 'Plugins',
+            'server' => 'Server',
+            'http_ssl' => 'HTTP & SSL',
+            'themes' => 'Themes',
+            'disk_space' => 'Disk Space',
+            'multilingual_woocommerce' => 'Multilingual & WooCommerce',
+        );
+
         return array(
             $module_id => array(
                 'id' => $module_id,
-                'name' => 'HTTP & SSL',
+                'name' => isset($module_names[$module_id]) ? $module_names[$module_id] : $module_id,
                 'results' => array(),
             ),
         );
@@ -148,21 +158,40 @@ wpdt_admin_check(
     'preserves the existing diagnostic submenus'
 );
 
-ob_start();
-$admin->render_http_ssl();
-$http_ssl_output = ob_get_clean();
+$expected_renderers = array(
+    'render_environment' => array('environment', 'Environment'),
+    'render_plugins' => array('plugins', 'Plugins'),
+    'render_server' => array('server', 'Server'),
+    'render_http_ssl' => array('http_ssl', 'HTTP &amp; SSL'),
+    'render_themes' => array('themes', 'Themes'),
+    'render_disk_space' => array('disk_space', 'Disk Space'),
+    'render_multilingual_woocommerce' => array('multilingual_woocommerce', 'Multilingual &amp; WooCommerce'),
+);
+
+foreach ($expected_renderers as $renderer => $expected) {
+    ob_start();
+    call_user_func(array($admin, $renderer));
+    $output = ob_get_clean();
+
+    wpdt_admin_check(
+        false !== strpos($output, '<h1>' . $expected[1] . '</h1>'),
+        'renders the expected module template for ' . $renderer
+    );
+}
+
+$expected_selected_calls = array();
+
+foreach ($expected_renderers as $expected) {
+    $expected_selected_calls[] = array($expected[0]);
+}
 
 wpdt_admin_check(
-    array(array('http_ssl')) === $manager->run_selected_calls,
-    'renders an individual diagnostic screen using only its requested module'
+    $expected_selected_calls === $manager->run_selected_calls,
+    'routes each individual diagnostic renderer to exactly its matching module'
 );
 wpdt_admin_check(
     0 === $manager->run_all_calls,
-    'does not invoke run_all() when rendering an individual diagnostic screen'
-);
-wpdt_admin_check(
-    false !== strpos($http_ssl_output, 'HTTP &amp; SSL'),
-    'renders the selected module result through the existing admin template'
+    'does not invoke run_all() when rendering individual diagnostic screens'
 );
 
 $totals = $GLOBALS['wpdt_admin_test_totals'];

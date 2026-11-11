@@ -14,7 +14,9 @@ define('WP_ENVIRONMENT_TYPE', 'staging');
 require_once __DIR__ . '/../includes/Debug/DebugConfigurationInspector.php';
 require_once __DIR__ . '/../includes/Debug/DebugLogTargetInspector.php';
 $passed=0; $failed=0;
-function wpdt_debug_check($ok,$label){global $passed,$failed;if($ok){$passed++;echo "PASS: $label\n";}else{$failed++;fwrite(STDERR,"FAIL: $label\n");}}
+function wpdt_debug_check($ok,$label){global $passed,$failed;if($ok){$passed++;echo "PASS: $label
+";}else{$failed++;fwrite(STDERR,"FAIL: $label
+");}}
 $config=(new WPDT\Debug\DebugConfigurationInspector())->inspect();
 wpdt_debug_check($config['wordpress_debug']==='enabled','detects WP_DEBUG enabled');
 wpdt_debug_check($config['environment_type']==='staging','reports an allowlisted WordPress environment type');
@@ -34,9 +36,14 @@ $outside=$root.DIRECTORY_SEPARATOR.'outside.log'; file_put_contents($outside,'DO
 wpdt_debug_check($inspector->inspect($outside,'enabled',WP_CONTENT_DIR)['status']==='unsupported_external_path','rejects external custom path');
 wpdt_debug_check($inspector->inspect(true,'disabled',WP_CONTENT_DIR)['status']==='not_configured','does not inspect when WP_DEBUG disabled');
 wpdt_debug_check($inspector->inspect(true,'unknown',WP_CONTENT_DIR)['status']==='unknown','preserves unknown configuration');
-$sibling=$content.'-sibling'; mkdir($sibling);\nwpdt_debug_check($inspector->inspect($sibling.DIRECTORY_SEPARATOR.'outside.log','enabled',WP_CONTENT_DIR)['status']==='unsupported_external_path','rejects sibling-directory prefix collisions');\n$link=WP_CONTENT_DIR.DIRECTORY_SEPARATOR.'linked.log';
-if(function_exists('symlink') && @symlink($outside,$link)){wpdt_debug_check($inspector->inspect($link,'enabled',WP_CONTENT_DIR)['status']==='unsupported_external_path','rejects symlink escape');}else{echo "SKIP: symlink creation unavailable\n";}
+$sibling=$content.'-sibling'; mkdir($sibling);
+wpdt_debug_check($inspector->inspect($sibling.DIRECTORY_SEPARATOR.'outside.log','enabled',WP_CONTENT_DIR)['status']==='unsupported_external_path','rejects sibling-directory prefix collisions');
+$link=WP_CONTENT_DIR.DIRECTORY_SEPARATOR.'linked.log';
+if(function_exists('symlink') && @symlink($outside,$link)){wpdt_debug_check($inspector->inspect($link,'enabled',WP_CONTENT_DIR)['status']==='unsupported_external_path','rejects symlink escape');}else{echo "SKIP: symlink creation unavailable
+";}
 $source=file_get_contents(__DIR__.'/../includes/Debug/DebugLogTargetInspector.php');
 wpdt_debug_check(strpos($source,'file_get_contents(')===false && strpos($source,'fopen(')===false && strpos($source,'readfile(')===false && strpos($source,'SplFileObject')===false,'target inspector has no file-content reader');
 @unlink($link); @unlink($log); @unlink($outside); @rmdir($sibling); @rmdir($content); @rmdir($root);
-echo "\n$passed passed, $failed failed.\n"; exit($failed===0?0:1);
+echo "
+$passed passed, $failed failed.
+"; exit($failed===0?0:1);

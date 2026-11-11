@@ -50,6 +50,17 @@ class DebugLogTargetInspector
             return $this->result('unsupported_external_path');
         }
 
+        $parent = realpath(dirname($target));
+
+        if ($parent === false || ! $this->is_within_directory($parent, $content_root)) {
+            return $this->result('unsupported_external_path');
+        }
+
+        // Do not follow symlinks in v1. This also rejects dangling symlinks.
+        if (is_link($target)) {
+            return $this->result('unsupported_file_type');
+        }
+
         $resolved_target = realpath($target);
 
         if ($resolved_target !== false) {
@@ -70,16 +81,6 @@ class DebugLogTargetInspector
                 $this->relative_location($resolved_target, $content_root),
                 $is_default ? 'default' : 'custom'
             );
-        }
-
-        if (is_link($target)) {
-            return $this->result('unsupported_file_type');
-        }
-
-        $parent = realpath(dirname($target));
-
-        if ($parent === false || ! $this->is_within_directory($parent, $content_root)) {
-            return $this->result('unsupported_external_path');
         }
 
         $basename = basename($target);

@@ -13,8 +13,8 @@ final class LegacyResultAdapter
     /**
      * Adapt one legacy diagnostic result.
      *
-     * Explicit IDs are preserved when valid. A deterministic ID derived from
-     * the module and label is used only when the legacy result has no ID.
+     * Explicit legacy IDs are qualified with their module when necessary. A deterministic
+     * ID derived from the module and label remains a compatibility fallback only.
      *
      * @param string $module_id Stable diagnostic module identifier.
      * @param array  $legacy   Existing diagnostic result array.
@@ -23,8 +23,8 @@ final class LegacyResultAdapter
      */
     public function adapt($module_id, array $legacy)
     {
-        if (!is_string($module_id) || !preg_match('/^[a-z0-9][a-z0-9._-]*$/', $module_id)) {
-            throw new \InvalidArgumentException('Module ID must be a stable lowercase identifier.');
+        if (!is_string($module_id) || !preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $module_id)) {
+            throw new \InvalidArgumentException('Module ID must be a stable lowercase identifier without dots.');
         }
 
         if (!isset($legacy['name']) || !is_string($legacy['name']) || trim($legacy['name']) === '') {
@@ -53,16 +53,28 @@ final class LegacyResultAdapter
                 throw new \InvalidArgumentException('Explicit legacy result ID must be a non-empty string.');
             }
 
-            $result_id = $legacy['id'];
+            $legacy_id = $legacy['id'];
+
+            if (preg_match('/^' . preg_quote($module_id, '/') . '\.[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/', $legacy_id)) {
+                $result_id = $legacy_id;
+            } elseif (preg_match('/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/', $legacy_id)) {
+                // Qualify pre-contract legacy IDs without changing their check segment.
+                $result_id = $module_id . '.' . $legacy_id;
+            } else {
+                throw new \InvalidArgumentException(
+                    'Explicit legacy result ID must be a valid check ID for its module.'
+                );
+            }
         } else {
             $slug = strtolower($legacy['name']);
             $slug = preg_replace('/[^a-z0-9]+/', '_', $slug);
             $slug = trim($slug, '_');
 
-            if ($slug === '') {
-                throw new \InvalidArgumentException('Legacy result name cannot produce a stable identifier.');
+            if (!preg_match('/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/', $slug)) {
+                throw new \InvalidArgumentException('Legacy result name cannot produce a valid compatibility identifier.');
             }
 
+            // Compatibility fallback only; integrated diagnostics must declare IDs explicitly.
             $result_id = $module_id . '.' . $slug;
         }
 

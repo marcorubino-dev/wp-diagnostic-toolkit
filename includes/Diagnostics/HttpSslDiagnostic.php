@@ -45,6 +45,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
         if (is_wp_error($response)) {
             $results[] = array(
                 'name'           => 'Home URL HTTP response',
+                'id' => 'http_ssl.home_url_http_response',
                 'value'          => 'Request failed',
                 'status'         => 'warning',
                 'description'    => 'The configured home URL could not be reached with the WordPress HTTP API.',
@@ -79,6 +80,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
 
             $results[] = array(
                 'name'           => 'Home URL HTTP response',
+                'id' => 'http_ssl.home_url_http_response',
                 'value'          => $status_code,
                 'status'         => $status,
                 'description'    => $description,
@@ -90,6 +92,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
         if (! $is_https) {
             $results[] = array(
                 'name'           => 'SSL certificate validation',
+                'id' => 'http_ssl.ssl_certificate_validation',
                 'value'          => 'Not applicable',
                 'status'         => 'info',
                 'description'    => 'The configured home URL does not use HTTPS, so a TLS certificate cannot be validated for this URL.',
@@ -105,6 +108,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
 
             $results[] = array(
                 'name'           => 'SSL certificate validation',
+                'id' => 'http_ssl.ssl_certificate_validation',
                 'value'          => $ssl_error ? 'Validation failed' : 'Not confirmed',
                 'status'         => $ssl_error ? 'critical' : 'info',
                 'description'    => $ssl_error
@@ -122,6 +126,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
         if ($status_code < 200) {
             $results[] = array(
                 'name'           => 'SSL certificate validation',
+                'id' => 'http_ssl.ssl_certificate_validation',
                 'value'          => 'Not confirmed',
                 'status'         => 'info',
                 'description'    => 'The HTTPS request did not return a valid HTTP response, so TLS validation cannot be confirmed from this result.',
@@ -134,6 +139,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
 
         $results[] = array(
             'name'           => 'SSL certificate validation',
+            'id' => 'http_ssl.ssl_certificate_validation',
             'value'          => 'TLS verification passed',
             'status'         => 'pass',
             'description'    => 'WordPress completed an HTTPS request with certificate verification enabled.',

@@ -51,6 +51,25 @@ wpdt_server_check(
 );
 
 $allowed_statuses = array('pass', 'info', 'warning', 'critical');
+$expected_ids = array(
+    'server.php_memory_limit',
+    'server.upload_max_filesize',
+    'server.post_max_size',
+    'server.max_execution_time',
+    'server.core_php_extensions',
+    'server.recommended_php_extensions',
+    'server.php_extension_json',
+    'server.php_extension_mysqli',
+    'server.php_extension_curl',
+    'server.php_extension_mbstring',
+    'server.php_extension_openssl',
+    'server.php_extension_xml',
+    'server.php_extension_zip',
+);
+$actual_ids = array_column($results, 'id');
+sort($expected_ids);
+sort($actual_ids);
+wpdt_server_check($expected_ids === $actual_ids, 'declares the complete stable server check ID set');
 $names = array();
 
 foreach ($results as $index => $result) {

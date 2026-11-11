@@ -35,6 +35,23 @@ $configuration_rows = array(
     array('label' => 'PHP error log target', 'value' => $labels[$configuration['php_error_log']] ?? 'Unknown', 'class' => 'neutral'),
 );
 
+$summary_rows = array(
+    'WordPress environment' => $configuration['environment_type'],
+    'WP_DEBUG' => $labels[$configuration['wordpress_debug']] ?? 'Unknown',
+    'WP_DEBUG_LOG' => $labels[$configuration['wordpress_debug_log']] ?? 'Unknown',
+    'WP_DEBUG_DISPLAY' => $labels[$configuration['wordpress_debug_display']] ?? 'Unknown',
+    'PHP log_errors' => $labels[$configuration['php_log_errors']] ?? 'Unknown',
+    'PHP error log target' => $labels[$configuration['php_error_log']] ?? 'Unknown',
+    'WordPress debug log status' => $target_labels[$target['status'] ?? 'unknown'] ?? 'Unknown',
+    'WordPress debug log location' => ! empty($target['relative_location'])
+        ? $target['relative_location']
+        : 'Not available',
+);
+$copy_summary = "WordPress Debug Summary\n";
+foreach ($summary_rows as $label => $value) {
+    $copy_summary .= $label . ': ' . $value . "\n";
+}
+
 $target_status = isset($target['status']) ? $target['status'] : 'unknown';
 $target_status_class = 'neutral';
 if ($target_status === 'detected_readable') {
@@ -50,7 +67,14 @@ if ($target_status === 'detected_readable') {
             <h1>Debug Center</h1>
             <p>Understand how WordPress and PHP debugging are configured on this site.</p>
         </div>
-        <span class="wpdt-readonly-badge"><span aria-hidden="true">●</span> Read-only</span>
+        <div class="wpdt-header-action">
+            <div class="wpdt-copy-control">
+                <textarea class="wpdt-copy-source" hidden readonly><?php echo esc_textarea($copy_summary); ?></textarea>
+                <button type="button" class="button button-secondary wpdt-copy-button" data-wpdt-copy>Copy summary</button>
+                <span class="wpdt-copy-feedback" aria-live="polite"></span>
+            </div>
+            <span class="wpdt-readonly-badge"><span aria-hidden="true">●</span> Read-only</span>
+        </div>
     </header>
 
     <section class="wpdt-section">

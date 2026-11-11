@@ -55,10 +55,68 @@ class DiagnosticManager
      */
     public function run_all()
     {
+        return $this->run_modules($this->diagnostics);
+    }
+
+    /**
+     * Run only the requested registered diagnostic modules.
+     *
+     * Results are returned in registration order. ID reservation and duplicate
+     * detection apply to this execution set; unselected modules are not inspected.
+     *
+     * @param array $module_ids Registered diagnostic module IDs.
+     * @return array
+     * @throws \InvalidArgumentException If an ID is invalid, duplicated, or unknown.
+     */
+    public function run_selected(array $module_ids)
+    {
+        $requested_ids = array();
+
+        foreach ($module_ids as $module_id) {
+            if (! is_string($module_id) || trim($module_id) === '') {
+                throw new \InvalidArgumentException(
+                    'Diagnostic module IDs must be non-empty strings.'
+                );
+            }
+
+            if (isset($requested_ids[$module_id])) {
+                throw new \InvalidArgumentException(
+                    sprintf('Diagnostic module ID "%s" was requested more than once.', $module_id)
+                );
+            }
+
+            if (! array_key_exists($module_id, $this->diagnostics)) {
+                throw new \InvalidArgumentException(
+                    sprintf('Diagnostic module "%s" is not registered.', $module_id)
+                );
+            }
+
+            $requested_ids[$module_id] = true;
+        }
+
+        $selected_diagnostics = array();
+
+        foreach ($this->diagnostics as $registered_module_id => $diagnostic) {
+            if (isset($requested_ids[$registered_module_id])) {
+                $selected_diagnostics[$registered_module_id] = $diagnostic;
+            }
+        }
+
+        return $this->run_modules($selected_diagnostics);
+    }
+
+    /**
+     * Execute and normalize the supplied diagnostic execution set.
+     *
+     * @param DiagnosticInterface[] $diagnostics Modules included in this run.
+     * @return array
+     */
+    private function run_modules(array $diagnostics)
+    {
         $module_runs = array();
         $reserved_ids = array();
 
-        foreach ($this->diagnostics as $module_id => $diagnostic) {
+        foreach ($diagnostics as $module_id => $diagnostic) {
             $module_name = $module_id;
             $legacy_results = null;
             $execution_error = null;

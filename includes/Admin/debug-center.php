@@ -1,6 +1,7 @@
 <?php
 defined('ABSPATH') || exit;
 $labels = array('enabled'=>'Enabled','disabled'=>'Disabled','unknown'=>'Unknown','configured'=>'Configured','not_configured'=>'Not configured','default'=>'Default / host-managed','syslog_or_sapi'=>'Syslog / SAPI','external_or_host_managed'=>'External / host-managed');
+$target_file_name = ! empty($target['relative_location']) ? basename($target['relative_location']) : 'Not available';
 $target_labels = array('not_configured'=>'Not configured','unsupported_external_path'=>'External path (not inspected)','missing'=>'Missing','unreadable'=>'Unreadable','unsupported_file_type'=>'Unsupported file type','detected_readable'=>'Detected and readable','unknown'=>'Unknown');
 ?>
 <div class="wrap wpdt-admin">
@@ -17,7 +18,7 @@ $target_labels = array('not_configured'=>'Not configured','unsupported_external_
 <?php if (! empty($configuration['debug_display_warning'])) : ?><div class="notice notice-warning inline"><p><strong>Security notice:</strong> Debug display is enabled. PHP errors may be exposed in rendered responses.</p></div><?php endif; ?>
 </section>
 <section class="wpdt-section"><div class="wpdt-section-header"><div><h2>WordPress debug log</h2><p>Metadata checks are restricted to targets inside the canonical wp-content directory.</p></div></div>
-<table class="widefat striped"><tbody><tr><th scope="row">File</th><td>debug.log</td></tr>
+<table class="widefat striped"><tbody><tr><th scope="row">File</th><td><?php echo esc_html($target_file_name); ?></td></tr>
 <tr><th scope="row">Relative location</th><td><?php echo ! empty($target['relative_location']) ? esc_html($target['relative_location']) : 'Not available'; ?></td></tr>
 <tr><th scope="row">Status</th><td><?php echo esc_html($target_labels[$target['status']] ?? 'Unknown'); ?></td></tr></tbody></table>
 <div class="notice notice-info inline"><p><strong>Privacy by design:</strong> WP Diagnostic Toolkit does not open, read, display, or download log contents. Log files can contain credentials, tokens, email addresses, request data, and internal server paths.</p></div>

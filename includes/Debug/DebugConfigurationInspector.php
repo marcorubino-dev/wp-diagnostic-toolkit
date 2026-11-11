@@ -42,7 +42,7 @@ class DebugConfigurationInspector
                 $debug['state'] === 'enabled'
                 && $debug_display['state'] === 'enabled'
             ),
-            'debug_log_value' => $debug_log['value'],
+            'debug_log_configured' => $this->is_debug_log_configured($debug_log),
         );
     }
 

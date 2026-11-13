@@ -86,6 +86,21 @@ function wpdt_theme_check($condition, $message)
     fwrite(STDERR, 'FAIL: ' . $message . PHP_EOL);
 }
 
+function wpdt_theme_assert_stable_ids($results)
+{
+    $expected_ids = array(
+        'themes.installed_themes',
+        'themes.active_theme',
+        'themes.active_theme_version',
+        'themes.child_theme_parent',
+        'themes.active_theme_updates',
+    );
+    $actual_ids = array_column($results, 'id');
+    sort($expected_ids);
+    sort($actual_ids);
+    wpdt_theme_check($expected_ids === $actual_ids, 'declares the complete stable theme check ID set');
+}
+
 function wpdt_theme_result($results, $name)
 {
     foreach ($results as $result) {
@@ -108,6 +123,7 @@ $GLOBALS['wpdt_theme_updates'] = (object) array('response' => array());
 
 $diagnostic = new \WPDT\Diagnostics\ThemeDiagnostic();
 $results = $diagnostic->run();
+wpdt_theme_assert_stable_ids($results);
 
 wpdt_theme_check(2 === wpdt_theme_result($results, 'Installed themes')['value'], 'counts installed themes');
 wpdt_theme_check('Example Child' === wpdt_theme_result($results, 'Active theme')['value'], 'reports the active theme name');

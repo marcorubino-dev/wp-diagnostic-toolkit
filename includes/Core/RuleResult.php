@@ -44,12 +44,15 @@ final class RuleResult
             }
         }
 
-        if (!preg_match('/^[a-z0-9][a-z0-9._-]*$/', $data['id'])) {
-            throw new \InvalidArgumentException('Field "id" must be a stable lowercase identifier.');
+        if (!preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $data['module'])) {
+            throw new \InvalidArgumentException('Field "module" must be a stable lowercase identifier without dots.');
         }
 
-        if (!preg_match('/^[a-z0-9][a-z0-9._-]*$/', $data['module'])) {
-            throw new \InvalidArgumentException('Field "module" must be a stable lowercase identifier.');
+        $expected_id_pattern = '/^' . preg_quote($data['module'], '/') . '\.[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/';
+        if (!preg_match($expected_id_pattern, $data['id'])) {
+            throw new \InvalidArgumentException(
+                'Field "id" must use the "module_id.check_id" format and match the result module.'
+            );
         }
 
         $allowed_outcomes = array(

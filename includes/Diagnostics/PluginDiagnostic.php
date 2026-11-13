@@ -47,24 +47,28 @@ class PluginDiagnostic implements DiagnosticInterface
         return array(
             array(
                 'name'        => 'Installed plugins',
+                'id' => 'plugins.installed_plugins',
                 'value'       => count($all_plugins),
                 'status'      => 'info',
                 'description' => 'Total number of installed plugins.',
             ),
             array(
                 'name'        => 'Active plugins',
+                'id' => 'plugins.active_plugins',
                 'value'       => $active_count,
                 'status'      => 'info',
                 'description' => 'Number of currently active plugins, including network-active plugins on multisite.',
             ),
             array(
                 'name'        => 'Inactive plugins',
+                'id' => 'plugins.inactive_plugins',
                 'value'       => $inactive_count,
                 'status'      => 'info',
                 'description' => 'Number of installed plugins that are currently inactive.',
             ),
             array(
                 'name'           => 'Active plugin updates',
+                'id' => 'plugins.active_plugin_updates',
                 'value'          => $update_status['value'],
                 'status'         => $update_status['status'],
                 'description'    => $update_status['description'],

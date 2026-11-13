@@ -63,6 +63,20 @@ function wpdt_assert_same($expected, $actual, $message)
     echo 'PASS: ' . $message . PHP_EOL;
 }
 
+function wpdt_plugin_assert_stable_ids($results)
+{
+    $expected_ids = array(
+        'plugins.installed_plugins',
+        'plugins.active_plugins',
+        'plugins.inactive_plugins',
+        'plugins.active_plugin_updates',
+    );
+    $actual_ids = array_column($results, 'id');
+    sort($expected_ids);
+    sort($actual_ids);
+    wpdt_assert_same($expected_ids, $actual_ids, 'declares the complete stable plugin check ID set');
+}
+
 function wpdt_plugin_result_value($results, $name)
 {
     foreach ($results as $result) {
@@ -91,6 +105,7 @@ $GLOBALS['wpdt_test_update_transient'] = (object) array(
 
 $diagnostic = new \WPDT\Diagnostics\PluginDiagnostic();
 $results = $diagnostic->run();
+wpdt_plugin_assert_stable_ids($results);
 
 wpdt_assert_same(3, wpdt_plugin_result_value($results, 'Installed plugins'), 'counts installed plugins');
 wpdt_assert_same(1, wpdt_plugin_result_value($results, 'Active plugins'), 'counts site-active plugins on single-site');
@@ -104,6 +119,7 @@ $GLOBALS['wpdt_test_network_plugins'] = array(
 );
 
 $results = $diagnostic->run();
+wpdt_plugin_assert_stable_ids($results);
 
 wpdt_assert_same(2, wpdt_plugin_result_value($results, 'Active plugins'), 'counts unique site-active and network-active plugins on multisite');
 wpdt_assert_same(1, wpdt_plugin_result_value($results, 'Inactive plugins'), 'excludes network-active plugins from inactive count');

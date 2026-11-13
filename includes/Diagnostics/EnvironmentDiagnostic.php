@@ -160,12 +160,14 @@ class EnvironmentDiagnostic implements DiagnosticInterface
         return array(
             array(
                 'name'        => 'WordPress version',
+                'id' => 'environment.wordpress_version',
                 'value'       => get_bloginfo('version'),
                 'status'      => 'info',
                 'description' => 'Installed WordPress version.',
             ),
             array(
                 'name'           => 'PHP version',
+                'id' => 'environment.php_version',
                 'value'          => $php_version,
                 'status'         => $php_version_supported ? 'pass' : 'warning',
                 'description'    => $php_version_supported
@@ -178,12 +180,14 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             ),
             array(
                 'name'        => 'Database version',
+                'id' => 'environment.database_version',
                 'value'       => $wpdb->db_version(),
                 'status'      => 'info',
                 'description' => 'Database server version reported by WordPress.',
             ),
             array(
                 'name'        => 'WP_DEBUG',
+                'id' => 'environment.wp_debug',
                 'value'       => $debug_enabled ? 'Enabled' : 'Disabled',
                 'status'      => $debug_enabled ? 'warning' : 'pass',
                 'description' => $debug_enabled
@@ -192,12 +196,14 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             ),
             array(
                 'name'        => 'WP_MEMORY_LIMIT',
+                'id' => 'environment.wp_memory_limit',
                 'value'       => $memory_limit,
                 'status'      => 'info',
                 'description' => 'WordPress memory limit constant, if explicitly defined.',
             ),
             array(
                 'name'           => 'Home URL HTTPS',
+                'id' => 'environment.home_url_https',
                 'value'          => $home_url_https ? 'Enabled' : 'Disabled',
                 'status'         => $home_url_https ? 'pass' : 'warning',
                 'description'    => $home_url_https
@@ -210,6 +216,7 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             ),
             array(
                 'name'           => 'Site URL HTTPS',
+                'id' => 'environment.site_url_https',
                 'value'          => $site_url_https ? 'Enabled' : 'Disabled',
                 'status'         => $site_url_https ? 'pass' : 'warning',
                 'description'    => $site_url_https
@@ -222,6 +229,7 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             ),
             array(
                 'name'           => 'Loopback request',
+                'id' => 'environment.loopback_request',
                 'value'          => $loopback_value,
                 'status'         => $loopback_status,
                 'description'    => $loopback_description,

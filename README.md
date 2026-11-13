@@ -8,6 +8,7 @@
 <img src="https://img.shields.io/badge/PHP-7.4%2B-777BB4?logo=php&logoColor=white" alt="PHP 7.4+" />
 <img src="https://img.shields.io/badge/License-GPL--2.0--or--later-2B7A4B" alt="GPL 2.0 or later" />
 <img src="https://img.shields.io/badge/Status-Active%20development-64748B" alt="Active development" />
+<a href="https://github.com/marcorubino-dev/wp-diagnostic-toolkit/actions/workflows/php-tests.yml"><img src="https://github.com/marcorubino-dev/wp-diagnostic-toolkit/actions/workflows/php-tests.yml/badge.svg?branch=main" alt="PHP Tests" /></a>
 
 </div>
 
@@ -34,6 +35,7 @@ Its purpose is to make technical information easier to access, surface potential
 - [WooCommerce and multilingual troubleshooting](#woocommerce-and-multilingual-troubleshooting)
 - [Design principles](#design-principles)
 - [Current status](#current-status)
+- [Architecture notes](#architecture-notes)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
 - [License](#license)
@@ -49,12 +51,15 @@ Its purpose is to make technical information easier to access, surface potential
 | **Server** | PHP configuration, resource limits, and extension availability. |
 | **Filesystem** | Available and total disk space reported for the filesystem containing the WordPress installation. |
 | **WooCommerce and multilingual** | WooCommerce availability, detection of selected multilingual plugins, and guidance for investigating language-switch/cart symptoms. |
+| **Debug Center** | Read-only inspection of WordPress/PHP debugging configuration and safe metadata checks for an eligible debug-log target. Log contents are never opened or displayed. |
 | **Dashboard** | A centralized view of diagnostic results, grouped by status, with report-copy actions. |
-| **Settings** | An administration section for toolkit-related settings. |
+| **Settings** | An administration section for toolkit-related settings, including appearance preferences. |
 
 Results use statuses such as `pass`, `info`, `warning`, and `critical` to help distinguish normal conditions from potential issues.
 
 **Scope note:** The initial multilingual module is an environment-level starting point. It does not capture a visitor's live cart, prove translation mapping correctness, or automatically identify a root cause.
+
+**Debug Center boundary:** It is an inspection surface, not a log viewer, repair tool, or server observability platform. It does not read, download, or modify log files.
 
 ## Requirements
 
@@ -74,7 +79,9 @@ For local development, install the plugin in a test WordPress environment before
 
 ## Testing
 
-The repository includes lightweight PHP CLI tests. They do not require PHPUnit or a WordPress bootstrap; tests that exercise WordPress-dependent diagnostics provide controlled stubs for the WordPress HTTP and environment APIs. The result-model tests cover normalized field validation, legacy adaptation, malformed-result isolation, duplicate-ID integrity errors, cross-module ID collisions, module exceptions, and compatibility with the existing admin presentation.
+The repository includes lightweight PHP CLI tests. They do not require PHPUnit or a WordPress bootstrap; tests that exercise WordPress-dependent diagnostics provide controlled stubs for the WordPress HTTP and environment APIs.
+
+The regression suite covers result normalization and validation, legacy adaptation, malformed-result isolation, duplicate-ID integrity errors, module execution, dashboard and admin rendering, environment and server checks, HTTP/SSL behavior, filesystem metadata, theme detection, and Debug Center path-safety boundaries.
 
 Run the test scripts from the repository root:
 
@@ -82,16 +89,19 @@ Run the test scripts from the repository root:
 php tests/PluginDiagnosticTest.php
 php tests/RuleResultTest.php
 php tests/DiagnosticManagerTest.php
+php tests/DashboardViewTest.php
 php tests/ServerDiagnosticTest.php
 php tests/DiskSpaceDiagnosticTest.php
 php tests/HttpSslDiagnosticTest.php
 php tests/EnvironmentDiagnosticTest.php
 php tests/ThemeDiagnosticTest.php
+php tests/AdminMenuTest.php
+php tests/DebugCenterTest.php
 ```
 
 The HTTP/SSL regression test covers successful responses, redirects, client and server errors, HEAD-to-GET fallback, generic transport failures, TLS verification errors, and non-HTTPS URLs. The environment test covers WordPress/database version reporting, HTTPS detection, loopback success, redirects, client/server errors, and transport failures. The theme test covers installed and active themes, child-theme parent detection, missing parents, undeclared versions, and update transient states.
 
-The GitHub Actions workflow runs PHP syntax validation and all CLI regression tests against PHP 7.4 through 8.4.
+The GitHub Actions workflow runs PHP syntax validation and the CLI regression suite against PHP 7.4 through 8.4 on pushes and pull requests targeting `main`.
 
 These tests verify diagnostic behavior against controlled API responses. They are not a substitute for integration testing in a real WordPress installation or validation against different hosting, proxy, DNS, and TLS configurations.
 
@@ -115,11 +125,15 @@ WP Diagnostic Toolkit
 │   ├── ServerDiagnostic
 │   ├── DiskSpaceDiagnostic
 │   └── MultilingualWooCommerceDiagnostic
+├── Debug
+│   ├── DebugConfigurationInspector
+│   └── DebugLogTargetInspector
 └── Admin
     ├── Dashboard
     ├── Environment
     ├── Plugins
     ├── Server
+    ├── Debug Center
     └── Settings
 ```
 
@@ -129,7 +143,7 @@ Each diagnostic module implements a common interface that defines its identifier
 
 ### Diagnostic manager
 
-The manager registers diagnostic modules, normalizes legacy arrays and native `RuleResult` objects, and isolates malformed results without discarding valid siblings. Duplicate result IDs are reported as integrity errors; the first result is retained. Module execution failures are represented explicitly so other modules can continue.
+The manager registers diagnostic modules, supports execution of selected registered modules, normalizes legacy arrays and native `RuleResult` objects, and isolates malformed results without discarding valid siblings. Duplicate result IDs are reported as integrity errors; the first result is retained. Module execution failures are represented explicitly so other modules can continue.
 
 ### Normalized result contract
 
@@ -138,6 +152,10 @@ The manager registers diagnostic modules, normalizes legacy arrays and native `R
 ### Admin interface
 
 The administration layer presents diagnostic results in the WordPress dashboard, keeping presentation separate from the diagnostic checks themselves. Diagnostic reports can also be copied for sharing or further investigation.
+
+### Debug Center
+
+Debug Center presents sanitized configuration states and, when permitted by the filesystem boundary, a safe relative location and metadata status for the WordPress debug-log target. It deliberately does not acquire log contents. See the [Debug Center v1 specification](docs/architecture/debug-center-v1-specification.md) for its security and scope requirements.
 
 ## WooCommerce and multilingual troubleshooting
 
@@ -171,9 +189,18 @@ The current module does not modify products, prices, translations, sessions, or 
 
 **Version:** 0.3.0 (development)
 
-The toolkit currently includes environment, HTTP/SSL, plugin, theme, server, filesystem, and initial WooCommerce/multilingual diagnostics. Diagnostic coverage, compatibility handling, result classification, and administration workflows may change as the project evolves.
+The toolkit currently includes environment, HTTP/SSL, plugin, theme, server, filesystem, and initial WooCommerce/multilingual diagnostics, plus a read-only Debug Center. Diagnostic coverage, compatibility handling, result classification, and administration workflows may change as the project evolves.
 
 The current implementation provides a foundation for a modular diagnostic tool. It should not yet be considered a comprehensive audit or monitoring solution.
+
+## Architecture notes
+
+The repository includes focused architecture documents for areas where contracts and security boundaries matter:
+
+- [Normalized diagnostic result contract](docs/architecture/rule-result-contract.md) — result fields, validation, and compatibility expectations.
+- [Debug Center v1 specification](docs/architecture/debug-center-v1-specification.md) — read-only scope, filesystem boundary, privacy rules, and acceptance criteria.
+- [Public integration contract](docs/architecture/public-integration-contract.md) — proposed API for external consumers. **Architecture proposal; not implemented.**
+- [Companion action engine specification](docs/architecture/action-engine-specification.md) — proposed separation between diagnostics and operations. **Design document; not a claim of shipped functionality.**
 
 ## Contributing
 

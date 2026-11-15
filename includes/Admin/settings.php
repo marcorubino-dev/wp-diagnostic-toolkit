@@ -14,7 +14,7 @@ defined('ABSPATH') || exit;
     <section class="wpdt-section">
         <div class="wpdt-section-header">
             <h2>Appearance</h2>
-            <p>Interface theme</p>
+            <p>Choose System, Light or Dark. Your preference is saved locally when browser storage is available.</p>
         </div>
 
         <div class="wpdt-settings-appearance-control"></div>

@@ -38,6 +38,39 @@ Out of scope:
 - REST endpoints for third-party remote execution.
 - Automatic execution from a diagnostic finding.
 
+## 3.1 Action mapping registry
+
+The mapping registry belongs to WP Operations Companion. It is not part of WPDT and must not be exposed as executable metadata by the diagnostic provider.
+
+Its sole purpose is to declare which registered companion action may be offered for a specific, stable diagnostic result. A mapping makes an action discoverable for evaluation; it does not authorize, validate, preview, or execute that action.
+
+A mapping must contain:
+
+- `mapping_id`: stable, unique identifier for the mapping.
+- `mapping_version`: version of the mapping definition.
+- `source_contract`: supported WPDT public contract major version.
+- `result_id`: exact public result identifier to which the mapping applies.
+- `action_id`: exact ID of an action registered by the companion.
+
+### Mapping rules
+
+1. Register mappings explicitly in the companion. Do not derive them dynamically from recommendation text, descriptions, titles, severity, confidence, or other display fields.
+2. Match `result_id` exactly. Do not use partial matches, wildcards, fuzzy matching, or inferred identifiers.
+3. Resolve `action_id` only through the companion's own action registry. An unknown or unavailable action makes the mapping unavailable; it must never trigger a fallback action.
+4. Check the supported public contract version before consuming WPDT results. An unsupported major version disables the integration, not the companion's standalone action functionality.
+5. Treat all diagnostic result data as untrusted input. A mapping must not copy arbitrary result values into executable arguments or bypass the action's own schema validation and preconditions.
+6. A mapped action is only offered for independent evaluation. The companion must still enforce capability checks, nonce validation, preview integrity, explicit confirmation, fresh precondition checks, concurrency/idempotency controls, audit logging, and post-action verification.
+7. Severity and confidence may inform presentation or prioritization, but they never grant authorization or prove that an operation is safe.
+8. A mapping must not require WPDT to be installed for the companion's action registry or execution lifecycle to function. Without a compatible diagnostic provider, mapped actions are simply unavailable through diagnostic results.
+
+The `recommendation` field is advisory display content only. It must never be parsed, evaluated, interpreted as a command, or used to select an action.
+
+### Example (conceptual)
+
+A companion may explicitly register a mapping from the exact result ID `plugins.inactive_plugin` to a companion-owned action ID. This means the UI may offer that action for evaluation when the result is present. It does not mean that the plugin should be deleted, deactivated, or otherwise modified. The action must independently establish its target, risk, preconditions, preview, and verification requirements.
+
+This example does not define or imply that such an action exists in the MVP.
+
 ## 3. Action contract
 
 A proposed PHP 7.4-compatible interface:

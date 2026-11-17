@@ -50,7 +50,7 @@ array(
     'modules'          => array(
         'environment' => array(
             'status'   => 'completed',
-            'findings' => array(
+            'results' => array(
                 array(
                     'finding_id'    => 'environment.php_version',
                     'module_id'     => 'environment',
@@ -92,7 +92,7 @@ Status semantics:
 
 | Field | Type | Contract |
 | --- | --- | --- |
-| `finding_id` | string | Stable lowercase identifier, unique within the snapshot. |
+| `result_id` | string | Stable lowercase identifier mapped from the internal `RuleResult.id`, unique within the snapshot. |
 | `module_id` | string | Stable ID of the producing module. |
 | `title` | string | Human-readable label. |
 | `outcome` | string | `pass`, `finding`, `error`, or `skipped`. |
@@ -103,7 +103,9 @@ Status semantics:
 | `recommendation` | string or null | Advisory next step. It is never an executable instruction. |
 | `evidence` | array/string/null | Minimal supporting evidence, redacted before leaving WPDT. |
 
-The public finding model is a projection of the internal normalized result model. Internal field names may differ, and the public API must not expose the presenter-specific shape.
+The public result model is a projection of the internal normalized `RuleResult` model. The public `result_id` maps directly from internal `RuleResult.id`; this mapping must preserve the identifier exactly and must not derive an ID from display text. Internal field names may otherwise differ, and the public API must not expose the presenter-specific shape.
+
+The `confidence` field describes the evidential basis for the result, not its severity or priority. It may be `direct` only when the check observes the stated condition directly, `inferred` only when a documented rule derives the conclusion from indirect evidence, and `unknown` when the basis cannot be reliably classified. The projection must not invent or guess confidence. Each diagnostic rule or result producer must supply a supported confidence value, or the public projection must use `unknown`.
 
 ## 5. Outcome semantics
 
@@ -127,7 +129,7 @@ Requirements:
 5. Apply bounded execution and safe error handling to modules that perform HTTP or filesystem checks.
 6. Module selection is not authorization. The consumer must enforce its own WordPress capability checks before calling the API.
 
-The public API is not a permission system. A consuming plugin must authorize its own user-facing operation independently.
+The public API is not a permission system. A consuming plugin must authorize its own user-facing operation independently. The API exposes diagnostic results only: it does not declare, select, or authorize companion actions, and consumers must never interpret `recommendation` text as an executable command. Any relationship between a result and an operation must be defined explicitly in the consuming plugin's own action-mapping registry and validated through that plugin's independent action lifecycle. The companion must remain able to operate without a diagnostic result or WPDT being available.
 
 ## 7. Privacy and evidence rules
 
@@ -155,7 +157,7 @@ A companion plugin may detect WPDT with `function_exists( 'wpdt_get_diagnostic_s
 - [ ] The function returns arrays or `WP_Error`, never internal WPDT objects.
 - [ ] Selective execution runs only requested modules.
 - [ ] Module failures do not erase valid sibling results.
-- [ ] IDs, outcomes, severity, confidence, and timestamp formats are validated.
+- [ ] `result_id` preserves the corresponding internal `RuleResult.id`; outcomes, severity, confidence, and timestamp formats are validated.
 - [ ] Sensitive values are redacted and output sizes are bounded.
 - [ ] Compatibility tests cover WPDT absent, inactive, supported, and unsupported contract versions.
 - [ ] Tests verify that consumers do not depend on admin presenter output or internal classes.

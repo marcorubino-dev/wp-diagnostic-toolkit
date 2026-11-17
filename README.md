@@ -180,6 +180,8 @@ The current module does not modify products, prices, translations, sessions, or 
 ## Design principles
 
 - **Read-only diagnostics:** Inspect the environment without intentionally modifying site content or configuration.
+- **Operational separation:** Remediation and write-enabled operations are intended to live in a separate companion plugin. WPDT findings and recommendations are advisory data, never executable commands.
+- **Versioned integrations:** External consumers should use a documented, versioned public contract rather than depending on WPDT internal classes, admin templates, or storage.
 - **Modular architecture:** Keep checks isolated so they can be maintained and extended independently.
 - **Actionable results:** Present findings with a clear status and supporting information.
 - **Practical scope:** Prioritize checks that help developers investigate real WordPress issues.

@@ -40,24 +40,28 @@ class ServerDiagnostic implements DiagnosticInterface
         $results = array(
             array(
                 'name'        => 'PHP memory limit',
+                'id' => 'server.php_memory_limit',
                 'value'       => ini_get('memory_limit'),
                 'status'      => 'info',
                 'description' => 'PHP memory limit configured for the current process.',
             ),
             array(
                 'name'        => 'Upload max filesize',
+                'id' => 'server.upload_max_filesize',
                 'value'       => ini_get('upload_max_filesize'),
                 'status'      => 'info',
                 'description' => 'Maximum size allowed for an uploaded file.',
             ),
             array(
                 'name'        => 'POST max size',
+                'id' => 'server.post_max_size',
                 'value'       => ini_get('post_max_size'),
                 'status'      => 'info',
                 'description' => 'Maximum size allowed for POST request data.',
             ),
             array(
                 'name'        => 'Maximum execution time',
+                'id' => 'server.max_execution_time',
                 'value'       => ini_get('max_execution_time') . ' seconds',
                 'status'      => 'info',
                 'description' => 'Maximum execution time configured for PHP scripts.',
@@ -113,7 +117,7 @@ class ServerDiagnostic implements DiagnosticInterface
         $results = array();
         $groups = $this->get_extension_groups();
 
-        foreach ($groups as $group) {
+        foreach ($groups as $group_id => $group) {
             $extensions = $group['extensions'];
             $loaded = array();
             $missing = array();
@@ -134,6 +138,7 @@ class ServerDiagnostic implements DiagnosticInterface
 
             $results[] = array(
                 'name'           => $group['label'] . ' PHP extensions',
+                'id'             => 'server.' . $group_id . '_php_extensions',
                 'value'          => count($loaded) . '/' . count($extensions) . ' loaded',
                 'status'         => $summary_status,
                 'description'    => $all_loaded
@@ -156,6 +161,7 @@ class ServerDiagnostic implements DiagnosticInterface
 
                 $results[] = array(
                     'name'           => 'PHP extension: ' . $extension,
+                    'id'             => 'server.php_extension_' . $extension,
                     'value'          => $is_loaded ? 'Loaded' : 'Not loaded',
                     'status'         => $is_loaded
                         ? 'pass'

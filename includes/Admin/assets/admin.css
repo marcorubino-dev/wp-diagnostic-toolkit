@@ -589,6 +589,7 @@
 .wpdt-check-status-info { color: var(--wpdt-color-info); }
 .wpdt-check-status-warning { color: var(--wpdt-color-warning); }
 .wpdt-check-status-critical { color: var(--wpdt-color-critical); }
+.wpdt-check-status-error { color: var(--wpdt-color-critical); }
 
 .wpdt-check-recommendation {
     margin-top: 10px;

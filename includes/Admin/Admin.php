@@ -321,15 +321,19 @@ class Admin
 
         $diagnostic = $diagnostics[$module_id];
 
-        $legacy_templates = array('environment', 'plugins', 'server');
-        $template = in_array($module_id, $legacy_templates, true)
-            ? $module_id
-            : 'module';
+        $page_descriptions = array(
+            'environment' => 'System configuration and runtime diagnostics.',
+            'plugins' => 'Plugin inventory and update diagnostics.',
+            'server' => 'PHP and server configuration diagnostics.',
+        );
 
         $this->render_template(
-            $template,
+            'module',
             array(
                 'diagnostic' => $diagnostic,
+                'page_description' => isset($page_descriptions[$module_id])
+                    ? $page_descriptions[$module_id]
+                    : 'Read-only diagnostic results for this module.',
             )
         );
     }

@@ -755,11 +755,7 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .wpdt-module {
-        transition: none;
-    }
-}
+
 
 /* Product identity and theme preference control */
 
@@ -847,11 +843,7 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     color: var(--wpdt-color-ink);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .wpdt-admin a.wpdt-module:hover {
-        transform: none;
-    }
-}
+
 
 /* -------------------------------------------------------------
    Visual refinement — dashboard and diagnostic navigation
@@ -1034,20 +1026,7 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .wpdt-summary-item,
-    .wpdt-header-action .button,
-    .wpdt-module-arrow,
-    .wpdt-copy-button {
-        transition: none;
-    }
 
-    .wpdt-summary-item:hover,
-    .wpdt-admin a.wpdt-module:hover,
-    .wpdt-header-action .button-primary:hover {
-        transform: none;
-    }
-}
 
 /* Dark-mode contrast corrections for WordPress controls and striped tables. */
 .wpdt-admin[data-theme-resolved="dark"] .wpdt-header-action .button-primary {
@@ -1252,11 +1231,7 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .wpdt-theme-option {
-        transition: none;
-    }
-}
+
 
 
 /* Debug Center — aligned with the shared admin surfaces. */
@@ -1498,4 +1473,23 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     .wpdt-debug-file-heading > .wpdt-debug-value { margin-left: 55px; }
     .wpdt-debug-file-card { padding: 15px; }
     .wpdt-debug-steps { padding-inline: 15px; }
+}
+
+/* Respect reduced-motion preferences across all interactive controls. */
+@media (prefers-reduced-motion: reduce) {
+    .wpdt-module,
+    .wpdt-summary-item,
+    .wpdt-header-action .button,
+    .wpdt-module-arrow,
+    .wpdt-copy-button,
+    .wpdt-theme-option {
+        transition: none;
+    }
+
+    .wpdt-module:hover,
+    .wpdt-summary-item:hover,
+    .wpdt-admin a.wpdt-module:hover,
+    .wpdt-header-action .button-primary:hover {
+        transform: none;
+    }
 }

@@ -124,7 +124,8 @@ $report_text = implode("\n", $report_lines);
 
             <div class="wpdt-summary">
                 <?php foreach (array('pass' => 'passed', 'info' => 'info', 'warning' => 'warnings', 'diagnostic_error' => 'diagnostic errors', 'critical' => 'critical', 'unclassified' => 'unclassified') as $status => $label) : ?>
-                    <div class="wpdt-summary-item wpdt-summary-<?php echo $status === 'unclassified' ? 'info' : esc_attr($status); ?>">
+                    <?php $summary_class = $status === 'diagnostic_error' ? 'error' : ($status === 'unclassified' ? 'info' : $status); ?>
+                    <div class="wpdt-summary-item wpdt-summary-<?php echo esc_attr($summary_class); ?>">
                         <span class="wpdt-summary-icon" aria-hidden="true">
                             <?php echo $status === 'pass' ? '✓' : ($status === 'warning' ? '⚠' : ($status === 'diagnostic_error' ? '!' : ($status === 'critical' ? '✕' : ($status === 'unclassified' ? '?' : 'ℹ')))); ?>
                         </span>

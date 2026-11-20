@@ -61,7 +61,7 @@ $report_text = implode("\n", $report_lines);
     <div class="wpdt-header">
         <div>
             <h1><?php echo esc_html($diagnostic['name']); ?></h1>
-            <p>Read-only diagnostic results for this module.</p>
+            <p><?php echo esc_html(isset($page_description) ? $page_description : 'Read-only diagnostic results for this module.'); ?></p>
         </div>
     </div>
 

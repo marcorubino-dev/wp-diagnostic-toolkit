@@ -237,7 +237,7 @@ wpdt_admin_check(
     'distinguishes diagnostic execution errors from functional warnings'
 );
 wpdt_admin_check(
-    strpos($error_module_output, 'wpdt-summary-diagnostic_error') !== false,
+    strpos($error_module_output, 'wpdt-summary-error') !== false,
     'includes a separate diagnostic-error counter in the module summary'
 );
 wpdt_admin_check(

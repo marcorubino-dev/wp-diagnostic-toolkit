@@ -10,8 +10,9 @@ $counts = array(
     'pass'     => 0,
     'info'     => 0,
     'warning'  => 0,
-    'critical'     => 0,
-    'unclassified' => 0,
+    'critical'        => 0,
+    'diagnostic_error' => 0,
+    'unclassified'    => 0,
 );
 
 $report_lines = array(
@@ -25,14 +26,25 @@ foreach ($results as $check) {
         ? strtolower(trim($check['status']))
         : 'unclassified';
 
-    if (! isset($counts[$status])) {
-        $status = 'unclassified';
-    }
+    $outcome = isset($check['outcome']) && is_string($check['outcome'])
+        ? strtolower(trim($check['outcome']))
+        : '';
 
-    $counts[$status]++;
+    if ($outcome === 'error') {
+        $counts['diagnostic_error']++;
+    } else {
+        if (! isset($counts[$status])) {
+            $status = 'unclassified';
+        }
+
+        $counts[$status]++;
+    }
 
     $report_lines[] = 'Check: ' . (isset($check['name']) ? $check['name'] : 'Unnamed check');
     $report_lines[] = 'Status: ' . strtoupper($status);
+    if ($outcome !== '') {
+        $report_lines[] = 'Outcome: ' . strtoupper($outcome);
+    }
     $report_lines[] = 'Observed value: ' . (isset($check['value']) ? $check['value'] : '');
 
     foreach (array('description' => 'Interpretation', 'evidence' => 'Observed evidence', 'recommendation' => 'Next step') as $key => $label) {
@@ -46,13 +58,19 @@ foreach ($results as $check) {
 
 $module_status = $counts['critical'] > 0
     ? 'CRITICAL'
-    : ($counts['warning'] > 0
-        ? 'NEEDS ATTENTION'
-        : ($counts['unclassified'] > 0 ? 'NEEDS REVIEW' : 'OK'));
+    : ($counts['diagnostic_error'] > 0
+        ? 'DIAGNOSTIC ERRORS'
+        : ($counts['warning'] > 0
+            ? 'NEEDS ATTENTION'
+            : ($counts['unclassified'] > 0 ? 'NEEDS REVIEW' : (empty($results) ? 'NO DATA' : 'OK'))));
 
 $status_class = $counts['critical'] > 0
     ? 'critical'
-    : (($counts['warning'] > 0 || $counts['unclassified'] > 0) ? 'warning' : 'pass');
+    : ($counts['diagnostic_error'] > 0
+        ? 'error'
+        : ($counts['warning'] > 0 || $counts['unclassified'] > 0
+            ? 'warning'
+            : (empty($results) ? 'empty' : 'pass')));
 
 $report_text = implode("\n", $report_lines);
 ?>
@@ -61,7 +79,7 @@ $report_text = implode("\n", $report_lines);
     <div class="wpdt-header">
         <div>
             <h1><?php echo esc_html($diagnostic['name']); ?></h1>
-            <p>Read-only diagnostic results for this module.</p>
+            <p><?php echo esc_html(isset($page_description) ? $page_description : 'Read-only diagnostic results for this module.'); ?></p>
         </div>
     </div>
 
@@ -72,6 +90,10 @@ $report_text = implode("\n", $report_lines);
                 <h2 class="wpdt-status wpdt-status-<?php echo esc_attr($status_class); ?>">
                     <?php if ($status_class === 'critical') : ?>
                         <span aria-hidden="true">✕</span>
+                    <?php elseif ($status_class === 'error') : ?>
+                        <span aria-hidden="true">!</span>
+                    <?php elseif ($status_class === 'empty') : ?>
+                        <span aria-hidden="true">—</span>
                     <?php elseif ($status_class === 'warning' && $counts['unclassified'] > 0 && $counts['warning'] === 0) : ?>
                         <span aria-hidden="true">?</span>
                     <?php elseif ($status_class === 'warning') : ?>
@@ -85,6 +107,10 @@ $report_text = implode("\n", $report_lines);
                     <?php
                     if ($counts['critical'] > 0) {
                         echo esc_html(sprintf('%d critical finding(s) require attention.', $counts['critical']));
+                    } elseif ($counts['diagnostic_error'] > 0) {
+                        echo esc_html(sprintf('%d diagnostic error(s) occurred. Review this module before trusting its results.', $counts['diagnostic_error']));
+                    } elseif (empty($results)) {
+                        echo esc_html('No diagnostic checks are available for this module.');
                     } elseif ($counts['warning'] > 0) {
                         echo esc_html(sprintf('%d warning(s) require attention.', $counts['warning']));
                     } elseif ($counts['unclassified'] > 0) {
@@ -97,10 +123,11 @@ $report_text = implode("\n", $report_lines);
             </div>
 
             <div class="wpdt-summary">
-                <?php foreach (array('pass' => 'passed', 'info' => 'info', 'warning' => 'warnings', 'critical' => 'critical', 'unclassified' => 'unclassified') as $status => $label) : ?>
-                    <div class="wpdt-summary-item wpdt-summary-<?php echo $status === 'unclassified' ? 'info' : esc_attr($status); ?>">
+                <?php foreach (array('pass' => 'passed', 'info' => 'info', 'warning' => 'warnings', 'diagnostic_error' => 'diagnostic errors', 'critical' => 'critical', 'unclassified' => 'unclassified') as $status => $label) : ?>
+                    <?php $summary_class = $status === 'diagnostic_error' ? 'error' : ($status === 'unclassified' ? 'info' : $status); ?>
+                    <div class="wpdt-summary-item wpdt-summary-<?php echo esc_attr($summary_class); ?>">
                         <span class="wpdt-summary-icon" aria-hidden="true">
-                            <?php echo $status === 'pass' ? '✓' : ($status === 'warning' ? '⚠' : ($status === 'critical' ? '✕' : ($status === 'unclassified' ? '?' : 'ℹ'))); ?>
+                            <?php echo $status === 'pass' ? '✓' : ($status === 'warning' ? '⚠' : ($status === 'diagnostic_error' ? '!' : ($status === 'critical' ? '✕' : ($status === 'unclassified' ? '?' : 'ℹ')))); ?>
                         </span>
                         <strong><?php echo esc_html($counts[$status]); ?></strong>
                         <span><?php echo esc_html($label); ?></span>
@@ -136,17 +163,30 @@ $report_text = implode("\n", $report_lines);
                     </tr>
                 </thead>
                 <tbody>
+                    <?php if (empty($results)) : ?>
+                        <tr>
+                            <td colspan="4">NO DATA: No diagnostic checks are available for this module.</td>
+                        </tr>
+                    <?php endif; ?>
                     <?php foreach ($results as $check) : ?>
                         <?php
                         $status = isset($check['status']) && is_string($check['status'])
                             ? strtolower(trim($check['status']))
                             : 'unclassified';
-                        if (! isset($counts[$status])) {
-                            $status = 'unclassified';
+                        $outcome = isset($check['outcome']) && is_string($check['outcome'])
+                            ? strtolower(trim($check['outcome']))
+                            : '';
+                        if ($outcome === 'error') {
+                            $status = 'error';
+                            $icon = '!';
+                        } else {
+                            if (! isset($counts[$status])) {
+                                $status = 'unclassified';
+                            }
+                            $icon = $status === 'critical'
+                                ? '✕'
+                                : ($status === 'warning' ? '⚠' : ($status === 'pass' ? '✓' : ($status === 'unclassified' ? '?' : 'ℹ')));
                         }
-                        $icon = $status === 'critical'
-                            ? '✕'
-                            : ($status === 'warning' ? '⚠' : ($status === 'pass' ? '✓' : ($status === 'unclassified' ? '?' : 'ℹ')));
                         ?>
                         <tr>
                             <td><strong><?php echo esc_html(isset($check['name']) ? $check['name'] : 'Unnamed check'); ?></strong></td>

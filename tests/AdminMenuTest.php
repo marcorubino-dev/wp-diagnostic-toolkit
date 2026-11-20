@@ -194,6 +194,61 @@ wpdt_admin_check(
     'does not invoke run_all() when rendering individual diagnostic screens'
 );
 
+
+function wpdt_render_module_template($diagnostic)
+{
+    $page_description = 'Test module description.';
+    ob_start();
+    include __DIR__ . '/../includes/Admin/module.php';
+    return ob_get_clean();
+}
+
+$empty_module_output = wpdt_render_module_template(array(
+    'name' => 'Empty module',
+    'results' => array(),
+));
+wpdt_admin_check(
+    strpos($empty_module_output, 'NO DATA') !== false,
+    'shows NO DATA for a module without diagnostic results'
+);
+wpdt_admin_check(
+    strpos($empty_module_output, 'No diagnostic checks are available for this module.') !== false,
+    'explains why an empty module has no status'
+);
+wpdt_admin_check(
+    strpos($empty_module_output, 'wpdt-status-empty') !== false,
+    'uses the empty status style for a module without results'
+);
+
+$error_module_output = wpdt_render_module_template(array(
+    'name' => 'Failed module',
+    'results' => array(
+        array(
+            'name' => 'Execution failure',
+            'status' => 'warning',
+            'outcome' => 'error',
+            'description' => 'The diagnostic could not complete.',
+            'evidence' => 'RuntimeException: simulated failure',
+        ),
+    ),
+));
+wpdt_admin_check(
+    strpos($error_module_output, 'DIAGNOSTIC ERRORS') !== false,
+    'distinguishes diagnostic execution errors from functional warnings'
+);
+wpdt_admin_check(
+    strpos($error_module_output, 'wpdt-summary-error') !== false,
+    'includes a separate diagnostic-error counter in the module summary'
+);
+wpdt_admin_check(
+    strpos($error_module_output, 'wpdt-check-status-error') !== false,
+    'renders execution errors with their own table status style'
+);
+wpdt_admin_check(
+    strpos($error_module_output, 'Outcome: ERROR') !== false,
+    'preserves the execution-error outcome in the copied module report'
+);
+
 $totals = $GLOBALS['wpdt_admin_test_totals'];
 echo PHP_EOL . sprintf('%d passed, %d failed.', $totals[0], $totals[1]) . PHP_EOL;
 exit($totals[1] === 0 ? 0 : 1);

@@ -50,20 +50,27 @@
 /* Page header */
 
 .wpdt-header {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 28px;
     margin: 0 0 28px;
+    padding: 18px 20px;
+    border: 1px solid var(--wpdt-color-border);
+    border-left: 4px solid var(--wpdt-color-primary);
+    border-radius: var(--wpdt-radius-lg);
+    background: linear-gradient(115deg, var(--wpdt-color-surface) 0%, var(--wpdt-color-canvas) 100%);
+    box-shadow: var(--wpdt-shadow-card);
 }
 
 .wpdt-header h1 {
     margin: 0 0 6px;
     color: var(--wpdt-color-ink);
-    font-size: 26px;
-    font-weight: 650;
+    font-size: clamp(24px, 2.2vw, 29px);
+    font-weight: 700;
     line-height: 1.25;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.035em;
 }
 
 .wpdt-header p {
@@ -84,14 +91,7 @@
     margin: 0;
 }
 
-.wpdt-admin .wpdt-header-action .button {
-    min-height: 36px;
-    padding: 4px 14px;
-    border-radius: var(--wpdt-radius-sm);
-    font-weight: 600;
-}
-
-/* Shared surfaces and status overview */
+.wpdt-admin /* Shared surfaces and status overview */
 
 .wpdt-status-card,
 .wpdt-module,
@@ -378,11 +378,11 @@
 .wpdt-module {
     position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 14px;
     min-width: 0;
-    min-height: 112px;
-    padding: 20px 42px 20px 20px;
+    min-height: 96px;
+    padding: 20px;
     transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
@@ -447,6 +447,7 @@
     font-size: 14px;
     font-weight: 650;
     line-height: 1.4;
+    letter-spacing: -0.01em;
 }
 
 .wpdt-module-content p {
@@ -759,20 +760,6 @@
 
 /* Product identity and theme preference control */
 
-.wpdt-header {
-    position: relative;
-    padding: 18px 20px;
-    border: 1px solid var(--wpdt-color-border);
-    border-left: 4px solid var(--wpdt-color-primary);
-    border-radius: var(--wpdt-radius-lg);
-    background: linear-gradient(115deg, var(--wpdt-color-surface) 0%, var(--wpdt-color-canvas) 100%);
-}
-
-.wpdt-header h1 {
-    font-size: 28px;
-    letter-spacing: -0.035em;
-}
-
 /* Dark theme tokens. System resolves through data-theme-resolved in admin.js. */
 
 .wpdt-admin[data-theme-resolved="dark"] {
@@ -854,17 +841,6 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     padding-bottom: 32px;
 }
 
-.wpdt-header {
-    gap: 28px;
-    border-color: var(--wpdt-color-border);
-    box-shadow: var(--wpdt-shadow-card);
-}
-
-.wpdt-header h1 {
-    font-size: clamp(24px, 2.2vw, 29px);
-    font-weight: 700;
-}
-
 .wpdt-header-action .button {
     min-height: 38px;
     padding: 5px 15px;
@@ -934,14 +910,6 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     border-left-width: 4px;
 }
 
-.wpdt-module {
-    position: relative;
-    min-height: 96px;
-    align-items: center;
-    padding: 20px;
-    border-color: var(--wpdt-color-border);
-}
-
 .wpdt-admin a.wpdt-module {
     padding-right: 42px;
 }
@@ -950,23 +918,6 @@ body:has(.wpdt-admin[data-theme-resolved="dark"]) #wpcontent {
     transform: translateY(-2px);
     border-color: var(--wpdt-color-primary);
     box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
-}
-
-.wpdt-module-icon {
-    width: 36px;
-    height: 36px;
-    flex-basis: 36px;
-    border-radius: 10px;
-    font-size: 14px;
-}
-
-.wpdt-module-content h3 {
-    font-size: 14px;
-    letter-spacing: -0.01em;
-}
-
-.wpdt-module-content p {
-    line-height: 1.55;
 }
 
 .wpdt-module-table {

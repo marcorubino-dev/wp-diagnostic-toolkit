@@ -119,6 +119,7 @@ wpdt_environment_check('pass' === wpdt_environment_result($results, 'Loopback re
 wpdt_environment_check('pass' === wpdt_environment_result($results, 'Home URL HTTPS')['status'], 'detects an HTTPS home URL');
 wpdt_environment_check('pass' === wpdt_environment_result($results, 'Site URL HTTPS')['status'], 'detects an HTTPS site URL');
 wpdt_environment_check(5 === $GLOBALS['wpdt_environment_last_request']['args']['timeout'], 'uses the configured loopback timeout');
+wpdt_environment_check(1024 === $GLOBALS['wpdt_environment_last_request']['args']['limit_response_size'], 'limits the loopback response body to 1 KB');
 
 $GLOBALS['wpdt_environment_response'] = array('response' => array('code' => 302));
 $results = $diagnostic->run();

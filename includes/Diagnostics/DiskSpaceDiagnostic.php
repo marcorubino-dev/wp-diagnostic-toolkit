@@ -43,6 +43,7 @@ class DiskSpaceDiagnostic implements DiagnosticInterface
             return array(
                 array(
                     'name'           => 'Filesystem disk space',
+                    'id' => 'disk_space.filesystem_capacity',
                     'value'          => 'Not available',
                     'status'         => 'info',
                     'description'    => 'PHP does not provide the filesystem space functions required by this check.',
@@ -64,6 +65,7 @@ class DiskSpaceDiagnostic implements DiagnosticInterface
             return array(
                 array(
                     'name'           => 'Filesystem disk space',
+                    'id' => 'disk_space.filesystem_capacity',
                     'value'          => 'Not available',
                     'status'         => 'info',
                     'description'    => 'The filesystem did not provide reliable total and free space values for the WordPress installation path.',
@@ -91,6 +93,7 @@ class DiskSpaceDiagnostic implements DiagnosticInterface
         return array(
             array(
                 'name'           => 'Filesystem disk space',
+                'id' => 'disk_space.filesystem_capacity',
                 'value'          => $this->format_bytes($free_space) . ' free of ' . $this->format_bytes($total_space),
                 'status'         => $status,
                 'description'    => sprintf(

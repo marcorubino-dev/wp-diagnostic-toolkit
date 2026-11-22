@@ -88,6 +88,15 @@ function wpdt_http_check($condition, $message)
     fwrite(STDERR, 'FAIL: ' . $message . PHP_EOL);
 }
 
+function wpdt_http_assert_stable_ids($results)
+{
+    $expected_ids = array('http_ssl.home_url_http_response', 'http_ssl.ssl_certificate_validation');
+    $actual_ids = array_column($results, 'id');
+    sort($expected_ids);
+    sort($actual_ids);
+    wpdt_http_check($expected_ids === $actual_ids, 'declares the stable HTTP and SSL check ID set');
+}
+
 function wpdt_http_result($results, $name)
 {
     foreach ($results as $result) {
@@ -102,6 +111,7 @@ function wpdt_http_result($results, $name)
 $diagnostic = new \WPDT\Diagnostics\HttpSslDiagnostic();
 
 $results = $diagnostic->run();
+wpdt_http_assert_stable_ids($results);
 wpdt_http_check('pass' === wpdt_http_result($results, 'Home URL HTTP response')['status'], 'classifies a successful HTTPS response as pass');
 wpdt_http_check('pass' === wpdt_http_result($results, 'SSL certificate validation')['status'], 'reports TLS verification as passed after a successful HTTPS request');
 wpdt_http_check(1 === $GLOBALS['wpdt_http_head_calls'], 'uses HEAD for the initial request');

@@ -97,6 +97,24 @@ function wpdt_environment_check($condition, $message)
     fwrite(STDERR, 'FAIL: ' . $message . PHP_EOL);
 }
 
+function wpdt_environment_assert_stable_ids($results)
+{
+    $expected_ids = array(
+        'environment.wordpress_version',
+        'environment.php_version',
+        'environment.database_version',
+        'environment.wp_debug',
+        'environment.wp_memory_limit',
+        'environment.home_url_https',
+        'environment.site_url_https',
+        'environment.loopback_request',
+    );
+    $actual_ids = array_column($results, 'id');
+    sort($expected_ids);
+    sort($actual_ids);
+    wpdt_environment_check($expected_ids === $actual_ids, 'declares the complete stable environment check ID set');
+}
+
 function wpdt_environment_result($results, $name)
 {
     foreach ($results as $result) {
@@ -112,6 +130,7 @@ $diagnostic = new \WPDT\Diagnostics\EnvironmentDiagnostic();
 
 $GLOBALS['wpdt_environment_response'] = array('response' => array('code' => 200));
 $results = $diagnostic->run();
+wpdt_environment_assert_stable_ids($results);
 
 wpdt_environment_check('6.8.2' === wpdt_environment_result($results, 'WordPress version')['value'], 'reports the WordPress version');
 wpdt_environment_check('8.0.36' === wpdt_environment_result($results, 'Database version')['value'], 'reports the database version');

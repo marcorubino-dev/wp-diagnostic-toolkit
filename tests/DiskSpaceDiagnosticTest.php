@@ -44,6 +44,10 @@ wpdt_disk_check(
 );
 
 $results = $diagnostic->run();
+wpdt_disk_check(
+    isset($results[0]['id']) && 'disk_space.filesystem_capacity' === $results[0]['id'],
+    'declares a stable namespaced filesystem capacity ID'
+);
 
 wpdt_disk_check(
     is_array($results) && 1 === count($results),

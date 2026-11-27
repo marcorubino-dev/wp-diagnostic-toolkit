@@ -131,6 +131,7 @@ class EnvironmentDiagnostic implements DiagnosticInterface
             $loopback_url,
             array(
                 'timeout' => 5,
+                'reject_unsafe_urls' => true,
                 'limit_response_size' => 1024,
             )
         );

@@ -165,7 +165,7 @@ $GLOBALS['wpdt_environment_response'] = new WP_Error('http_request_failed', 'Con
 $results = $diagnostic->run();
 $loopback = wpdt_environment_result($results, 'Loopback request');
 wpdt_environment_check('warning' === $loopback['status'], 'classifies a failed loopback request as warning');
-wpdt_environment_check('Connection timed out' === $loopback['evidence'], 'preserves the transport error as evidence');
+wpdt_environment_check('Loopback request failed; inspect server logs for transport details.' === $loopback['evidence'], 'uses safe generic evidence for a failed loopback request');
 
 $GLOBALS['wpdt_environment_home_url'] = 'http://example.test';
 $GLOBALS['wpdt_environment_site_url'] = 'http://example.test/wp';

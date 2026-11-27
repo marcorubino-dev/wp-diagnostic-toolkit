@@ -95,6 +95,7 @@ php tests/DiskSpaceDiagnosticTest.php
 php tests/HttpSslDiagnosticTest.php
 php tests/EnvironmentDiagnosticTest.php
 php tests/ThemeDiagnosticTest.php
+php tests/MultilingualWooCommerceDiagnosticTest.php
 php tests/AdminMenuTest.php
 php tests/DebugCenterTest.php
 ```

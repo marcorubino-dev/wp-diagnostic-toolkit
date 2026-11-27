@@ -162,6 +162,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
             'timeout'             => 8,
             'redirection'         => 3,
             'sslverify'           => true,
+            'reject_unsafe_urls'  => true,
             'limit_response_size' => 1024,
         );
 

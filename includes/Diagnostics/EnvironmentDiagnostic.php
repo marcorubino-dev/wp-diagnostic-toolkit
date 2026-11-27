@@ -46,7 +46,7 @@ class EnvironmentDiagnostic implements DiagnosticInterface
                 'value'          => 'Request failed',
                 'description'    => 'WordPress could not successfully reach its own site.',
                 'recommendation' => 'Review loopback requests, DNS, firewall, or server configuration.',
-                'evidence'       => $response->get_error_message(),
+                'evidence'       => 'Loopback request failed; inspect server logs for transport details.',
             );
         }
 

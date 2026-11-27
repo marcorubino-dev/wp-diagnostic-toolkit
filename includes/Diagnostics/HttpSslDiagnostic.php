@@ -49,7 +49,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
                 'value'          => 'Request failed',
                 'status'         => 'warning',
                 'description'    => 'The configured home URL could not be reached with the WordPress HTTP API.',
-                'evidence'       => $url . ' | ' . $method . ' | ' . $response->get_error_message(),
+                'evidence'       => $url . ' | ' . $method . ' | Request failed; inspect server logs for transport details.',
                 'recommendation' => 'Check DNS, hosting availability, firewall rules, redirects, and server response.',
             );
         } else {
@@ -75,7 +75,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
 
             $location = wp_remote_retrieve_header($response, 'location');
             if ($status_code >= 300 && $status_code < 400 && ! empty($location)) {
-                $evidence .= ' | Location: ' . $location;
+                $evidence .= ' | Redirect response received; inspect redirect configuration.';
             }
 
             $results[] = array(
@@ -114,7 +114,7 @@ class HttpSslDiagnostic implements DiagnosticInterface
                 'description'    => $ssl_error
                     ? 'The HTTPS request failed during TLS/SSL validation.'
                     : 'The HTTPS request failed, so certificate validity could not be confirmed.',
-                'evidence'       => $response->get_error_message(),
+                'evidence'       => 'TLS/SSL validation could not be completed; inspect server logs for transport details.',
                 'recommendation' => $ssl_error
                     ? 'Check certificate validity, hostname coverage, certificate chain, and server TLS configuration.'
                     : 'Resolve the connection issue and re-run the diagnostic before drawing conclusions about the certificate.',

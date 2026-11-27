@@ -123,7 +123,7 @@ $GLOBALS['wpdt_http_head_response'] = array('response' => array('code' => 301), 
 $results = $diagnostic->run();
 $http_result = wpdt_http_result($results, 'Home URL HTTP response');
 wpdt_http_check('warning' === $http_result['status'], 'classifies an HTTP redirect as warning');
-wpdt_http_check(false !== strpos($http_result['evidence'], 'Location: https://www.example.test/'), 'includes redirect location in evidence');
+wpdt_http_check(false === strpos($http_result['evidence'], 'Location:'), 'does not expose the raw redirect location in evidence');
 
 $GLOBALS['wpdt_http_head_response'] = array('response' => array('code' => 404), 'headers' => array());
 $results = $diagnostic->run();
@@ -152,9 +152,13 @@ wpdt_http_check('pass' === $http_result['status'], 'classifies a successful GET 
 wpdt_http_check(false !== strpos($http_result['evidence'], 'GET fallback used'), 'documents the GET fallback in evidence');
 wpdt_http_check(true === $GLOBALS['wpdt_http_last_args']['reject_unsafe_urls'], 'keeps unsafe-URL rejection enabled for the GET fallback');
 
-$GLOBALS['wpdt_http_head_response'] = new WP_Error('http_request_failed', 'Connection timed out');
+$GLOBALS['wpdt_http_head_response'] = new WP_Error('http_request_failed', 'Connection timed out: token=private-value');
 $results = $diagnostic->run();
-wpdt_http_check('warning' === wpdt_http_result($results, 'Home URL HTTP response')['status'], 'classifies a generic transport error as warning');
+$http_error_result = wpdt_http_result($results, 'Home URL HTTP response');
+$ssl_error_result = wpdt_http_result($results, 'SSL certificate validation');
+wpdt_http_check('warning' === $http_error_result['status'], 'classifies a generic transport error as warning');
+wpdt_http_check(false === strpos($http_error_result['evidence'], 'private-value'), 'does not expose raw transport error details in HTTP evidence');
+wpdt_http_check(false === strpos($ssl_error_result['evidence'], 'private-value'), 'does not expose raw transport error details in SSL evidence');
 wpdt_http_check('info' === wpdt_http_result($results, 'SSL certificate validation')['status'], 'does not claim certificate failure for a generic connection error');
 
 $GLOBALS['wpdt_http_head_response'] = new WP_Error('http_request_failed', 'SSL certificate verify failed');

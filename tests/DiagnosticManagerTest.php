@@ -191,8 +191,8 @@ wpdt_manager_check(
     'converts a module exception into an explicit error result'
 );
 wpdt_manager_check(
-    $results['broken_module']['results'][0]['evidence'] === 'RuntimeException: Simulated diagnostic failure.',
-    'retains exception class and message as diagnostic evidence'
+    $results['broken_module']['results'][0]['evidence'] === 'The diagnostic module threw an exception. Review server logs for details.',
+    'does not expose exception class or message in diagnostic evidence'
 );
 
 $native_result = new RuleResult(array(

@@ -178,7 +178,7 @@ class DiagnosticManager
                         'module_execution',
                         'Diagnostic execution failed',
                         'The diagnostic module could not complete its execution.',
-                        get_class($module_run['execution_error']) . ': ' . $module_run['execution_error']->getMessage(),
+                        'The diagnostic module threw an exception. Review server logs for details.',
                         $seen_ids,
                         $reserved_ids
                     ),
@@ -274,7 +274,7 @@ class DiagnosticManager
                     'invalid_result_' . $index,
                     'Invalid diagnostic result',
                     'This result could not be normalized. Other results from the module were retained.',
-                    get_class($exception) . ': ' . $exception->getMessage(),
+                    'The diagnostic result could not be normalized. Review server logs for details.',
                     $seen_ids,
                     $reserved_ids
                 );

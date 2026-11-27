@@ -116,6 +116,7 @@ wpdt_http_check('pass' === wpdt_http_result($results, 'Home URL HTTP response')[
 wpdt_http_check('pass' === wpdt_http_result($results, 'SSL certificate validation')['status'], 'reports TLS verification as passed after a successful HTTPS request');
 wpdt_http_check(1 === $GLOBALS['wpdt_http_head_calls'], 'uses HEAD for the initial request');
 wpdt_http_check(true === $GLOBALS['wpdt_http_last_args']['sslverify'], 'enables certificate verification');
+wpdt_http_check(true === $GLOBALS['wpdt_http_last_args']['reject_unsafe_urls'], 'enables WordPress unsafe-URL rejection for the HEAD request');
 wpdt_http_check(8 === $GLOBALS['wpdt_http_last_args']['timeout'], 'uses the configured request timeout');
 
 $GLOBALS['wpdt_http_head_response'] = array('response' => array('code' => 301), 'headers' => array('location' => 'https://www.example.test/'));
@@ -149,6 +150,7 @@ $http_result = wpdt_http_result($results, 'Home URL HTTP response');
 wpdt_http_check(1 === $GLOBALS['wpdt_http_get_calls'] - $before_get, 'falls back to GET when HEAD returns 405');
 wpdt_http_check('pass' === $http_result['status'], 'classifies a successful GET fallback as pass');
 wpdt_http_check(false !== strpos($http_result['evidence'], 'GET fallback used'), 'documents the GET fallback in evidence');
+wpdt_http_check(true === $GLOBALS['wpdt_http_last_args']['reject_unsafe_urls'], 'keeps unsafe-URL rejection enabled for the GET fallback');
 
 $GLOBALS['wpdt_http_head_response'] = new WP_Error('http_request_failed', 'Connection timed out');
 $results = $diagnostic->run();

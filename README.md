@@ -207,7 +207,7 @@ The repository includes focused architecture documents for areas where contracts
 
 ## Contributing
 
-Contributions, bug reports, and suggestions are welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, testing expectations, and issue reporting. Contributions, bug reports, and suggestions are welcome.
 
 When reporting an issue, include relevant details where possible:
 
